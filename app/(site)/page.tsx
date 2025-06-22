@@ -28,7 +28,7 @@ export default function Home() {
       <Brands />
       <Feature />
       <About />
-      {/* fade */}
+      {/* fdsjfsd */}
       <FeaturesTab />
       <FunFact />
       <Integration />
