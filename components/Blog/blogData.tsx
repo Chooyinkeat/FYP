@@ -3,45 +3,38 @@ import { Blog } from "@/types/blog";
 const BlogData: Blog[] = [
   {
     _id: 1,
-    mainImage: "/images/blog/blog-01.png",
-    title: "Free advertising for your online business",
+    mainImage: "/images/blog/img_1.webp",
+    title: "How AI Is Revolutionizing Lost and Found Systems",
     metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
+      "Explore how image recognition and AI-powered algorithms are transforming the process of recovering lost items efficiently.",
   },
   {
     _id: 2,
-    mainImage: "/images/blog/blog-02.png",
-    title: "9 simple ways to improve your design skills",
+    mainImage: "/images/blog/img_2.webp",
+    title: "Building a Real-Time Chat System with   WebSocket",
     metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
+      "A deep dive into how WebSocket enables secure and instant messaging between item finders and owners.",
   },
   {
-    _id: 2,
-    mainImage: "/images/blog/blog-03.png",
-    title: "Tips to quickly improve your coding speed.",
+    _id: 4,
+    mainImage: "/images/blog/img_3.png",
+    title: "Improving Image Matching Accuracy with  TensorFlow.js",
     metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
+      "Discover preprocessing techniques and model selection strategies to enhance object matching accuracy in browser-based systems.",
   },
   {
-    _id: 1,
-    mainImage: "/images/blog/blog-03.png",
-    title: "Free advertising for your online business",
+    _id: 5,
+    mainImage: "/images/blog/blog-05.png",
+    title: "Why Lost & Found Systems Need Centralized Platforms",
     metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
+      "Understand the importance of centralized platforms in increasing lost item recovery success and community trust.",
   },
   {
-    _id: 2,
-    mainImage: "/images/blog/blog-04.png",
-    title: "9 simple ways to improve your design skills",
+    _id: 6,
+    mainImage: "/images/blog/blog-06.png",
+    title: "Ethical Considerations in Building AI for Public Use",
     metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
-  },
-  {
-    _id: 2,
-    mainImage: "/images/blog/blog-01.png",
-    title: "Tips to quickly improve your coding speed.",
-    metadata:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit convallis tortor.",
+      "Explore the privacy, consent, and security challenges when designing AI-powered systems for general users.",
   },
 ];
 
