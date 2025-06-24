@@ -2,10 +2,9 @@ import Signup from "@/components/Auth/Signup";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign Up Page - Solid SaaS Boilerplate",
-
-  // other metadata
-  description: "This is Sign Up page for Startup Pro"
+  title: "Sign Up | Lost & Found Manager",
+  description:
+    "Create your account to start tracking and reporting lost and found items with ease.",
 };
 
 export default function Register() {

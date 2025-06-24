@@ -1,15 +1,15 @@
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import jwt from "jsonwebtoken"; // Optional: for token verification
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
 
-  // If no token, redirect or block
+  // If no token, handle unauthorized access
   if (!token) {
-    const isAPI = request.nextUrl.pathname.startsWith("/api/");
+    const isAPI = request.nextUrl.pathname.startsWith("/api/protected/");
 
-    // Block API access with 401
     if (isAPI) {
       return NextResponse.json(
         { success: false, message: "Unauthorized - middleware" },
@@ -17,14 +17,25 @@ export function middleware(request: NextRequest) {
       );
     }
 
-    // Redirect page requests to login
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    // Redirect page requests to signin
+    return NextResponse.redirect(new URL("/auth/signin", request.url));
+  }
+
+  // Optional: verify token validity
+  try {
+    jwt.verify(token, process.env.JWT_SECRET!);
+  } catch (error) {
+    return NextResponse.redirect(new URL("/auth/signin", request.url));
   }
 
   return NextResponse.next();
 }
 
-// 🔥 Apply to both page and API routes
+// ✅ Only protect secure routes, NOT /auth/* to avoid redirect loop
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/user-info"],
+  matcher: [
+    // Protect all API routes except auth/login and auth/register
+    "/api/protected/:path*",
+    "/profile/:path*",
+  ],
 };
