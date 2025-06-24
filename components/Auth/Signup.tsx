@@ -1,22 +1,84 @@
 "use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import Validator from "@/lib/validation";
+import Swal from "sweetalert2";
 
 const submitForm = async (e: React.FormEvent) => {
   e.preventDefault();
   const form = e.currentTarget as HTMLFormElement;
   const formData = new FormData(form);
 
+  const username = formData.get("username")?.toString().trim() || "";
+  const email = formData.get("email")?.toString().trim() || "";
+  const password = formData.get("password")?.toString() || "";
+  const confirmPassword = formData.get("confirm_password")?.toString() || "";
+  const contact = formData.get("contact")?.toString().trim() || "";
+
+  // ✅ Frontend validation using your Validator class
+  if (!username) {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Username",
+      text: "Please enter your username.",
+    });
+    return;
+  }
+
+  if (!Validator.isEmailValid(email)) {
+    Swal.fire({
+      icon: "error",
+      title: "Invalid Email",
+      text: "Please enter a valid email address.",
+    });
+    return;
+  }
+
+  if (!Validator.isPasswordStrong(password)) {
+    Swal.fire({
+      icon: "error",
+      title: "Weak Password",
+      html: `
+        Your password must:
+        <ul style="text-align:left">
+          <li>Be at least 8 characters</li>
+          <li>Contain 1 uppercase, 1 lowercase, 1 number</li>
+          <li>Include 1 special character</li>
+        </ul>
+      `,
+    });
+    return;
+  }
+
+  // ✅ Check if password matches confirm password
+  if (password !== confirmPassword) {
+    Swal.fire({
+      icon: "error",
+      title: "Password Mismatch",
+      text: "Password and Confirm Password do not match.",
+    });
+    return;
+  }
+
+  if (!Validator.isContactNumberValid(contact)) {
+    Swal.fire({
+      icon: "error",
+      title: "Invalid Contact Number",
+      text: "Please enter a valid contact number (e.g., 012-3456789).",
+    });
+    return;
+  }
+
   const jsonData = {
-    username: formData.get("username"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    contact: formData.get("contact"),
+    username,
+    email,
+    password,
+    contact,
     type: "0",
   };
+
   try {
     const response = await axios.post("/api/registerAPI", jsonData);
     if (response.data.success) {

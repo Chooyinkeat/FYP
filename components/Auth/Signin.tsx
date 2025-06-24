@@ -1,16 +1,54 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import axios from "axios";
+import Validator from "@/lib/validation";
+import Swal from "sweetalert2";
+
+const submitForm = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const form = e.currentTarget as HTMLFormElement;
+  const formData = new FormData(form);
+  const email = String(formData.get("email"));
+  const password = String(formData.get("password"));
+  // ✅ Validate before sending request
+  if (!Validator.isEmailValid(email)) {
+    return Swal.fire({
+      icon: "error",
+      title: "Invalid Email",
+      text: "Please enter a valid email address.",
+    });
+  }
+
+  if (!Validator.isPasswordStrong(password)) {
+    return Swal.fire({
+      icon: "error",
+      title: "Weak Password",
+      text: "Password must be exactly 8 characters and include uppercase, lowercase, a number, and a symbol.",
+    });
+  }
+
+  const jsonData = {
+    email: email,
+    password: password,
+  };
+  try {
+    const response = await axios.post("/api/loginApi", jsonData);
+    if (response.data.success) {
+      // Handle successful login (e.g., redirect or show a success message)
+      console.log("Login successful");
+    } else {
+      // Handle login error
+      console.error(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+  }
+};
 
 const Signin = () => {
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
-
   return (
     <>
       {/* <!-- ===== SignIn Form Start ===== --> */}
@@ -53,11 +91,11 @@ const Signin = () => {
             <h2 className="xl:text-sectiontitle2 mb-15 text-center text-3xl font-semibold text-black dark:text-white">
               Login to Your Account
             </h2>
-            <form className="mx-auto max-w-md pb-10">
+            <form className="mx-auto max-w-md pb-10" onSubmit={submitForm}>
               <div className="group relative z-0 mb-5 w-full">
                 <input
                   type="email"
-                  name="floating_email"
+                  name="email"
                   id="floating_email"
                   className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                   placeholder=" "
@@ -73,7 +111,7 @@ const Signin = () => {
               <div className="group relative z-0 mb-5 w-full">
                 <input
                   type="password"
-                  name="floating_password"
+                  name="password"
                   id="floating_password"
                   className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                   placeholder=" "
@@ -88,7 +126,7 @@ const Signin = () => {
               </div>
               <button
                 aria-label="signup with email and password"
-                className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-4 xl:my-5"
+                className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:mx-5 lg:my-4 xl:mx-10 xl:my-5"
               >
                 Sign In
                 <svg
@@ -105,6 +143,26 @@ const Signin = () => {
                   />
                 </svg>
               </button>
+              <Link
+                href="/auth/resetpassword"
+                aria-label="signup with email and password"
+                className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-4 xl:my-5"
+              >
+                Forgot Password?
+                <svg
+                  className="fill-white"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
+                    fill=""
+                  />
+                </svg>
+              </Link>
             </form>
             <div className="mb-10 flex items-center justify-center">
               <span className="dark:bg-stroke-dark bg-stroke dark:bg-strokedark hidden h-[1px] w-full max-w-[200px] sm:block"></span>
