@@ -8,7 +8,7 @@ import { cookies } from "next/headers"; // for setting cookies
 
 // Make sure these are in your .env.local file
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "1h"; // e.g., "1h", "3600s"
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION; // e.g., "1h", "3600s"
 
 export async function POST(request: NextRequest) {
   try {
