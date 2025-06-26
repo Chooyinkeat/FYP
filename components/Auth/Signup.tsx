@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import Validator from "@/lib/validation";
 import Swal from "sweetalert2";
+import { signInWithGoogle, signInWithGithub } from "@/lib/firebaseAuth";
 
 const submitForm = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -77,19 +78,139 @@ const submitForm = async (e: React.FormEvent) => {
     password,
     contact,
     type: "0",
+    profile: "default_pic.png",
   };
 
   try {
     const response = await axios.post("/api/registerAPI", jsonData);
     if (response.data.success) {
-      // Handle successful registration (e.g., redirect or show a success message)
-      console.log("Registration successful");
-    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful",
+        text: "You can now log in with your credentials.",
+      }).then(() => {
+        const data = response.data.user;
+        sessionStorage.setItem("userId", data.userId);
+        sessionStorage.setItem("profile", data.profile);
+        window.location.href = "/blog"; // Redirect to blog page
+      });
+    } else if (response.data.status === 409) {
       // Handle registration error
-      console.error(response.data.message);
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: response.data.message || "An error occurred during registration.",
+      });
     }
   } catch (error) {
+    // Handle network or server error
+    Swal.fire({
+      icon: "error",
+      title: "Registration Error",
+      text: "An error occurred while trying to register. Please try again later.",
+    });
     console.error("Error during registration:", error);
+  }
+};
+
+const handleGoogleSignIn = async () => {
+  try {
+    const result = await signInWithGoogle();
+    if (result) {
+      const user = result.user;
+      // User info
+      const displayName = user.displayName;
+      const email = user.email;
+      const photoURL = user.photoURL;
+
+      try {
+        const response = await axios.post("/api/authAPI", {
+          email: email,
+          username: displayName,
+          profile: photoURL,
+          type: user.uid,
+        });
+        if (response.data.status == 200) {
+          // redirect
+          const data = response.data.user;
+          sessionStorage.setItem("userId", data.userId);
+          sessionStorage.setItem("profile", data.profile);
+          window.location.href = "/blog"; // Change this to your desired route
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Registration Failed",
+            text:
+              response.data.message || "An error occurred during registration.",
+          });
+        }
+      } catch (error) {
+        console.error("Error registering user:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: "Error during user registration: " + (error as Error).message,
+        });
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("Google sign-in failed:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Google Sign-in Failed",
+      text: "Error during Google sign-in: " + (error as Error).message,
+    });
+  }
+};
+
+const handleGithubSignIn = async () => {
+  try {
+    const result = await signInWithGithub();
+    if (result) {
+      const user = result.user;
+
+      const displayName = user.displayName || "sample name";
+      const email = user.email || "sample@email.com";
+
+      try {
+        const response = await axios.post("/api/authAPI", {
+          email: email,
+          username: displayName,
+          profile: user.photoURL,
+          type: user.uid,
+        });
+        if (response.data.status == 200) {
+          // redirect
+          const data = response.data.user;
+          sessionStorage.setItem("userId", data.userId);
+          sessionStorage.setItem("profile", data.profile);
+          window.location.href = "/blog"; // Change this to your desired route
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Registration Failed",
+            text:
+              response.data.message || "An error occurred during registration.",
+          });
+        }
+      } catch (error) {
+        console.error("Error registering user:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: "Error during user registration: " + (error as Error).message,
+        });
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("GitHub sign-in failed:", error);
+    Swal.fire({
+      icon: "error",
+      title: "GitHub Sign-in Failed",
+      text: "Error during GitHub sign-in: " + (error as Error).message,
+    });
   }
 };
 
@@ -225,7 +346,7 @@ const Signup = () => {
                 <button
                   type="submit"
                   aria-label="signup with email and password"
-                  className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-4 xl:my-5"
+                  className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-4 xl:my-5"
                 >
                   Create Account
                   <svg
@@ -253,9 +374,11 @@ const Signup = () => {
               <span className="dark:bg-stroke-dark bg-stroke dark:bg-strokedark hidden h-[1px] w-full max-w-[200px] sm:block"></span>
             </div>
             <div className="flex items-center gap-8">
+              {/* sign in with google */}
               <button
                 aria-label="signup with google"
-                className="text-body-color dark:text-body-color-dark dark:shadow-two border-stroke hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none"
+                className="text-body-color dark:text-body-color-dark dark:shadow-two border-stroke hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full cursor-pointer items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none"
+                onClick={handleGoogleSignIn}
               >
                 <span className="mr-3">
                   <svg
@@ -292,10 +415,11 @@ const Signup = () => {
                 </span>
                 Signup with Google
               </button>
-
+              {/* sign in with github */}
               <button
+                onClick={handleGithubSignIn}
                 aria-label="signup with github"
-                className="text-body-color dark:text-body-color-dark dark:shadow-two border-stroke hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none"
+                className="text-body-color dark:text-body-color-dark dark:shadow-two border-stroke hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full cursor-pointer items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none"
               >
                 <span className="mr-3">
                   <svg

@@ -4,7 +4,10 @@ const nextConfig = {
   reactStrictMode: true,
   // swcMinify: true,
   images: {
-    domains: ["localhost"],
+    domains: [
+      "lh3.googleusercontent.com", // for Google profile photos
+      "avatars.githubusercontent.com", // for GitHub profile photos
+    ],
     remotePatterns: [
       {
         protocol: "https",
