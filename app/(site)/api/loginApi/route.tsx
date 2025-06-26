@@ -1,6 +1,5 @@
 import pool from "@/lib/db";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
@@ -18,9 +17,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // ✅ Find user by email only
     const [rows] = await pool.query(
-      "SELECT * FROM user WHERE email = ? LIMIT 1",
+      "SELECT * FROM user WHERE email = ? AND sign_up_type = 0 LIMIT 1",
       [email],
     );
 
@@ -33,7 +31,6 @@ export async function POST(request: NextRequest) {
 
     const user = (rows as any[])[0];
 
-    // ✅ Compare entered password with hashed password in DB
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -43,22 +40,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ✅ Create JWT token
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: JWT_hour,
-    });
+    const token = jwt.sign(
+      { userId: user.user_id, email: user.email }, // use actual column name from your DB
+      JWT_SECRET,
+      { expiresIn: JWT_hour },
+    );
 
-    // ✅ Set secure, HttpOnly cookie
-    const cookieStore = await cookies();
-    cookieStore.set("token", token, {
+    // ✅ Set the cookie correctly on the response
+    // for public access, use secure and sameSite attributes
+    const response = NextResponse.json({
+      success: true,
+      message: "Logged in",
+      user: {
+        userId: user.user_id,
+        profile: user.profile,
+      },
+    });
+    // Set the token in the cookie
+    // Ensure the cookie is set with httpOnly, secure, and sameSite attributes
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60, // 1 hour in seconds
+      maxAge: 60 * 60, // 1 hour
     });
 
-    return NextResponse.json({ success: true, message: "Logged in" });
+    return response;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json({

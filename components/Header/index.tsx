@@ -14,6 +14,23 @@ const Header = () => {
 
   const pathUrl = usePathname();
 
+  const [userId, setUserId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("userId");
+    const storedProfile = sessionStorage.getItem("profile");
+    console.log("User ID:", storedUserId);
+    console.log("Profile URL:", storedProfile);
+    setUserId(storedUserId);
+    setProfile(storedProfile);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    window.location.href = "/"; // or redirect to sign-in page
+  };
+
   // Sticky menu
   const handleStickyMenu = () => {
     if (window.scrollY >= 80) {
@@ -153,8 +170,45 @@ const Header = () => {
 
           <div className="mt-7 flex items-center gap-6 xl:mt-0">
             <ThemeToggler />
+            {userId ? (
+              // Logged in view
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="bg-primary text-regular hover:bg-primaryho flex cursor-pointer items-center justify-center rounded-full px-7.5 py-2.5 text-white duration-300 ease-in-out"
+                >
+                  Sign Out 🚪
+                </button>
+                <Image
+                  onClick={() => {
+                    window.location.href = "/profile";
+                  }}
+                  className="h-10 w-10 cursor-pointer rounded-full p-1 ring-2 ring-gray-300 dark:ring-gray-500"
+                  src={profile ?? "/images/default_pic.png"}
+                  alt="Test"
+                  width={400}
+                  height={300}
+                />
+              </>
+            ) : (
+              // Not logged in view
+              <>
+                <Link
+                  href="/auth/signin"
+                  className="text-regular text-waterloo hover:text-primary font-medium"
+                >
+                  Sign In 🌟
+                </Link>
 
-            <Link
+                <Link
+                  href="/auth/signup"
+                  className="bg-primary text-regular hover:bg-primaryho flex items-center justify-center rounded-full px-7.5 py-2.5 text-white duration-300 ease-in-out"
+                >
+                  Sign up 🔥
+                </Link>
+              </>
+            )}
+            {/* <Link
               href="/auth/signin"
               className="text-regular text-waterloo hover:text-primary font-medium"
             >
@@ -166,7 +220,7 @@ const Header = () => {
               className="bg-primary text-regular hover:bg-primaryho flex items-center justify-center rounded-full px-7.5 py-2.5 text-white duration-300 ease-in-out"
             >
               Sign up 🔥
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

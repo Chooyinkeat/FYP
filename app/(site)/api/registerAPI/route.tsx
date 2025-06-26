@@ -12,9 +12,10 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION; // e.g., "1h", "3600s"
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, password, contact, type } = await request.json();
+    const { username, email, password, contact, type, profile } =
+      await request.json();
 
-    if (!email || !password || !username || !contact || !type) {
+    if (!email || !password || !username || !contact || !type || !profile) {
       return NextResponse.json({
         success: false,
         message: "All fields are required",
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         message: "Email already registered",
+        status: 409,
       });
     }
 
@@ -37,8 +39,8 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ✅ Insert user into DB
-    const query = `INSERT INTO user (username, email, password, contact, sign_up_type) VALUES (?, ?, ?, ?, ?)`;
-    const values = [username, email, hashedPassword, contact, type];
+    const query = `INSERT INTO user (username, email, password, contact, sign_up_type, profile) VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [username, email, hashedPassword, contact, type, profile];
     const result = await pool.query(query, values);
 
     // ✅ Get the newly inserted user's ID (depends on your DB driver)
@@ -49,25 +51,30 @@ export async function POST(request: NextRequest) {
       expiresIn: JWT_EXPIRATION,
     });
 
-    // ✅ Set HttpOnly cookie
-    const cookieStore = await cookies(); // in app router
-    cookieStore.set("token", token, {
+    const response = NextResponse.json({
+      success: true,
+      message: "User registered and logged in",
+      status: 200,
+      user: {
+        userId: insertedId,
+        profile: profile,
+      },
+    });
+
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60, // 1 hour in seconds
     });
-
-    return NextResponse.json({
-      success: true,
-      message: "User registered and logged in",
-    });
+    return response;
   } catch (error) {
     console.error("Error during registration:", error);
     return NextResponse.json({
       success: false,
       message: "Internal server error",
+      status: 500,
     });
   }
 }

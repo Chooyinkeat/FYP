@@ -145,7 +145,7 @@ const ResetPassword = () => {
             <button
               onClick={handleSend}
               aria-label="signup with email and password"
-              className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho my-3 inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-2 xl:my-3"
+              className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho my-3 inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-2 xl:my-3"
             >
               Send email
               <svg
