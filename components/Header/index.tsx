@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-
 import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
 
@@ -20,8 +19,6 @@ const Header = () => {
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
     const storedProfile = sessionStorage.getItem("profile");
-    console.log("User ID:", storedUserId);
-    console.log("Profile URL:", storedProfile);
     setUserId(storedUserId);
     setProfile(storedProfile);
   }, []);
@@ -208,19 +205,6 @@ const Header = () => {
                 </Link>
               </>
             )}
-            {/* <Link
-              href="/auth/signin"
-              className="text-regular text-waterloo hover:text-primary font-medium"
-            >
-              Sign In 🌟
-            </Link>
-
-            <Link
-              href="/auth/signup"
-              className="bg-primary text-regular hover:bg-primaryho flex items-center justify-center rounded-full px-7.5 py-2.5 text-white duration-300 ease-in-out"
-            >
-              Sign up 🔥
-            </Link> */}
           </div>
         </div>
       </div>
