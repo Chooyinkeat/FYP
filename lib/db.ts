@@ -1,10 +1,10 @@
 import mysql, { Pool } from "mysql2/promise";
 
 const pool: Pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
+  host: process.env.NEXT_PUBLIC_db_host,
+  user: process.env.NEXT_PUBLIC_db_user,
   password: "",
-  database: "visionvault",
+  database: process.env.NEXT_PUBLIC_db_name,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

@@ -4,7 +4,6 @@ import pool from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers"; // for setting cookies
 
 // Make sure these are in your .env.local file
 const JWT_SECRET = process.env.JWT_SECRET!;

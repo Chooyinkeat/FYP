@@ -6,28 +6,28 @@ const SidebarLink = () => {
     <>
       <li className="block">
         <Link
-          href={`/docs`}
-          className={`flex w-full rounded-xs bg-stroke px-3 py-2 text-base text-black dark:bg-blackho dark:text-white`}
+          href={`/docs/introduction`}
+          className={`bg-stroke dark:bg-blackho flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white`}
         >
-          Introduction
+          Project Introduction
         </Link>
         <Link
-          href={`/docs`}
-          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white `}
+          href={`/docs/system-features`}
+          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white`}
         >
-          Bootstrap Template Guide
+          System Features & User Flow
         </Link>
         <Link
-          href={`/docs`}
-          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white `}
+          href={`/docs/ai-image-matching`}
+          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white`}
         >
-          Style Guide
+          AI Image Matching
         </Link>
         <Link
-          href={`/docs`}
-          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white `}
+          href={`/docs/technical-stack`}
+          className={`flex w-full rounded-xs px-3 py-2 text-base text-black dark:text-white`}
         >
-          Using Tailwind Components
+          Tech Stack & Architecture
         </Link>
       </li>
     </>
