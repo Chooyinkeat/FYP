@@ -16,6 +16,7 @@ const Profile = () => {
   });
   const [imagePreview, setImagePreview] = useState("/images/default.png");
   const [profileFile, setProfileFile] = useState<File | null>(null);
+
   const postProfileData = async () => {
     try {
       const response = await axios.get("/api/protected/fetchProfileAPI", {

@@ -3,9 +3,9 @@ import BlogItem from "@/components/Blog/BlogItem";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog Page - Solid SaaS Boilerplate",
-  // other metadata
-  description: "This is Blog page for Solid Pro",
+  title: "Lost Items | VisionVault",
+  description:
+    "Browse and search reported lost items on VisionVault. Help reunite belongings with their rightful owners through intelligent image recognition and real-time updates.",
 };
 
 const BlogPage = async () => {

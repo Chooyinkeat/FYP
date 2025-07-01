@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prepare": "next-ws patch"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -20,12 +21,14 @@
     "mysql2": "^3.14.1",
     "next": "^15.3.4",
     "next-themes": "^0.2.1",
+    "next-ws": "^2.0.9",
     "nodemailer": "^7.0.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hot-toast": "^2.4.1",
     "sweetalert2": "^11.6.13",
-    "swiper": "^9.3.2"
+    "swiper": "^9.3.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.3",
