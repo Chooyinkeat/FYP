@@ -7,14 +7,6 @@ import { useEffect, useState } from "react";
 
 const BlogItem = ({ blog }: { blog: Blog }) => {
   const { mainImage, title, metadata } = blog;
-  // useEffect(() => {
-  //   const userId = sessionStorage.getItem("userId");
-  //   const profile = sessionStorage.getItem("profile");
-
-  //   console.log("User ID:", userId);
-  //   console.log("Profile URL:", profile);
-  // }, []);
-
   return (
     <>
       <motion.div
