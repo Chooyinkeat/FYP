@@ -3,35 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import axios from "axios";
-import Validator from "@/lib/validation";
-import Swal from "sweetalert2";
 import { Chat } from "@/types/chatlist"; // Adjust the import path as necessary
 
-const dummyChats = [
-  {
-    name: "nwkch5h0xu",
-    preview: "Dear customer, ple...",
-    date: "Fri",
-    unread: 6,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "Shopee Choice G...",
-    preview: "Hi dear! 🎁 Thank ...",
-    date: "23/03",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "spraygadget",
-    preview: "[Image]",
-    date: "07/02",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-];
+interface LeftPanelProps {
+  onSelectChat: (contactId: number) => void;
+}
 
-export default function LeftPanel() {
+const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +33,7 @@ export default function LeftPanel() {
       if (result && Array.isArray(result.data)) {
         setChats(result.data);
       } else {
-        console.error("Invalid response format:", result);
+        console.log("Invalid response format:", result);
         setChats([]); // fallback to empty list
       }
       setIsLoading(false);
@@ -90,7 +68,7 @@ export default function LeftPanel() {
           chats.map((chat, index) => (
             <div
               key={chat.contact_id}
-              onClick={() => setSelectedChat(index)}
+              onClick={() => onSelectChat(chat.contact_id)}
               className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 hover:bg-gray-100 ${
                 selectedChat === index ? "bg-gray-100" : ""
               }`}
@@ -140,4 +118,5 @@ export default function LeftPanel() {
       </div>
     </div>
   );
-}
+};
+export default LeftPanel;

@@ -4,35 +4,13 @@ import Image from "next/image";
 import LeftPanel from "@/components/Chatwidget/LeftPanel";
 import RightPanel from "@/components/Chatwidget/RightPanel";
 
-const dummyChats = [
-  {
-    name: "nwkch5h0xu",
-    preview: "Dear customer, ple...",
-    date: "Fri",
-    unread: 6,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "Shopee Choice G...",
-    preview: "Hi dear! 🎁 Thank ...",
-    date: "23/03",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "spraygadget",
-    preview: "[Image]",
-    date: "07/02",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-];
-
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const handleSelectChat = (contactId: number) => {
+    setSelectedChat(contactId); // ✅ this is what drives the UI logic
+  };
 
   // Open websocket connection
   useEffect(() => {
@@ -41,9 +19,9 @@ export default function ChatWidget() {
 
     ws.onopen = () => console.log("Connected to server");
 
-    ws.onmessage = (event) => {
-      setMessages((prev) => [...prev, event.data]);
-    };
+    // ws.onmessage = (event) => {
+    //   setMessages((prev) => [...prev, event.data]);
+    // };
 
     ws.onclose = () => console.log("Disconnected");
 
@@ -69,14 +47,10 @@ export default function ChatWidget() {
         <div className="h-[500px] w-[600px] overflow-hidden rounded-lg border bg-white shadow-lg">
           <div className="flex h-full">
             {/* Left Panel */}
-            <LeftPanel />
+            <LeftPanel onSelectChat={handleSelectChat} />
             <div className="flex w-2/3 flex-col bg-gray-50">
               <div className="flex items-center justify-between border-b bg-white px-4 py-2">
-                <span className="font-medium text-gray-800">
-                  {selectedChat !== null
-                    ? dummyChats[selectedChat].name
-                    : "Welcome"}
-                </span>
+                <span className="font-medium text-gray-800">Welcome</span>
                 <div className="space-x-2">
                   {/* Minimize Button */}
                   <button
@@ -112,7 +86,7 @@ export default function ChatWidget() {
                   <p className="text-sm">Start responding to your users now!</p>
                 </div>
               ) : (
-                <RightPanel />
+                <RightPanel contactId={selectedChat} />
               )}
             </div>
           </div>
