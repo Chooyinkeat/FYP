@@ -1,46 +1,44 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 
-const dummyChats = [
-  {
-    name: "nwkch5h0xu",
-    preview: "Dear customer, ple...",
-    date: "Fri",
-    unread: 6,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "Shopee Choice G...",
-    preview: "Hi dear! 🎁 Thank ...",
-    date: "23/03",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-  {
-    name: "spraygadget",
-    preview: "[Image]",
-    date: "07/02",
-    unread: 3,
-    avatar: "/images/default_pic.png",
-  },
-];
+interface RightPanelProps {
+  contactId: number | null;
+}
 
-export default function RightPanel() {
-  const [selectedChat, setSelectedChat] = useState<number | null>(null);
+const RightPanel: React.FC<RightPanelProps> = ({ contactId }) => {
   const [input, setInput] = useState("");
-
   const [messages, setMessages] = useState<string[]>([]);
 
+  // Simulate fetching messages when contactId changes
+  useEffect(() => {
+    if (contactId !== null) {
+      // Simulated messages (replace with actual API/WebSocket later)
+      setMessages([`Welcome to chat with user ${contactId}`]);
+    } else {
+      setMessages([]);
+    }
+  }, [contactId]);
+
   const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages([...messages, input]);
+    if (!input.trim() || contactId === null) return;
+
+    // Example: Replace this with API or WebSocket call
+    setMessages((prev) => [...prev, input]);
     setInput("");
   };
 
   return (
-    <>
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      {contactId !== null && (
+        <div className="border-b bg-white px-4 py-2 text-sm font-medium text-gray-800">
+          Chatting with contact ID: {contactId}
+        </div>
+      )}
+
+      {/* Message list */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4 text-sm">
         {messages.length === 0 ? (
           <p className="text-center text-gray-400">No messages yet</p>
@@ -62,7 +60,7 @@ export default function RightPanel() {
         )}
       </div>
 
-      {/* Input */}
+      {/* Input field */}
       <div className="flex border-t bg-white px-2 py-2">
         <input
           type="text"
@@ -70,15 +68,25 @@ export default function RightPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Type your message..."
+          placeholder={
+            contactId === null
+              ? "Select a contact to start chatting..."
+              : "Type your message..."
+          }
+          disabled={contactId === null}
         />
         <button
           onClick={sendMessage}
-          className="ml-2 rounded bg-blue-600 px-4 py-1 text-sm text-white"
+          className={`ml-2 rounded px-4 py-1 text-sm text-white ${
+            contactId === null ? "bg-gray-400" : "bg-blue-600"
+          }`}
+          disabled={contactId === null}
         >
           Send
         </button>
       </div>
-    </>
+    </div>
   );
-}
+};
+
+export default RightPanel;
