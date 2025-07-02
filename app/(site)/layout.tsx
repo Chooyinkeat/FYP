@@ -19,7 +19,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");

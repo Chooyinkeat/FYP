@@ -1,66 +1,80 @@
 "use client";
+import { useState, useEffect } from "react";
+import type { RightPanelProps, Message } from "@/types/chatlist";
 
-import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
-
-interface RightPanelProps {
-  contactId: number | null;
-}
-
-const RightPanel: React.FC<RightPanelProps> = ({ contactId }) => {
+const RightPanel: React.FC<RightPanelProps> = ({
+  contactId,
+  ws,
+  messages,
+  setMessages,
+}) => {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
-
-  // Simulate fetching messages when contactId changes
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
-    if (contactId !== null) {
-      // Simulated messages (replace with actual API/WebSocket later)
-      setMessages([`Welcome to chat with user ${contactId}`]);
-    } else {
-      setMessages([]);
-    }
-  }, [contactId]);
+    const storedUserId = sessionStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
+
+  const numId = Number(userId);
 
   const sendMessage = () => {
-    if (!input.trim() || contactId === null) return;
+    if (!input.trim() || !ws || contactId === null) {
+      console.log("Invalid message");
+      return;
+    }
 
-    // Example: Replace this with API or WebSocket call
-    setMessages((prev) => [...prev, input]);
+    const msgToSend: Message = {
+      type: "chat",
+      chat_id: Date.now(), // temporary unique ID
+      sender_id: numId,
+      receiver_id: contactId,
+      message: input.trim(),
+      created_date: new Date().toISOString(),
+      last_updated_date: new Date().toISOString(),
+    };
+
+    ws.send(JSON.stringify(msgToSend));
+    setMessages((prev) => [...prev, msgToSend]); // Optimistic update
     setInput("");
   };
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
-      {contactId !== null && (
-        <div className="border-b bg-white px-4 py-2 text-sm font-medium text-gray-800">
-          Chatting with contact ID: {contactId}
-        </div>
-      )}
+      <div className="border-b bg-white px-4 py-2 text-sm font-medium text-gray-800">
+        Chatting with contact ID: {contactId}
+      </div>
 
-      {/* Message list */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4 text-sm">
         {messages.length === 0 ? (
           <p className="text-center text-gray-400">No messages yet</p>
         ) : (
-          messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`${
-                idx % 2 === 0
-                  ? "bg-gray-200 text-left"
-                  : "bg-blue-500 text-right text-white"
-              } max-w-[70%] rounded-md p-2 ${
-                idx % 2 === 0 ? "self-start" : "ml-auto self-end"
-              }`}
-            >
-              {msg}
-            </div>
-          ))
+          messages.map((msg, idx) => {
+            const isSent = msg.sender_id !== contactId;
+            return (
+              <div
+                key={msg.chat_id ?? idx}
+                className={`flex ${isSent ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-md ${
+                    isSent
+                      ? "rounded-br-none bg-blue-600 text-white"
+                      : "rounded-bl-none bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  <p className="break-words whitespace-pre-wrap">
+                    {msg.message}
+                  </p>
+                  <span className="mt-1 block text-right text-[10px] text-gray-400">
+                    {new Date(msg.created_date).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
-      {/* Input field */}
       <div className="flex border-t bg-white px-2 py-2">
         <input
           type="text"
@@ -68,11 +82,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ contactId }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder={
-            contactId === null
-              ? "Select a contact to start chatting..."
-              : "Type your message..."
-          }
+          placeholder="Type your message..."
           disabled={contactId === null}
         />
         <button
