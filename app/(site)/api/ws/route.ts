@@ -10,8 +10,15 @@ export function SOCKET(
   console.log("A client connected");
   client.on("message", (message) => {
     console.log("Received message:", message.toString());
+
+    // Broadcast to other connected clients
+    for (const other of server.clients)
+      if (client !== other && other.readyState === other.OPEN)
+        other.send(message);
+
     client.send(message); // Echo back the message
   });
+
   client.on("close", () => {
     console.log("A client disconnected");
   });

@@ -77,7 +77,9 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
                 <div className="h-10 w-10 rounded-full bg-gray-300">
                   <Image
                     src={
-                      chat.contact_profile_picture || "/images/default_pic.png"
+                      chat.contact_profile_picture?.startsWith("http")
+                        ? chat.contact_profile_picture
+                        : "/images/" + chat.contact_profile_picture
                     }
                     alt={`${chat.contact_username} avatar`}
                     width={40}
