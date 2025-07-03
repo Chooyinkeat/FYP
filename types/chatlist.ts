@@ -23,3 +23,7 @@ export interface Message {
   last_updated_date: string;
   type?: string; // for "chat" messages via WS
 }
+
+export interface LeftPanelProps {
+  onSelectChat: (contactId: number) => void;
+}

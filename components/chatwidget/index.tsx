@@ -11,27 +11,27 @@ export default function ChatWidget() {
   const wsRef = useRef<WebSocket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
-
-  const handleSelectChat = (contactId: number) => {
-    setSelectedChat(contactId);
+  const handleSelectChat = (receiverId: number) => {
+    setSelectedChat(receiverId);
   };
 
   // WebSocket setup
   useEffect(() => {
+    const storedUserId = Number(sessionStorage.getItem("userId"));
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const host = window.location.host;
-    const ws = new WebSocket(`${protocol}://${host}/api/ws`);
+    const ws = new WebSocket(
+      `${protocol}://${host}/api/ws?userId=${storedUserId}`,
+    );
     wsRef.current = ws;
-
     ws.onopen = () => console.log("Connected to server");
-
     ws.onmessage = async (event) => {
       try {
         const data =
           typeof event.data === "string"
             ? JSON.parse(event.data)
             : JSON.parse(await event.data.text());
-
+        console.log("Received message: ", data);
         if (data.type === "chat") {
           setMessages((prev) => {
             const exists = prev.some(

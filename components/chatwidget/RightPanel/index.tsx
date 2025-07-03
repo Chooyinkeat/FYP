@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import type { RightPanelProps, Message } from "@/types/chatlist";
 
@@ -10,6 +11,25 @@ const RightPanel: React.FC<RightPanelProps> = ({
 }) => {
   const [input, setInput] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+
+  const sendDB = async () => {
+    try {
+      const response = await axios.post(
+        "/api/protected/sendMessageAPI",
+        {
+          receiverId: contactId,
+          message: input.trim(),
+        },
+        {
+          withCredentials: true, // 🔒 include cookies (important!)
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.log("Error fetching user ID:", error);
+    }
+  };
+
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
     setUserId(storedUserId);
@@ -36,6 +56,13 @@ const RightPanel: React.FC<RightPanelProps> = ({
     ws.send(JSON.stringify(msgToSend));
     setMessages((prev) => [...prev, msgToSend]); // Optimistic update
     setInput("");
+    sendDB().then((data) => {
+      if (data.success) {
+        console.log("Message sent successfully");
+      } else {
+        console.error("Failed to send message:", data.message);
+      }
+    });
   };
 
   return (

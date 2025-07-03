@@ -3,17 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import axios from "axios";
+import { LeftPanelProps } from "@/types/chatlist"; // Adjust the import path as necessary
 import { Chat } from "@/types/chatlist"; // Adjust the import path as necessary
-
-interface LeftPanelProps {
-  onSelectChat: (contactId: number) => void;
-}
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
 
   const fetchChatList = async () => {
     try {
@@ -24,6 +21,26 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
       return response.data; // Assuming your API returns the user data in this format
     } catch (error) {
       console.log("Error details:", error.response?.data || error.message);
+    }
+  };
+
+  const searchName = async (username: string) => {
+    if (!searchInput.trim()) return;
+    try {
+      const response = await axios.post(
+        "/api/protected/searchChatNameAPI",
+        { username: username },
+        { withCredentials: true },
+      );
+      if (response.data.success) {
+        setChats(response.data.data);
+        setHasError(false);
+      } else {
+        setHasError(true);
+      }
+    } catch (error) {
+      console.log("Error searching name:", error);
+      setHasError(true);
     }
   };
 
@@ -41,6 +58,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
 
     loadChats();
   }, []);
+
   return (
     <div className="w-1/3 border-r bg-white">
       <div className="border-b px-4 py-2 text-lg font-semibold text-red-600">
@@ -52,6 +70,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
           type="text"
           placeholder="Search name"
           className="w-full rounded border px-2 py-1 text-sm"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
 
@@ -69,9 +89,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
             <div
               key={chat.contact_id}
               onClick={() => onSelectChat(chat.contact_id)}
-              className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 hover:bg-gray-100 ${
-                selectedChat === index ? "bg-gray-100" : ""
-              }`}
+              className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 hover:bg-gray-100`}
             >
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-full bg-gray-300">
