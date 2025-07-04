@@ -26,9 +26,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const [rows] = await pool.query(`SELECT * FROM user WHERE username = ?`, [
-      username,
-    ]);
+    const [rows] = await pool.query(
+      `SELECT user_id, username, profile FROM user WHERE TRIM(username) = ?`,
+      [username],
+    );
+
     if ((rows as any[]).length === 0) {
       return NextResponse.json(
         { success: false, message: "User not found" },

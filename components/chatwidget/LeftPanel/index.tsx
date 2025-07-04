@@ -1,66 +1,120 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { LeftPanelProps } from "@/types/chatlist"; // Adjust the import path as necessary
-import { Chat } from "@/types/chatlist"; // Adjust the import path as necessary
+import { Chat } from "@/types/chatlist";
+import { debounce } from "lodash";
+import { LeftPanelProps } from "@/types/chatlist";
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const fetchChatList = async () => {
+  const fetchChatList = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const response = await axios.get("/api/protected/chatListAPI", {
         withCredentials: true, // 🔒 include cookies (important!)
       });
-
-      return response.data; // Assuming your API returns the user data in this format
-    } catch (error) {
-      console.log("Error details:", error.response?.data || error.message);
-    }
-  };
-
-  const searchName = async (username: string) => {
-    if (!searchInput.trim()) return;
-    try {
-      const response = await axios.post(
-        "/api/protected/searchChatNameAPI",
-        { username: username },
-        { withCredentials: true },
-      );
-      if (response.data.success) {
+      if (response.data && Array.isArray(response.data.data)) {
         setChats(response.data.data);
         setHasError(false);
       } else {
-        setHasError(true);
+        console.log("Invalid response format for chat list:", response.data);
+        setChats([]); // fallback to empty list
+        setHasError(true); // Indicate an error if format is wrong
       }
     } catch (error) {
-      console.log("Error searching name:", error);
+      console.log(
+        "Error fetching chat list:",
+        error.response?.data || error.message,
+      );
       setHasError(true);
-    }
-  };
-
-  useEffect(() => {
-    const loadChats = async () => {
-      const result = await fetchChatList();
-      if (result && Array.isArray(result.data)) {
-        setChats(result.data);
-      } else {
-        console.log("Invalid response format:", result);
-        setChats([]); // fallback to empty list
-      }
+      setChats([]); // Clear chats on error
+    } finally {
       setIsLoading(false);
-    };
-
-    loadChats();
+    }
   }, []);
 
+  const searchName = useCallback(
+    async (username: string) => {
+      if (!username.trim()) {
+        fetchChatList();
+        return;
+      }
+
+      setIsLoading(true);
+      setHasError(false);
+      try {
+        const response = await axios.post(
+          "/api/protected/searchChatNameAPI",
+          { username: username },
+          { withCredentials: true },
+        );
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const chatData: Chat = {
+            contact_id: Number(response.data.data[0].user_id),
+            contact_username: response.data.data[0].username,
+            contact_profile_picture: response.data.data[0].profile,
+            last_message_date: "",
+            last_message_content: "",
+            unread: 0,
+          };
+          setChats([chatData]);
+          setHasError(false);
+        } else {
+          setChats([]);
+          setHasError(false);
+        }
+      } catch (error) {
+        console.log(
+          "Error searching name:",
+          error.response?.data || error.message,
+        );
+        setHasError(true);
+        setChats([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchChatList],
+  );
+
+  const debouncedSearchName = useCallback(
+    debounce((username: string) => searchName(username), 300),
+    [searchName],
+  );
+
+  // Effect for initial chat list load
+  useEffect(() => {
+    const loadInitialChats = async () => {
+      await fetchChatList();
+      setInitialLoadComplete(true); // Mark initial load as complete
+    };
+    loadInitialChats();
+  }, [fetchChatList]);
+
+  useEffect(() => {
+    if (initialLoadComplete) {
+      debouncedSearchName(searchInput);
+    }
+
+    return () => {
+      debouncedSearchName.cancel();
+    };
+  }, [searchInput, debouncedSearchName, initialLoadComplete]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+
   return (
-    <div className="w-1/3 border-r bg-white">
+    <div className="flex h-screen w-1/3 flex-col border-r bg-white">
       <div className="border-b px-4 py-2 text-lg font-semibold text-red-600">
         Chat ({chats.length})
       </div>
@@ -69,30 +123,39 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
         <input
           type="text"
           placeholder="Search name"
-          className="w-full rounded border px-2 py-1 text-sm"
+          className="w-full rounded border px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={handleInputChange}
         />
       </div>
 
-      <div className="overflow-y-auto">
+      <div className="flex-grow overflow-y-auto">
         {isLoading ? (
           <div className="p-4 text-center text-sm text-gray-500">
             Loading chats...
           </div>
-        ) : hasError || chats.length === 0 ? (
+        ) : hasError ? (
+          <div className="p-4 text-center text-sm text-red-500">
+            Error loading chats. Please try again.
+          </div>
+        ) : searchInput.trim() && chats.length === 0 ? (
+          <div className="p-4 text-center text-sm text-gray-500">
+            No results found for "{searchInput}".
+          </div>
+        ) : chats.length === 0 ? (
           <div className="p-4 text-center text-sm text-gray-500">
             No messages found.
           </div>
         ) : (
           chats.map((chat, index) => (
             <div
-              key={chat.contact_id}
+              key={chat.contact_id || `chat-${index}`} // Added index fallback for key
               onClick={() => onSelectChat(chat.contact_id)}
-              className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 hover:bg-gray-100`}
+              className={`mx-2 my-1 flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 transition-colors duration-150 hover:bg-gray-100`}
             >
-              <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full bg-gray-300">
+              <div className="flex min-w-0 flex-grow items-center gap-2">
+                {/* Added flex-grow and min-w-0 */}
+                <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300">
                   <Image
                     src={
                       chat.contact_profile_picture?.startsWith("http")
@@ -103,20 +166,25 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
                     width={40}
                     height={40}
                     className="h-full w-full rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/default-avatar.png"; // Provide a default image path
+                    }}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">
+                <div className="flex min-w-0 flex-grow flex-col">
+                  {/* Added flex-grow */}
+                  <span className="truncate text-sm font-medium text-gray-800">
                     {chat.contact_username}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {chat.last_message_content?.slice(0, 25) || "[No message]"}
-                    ...
+                  <span className="truncate text-xs text-gray-500">
+                    {chat.last_message_content || "[No message]"}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                <span className="text-xs text-gray-400">
+              <div className="flex flex-shrink-0 flex-col items-end text-right">
+                {/* Added text-right */}
+                <span className="text-xs whitespace-nowrap text-gray-400">
+                  {/* Added whitespace-nowrap */}
                   {new Date(chat.last_message_date).toLocaleDateString(
                     "en-MY",
                     {
@@ -127,7 +195,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onSelectChat }) => {
                   )}
                 </span>
                 {chat.unread && chat.unread > 0 && (
-                  <span className="mt-1 rounded-full bg-red-500 px-2 text-xs text-white">
+                  <span className="mt-1 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
                     {chat.unread}
                   </span>
                 )}
