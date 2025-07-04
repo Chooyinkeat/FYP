@@ -7,6 +7,10 @@ export interface Chat {
   unread?: number; // optional, depends if you implement it later
 }
 
+export interface LeftPanelProps {
+  onSelectChat: (contactId: number) => void;
+}
+
 export interface RightPanelProps {
   contactId: number | null;
   ws: WebSocket | null;
@@ -22,8 +26,4 @@ export interface Message {
   created_date: string;
   last_updated_date: string;
   type?: string; // for "chat" messages via WS
-}
-
-export interface LeftPanelProps {
-  onSelectChat: (contactId: number) => void;
 }
