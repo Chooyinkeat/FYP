@@ -14,6 +14,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
     "firebase": "^11.9.1",
     "framer-motion": "^12.0.6",
     "jose": "^6.0.11",
@@ -28,6 +29,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hot-toast": "^2.4.1",
+    "react-icons": "^5.5.0",
     "sweetalert2": "^11.6.13",
     "swiper": "^9.3.2",
     "ws": "^8.18.3"
