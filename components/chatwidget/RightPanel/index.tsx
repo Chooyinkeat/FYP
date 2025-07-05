@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { RightPanelProps, Message } from "@/types/chatlist";
 
 const RightPanel: React.FC<RightPanelProps> = ({
@@ -11,7 +11,8 @@ const RightPanel: React.FC<RightPanelProps> = ({
 }) => {
   const [input, setInput] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
-
+  const numId = Number(userId);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const sendDB = async () => {
     try {
       const response = await axios.post(
@@ -29,13 +30,6 @@ const RightPanel: React.FC<RightPanelProps> = ({
       console.log("Error fetching user ID:", error);
     }
   };
-
-  useEffect(() => {
-    const storedUserId = sessionStorage.getItem("userId");
-    setUserId(storedUserId);
-  }, []);
-
-  const numId = Number(userId);
   const sendMessage = () => {
     if (!input.trim() || !ws || contactId === null) {
       console.log("Invalid message");
@@ -64,76 +58,90 @@ const RightPanel: React.FC<RightPanelProps> = ({
     });
   };
 
-  return (
-    <>
-      <div className="flex h-full flex-col">
-        <div className="border-b bg-white px-4 py-2 text-sm font-medium text-gray-800">
-          Chatting with contact ID: {contactId}
-        </div>
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
 
-        <div className="flex-1 space-y-2 overflow-y-auto p-4 text-sm">
-          {messages.length === 0 ? (
-            <p className="text-center text-gray-400">No messages yet</p>
-          ) : (
-            messages.map((msg, idx) => {
-              const isSent = msg.sender_id !== contactId;
-              return (
-                <div
-                  key={msg.chat_id ?? idx}
-                  className={`flex ${isSent ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-md ${
-                      isSent
-                        ? "rounded-br-none bg-blue-600 text-white"
-                        : "rounded-bl-none bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    <p className="break-words whitespace-pre-wrap">
-                      {msg.message}
-                    </p>
-                    <span className="mt-1 block text-right text-[10px] text-gray-400">
-                      {new Date(msg.created_date).toLocaleTimeString()}
-                    </span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-        <div className="flex items-center gap-2 border-t bg-white px-2 py-2">
-          <label className="cursor-pointer text-sm text-blue-600 hover:underline">
-            📎
-            <input
-              type="file"
-              className="hidden"
-              // onChange={handleFileChange}
-              disabled={contactId === null}
-            />
-          </label>
-          {/* Message Input */}
-          <input
-            type="text"
-            className="flex-1 rounded border px-2 py-1 text-sm"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Type your message..."
-            disabled={contactId === null}
-          />
-          {/* Send Button */}
-          <button
-            onClick={sendMessage}
-            className={`rounded px-4 py-1 text-sm text-white ${
-              contactId === null ? "bg-gray-400" : "bg-blue-600"
-            }`}
-            disabled={contactId === null}
-          >
-            Send
-          </button>
-        </div>
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages]);
+
+  return (
+    <div className="flex h-screen flex-col">
+      {/* Header */}
+      <div className="sticky top-0 z-10 border-b bg-white px-4 py-2 text-sm font-medium text-gray-800">
+        Chatting with contact ID: {contactId}
       </div>
-    </>
+
+      {/* Messages */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 space-y-2 overflow-y-auto px-4 py-2 pb-50"
+      >
+        {messages.length === 0 ? (
+          <p className="text-center text-gray-400">No messages yet</p>
+        ) : (
+          messages.map((msg, idx) => {
+            const isSent = msg.sender_id !== contactId;
+            return (
+              <div
+                key={msg.chat_id ?? idx}
+                className={`flex ${
+                  isSent ? "justify-end" : "justify-start"
+                } mb-2`}
+              >
+                <div
+                  className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-md ${
+                    isSent
+                      ? "rounded-br-none bg-blue-600 text-white"
+                      : "rounded-bl-none bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  <p className="break-words whitespace-pre-wrap">
+                    {msg.message}
+                  </p>
+                  <span className="mt-1 block text-right text-[10px] text-gray-400">
+                    {new Date(msg.created_date).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="sticky bottom-0 z-10 flex items-center gap-2 border-t bg-white px-2 py-2">
+        <label className="cursor-pointer text-sm text-blue-600 hover:underline">
+          📎
+          <input type="file" className="hidden" disabled={contactId === null} />
+        </label>
+
+        <input
+          type="text"
+          className="flex-1 rounded border px-2 py-1 text-sm"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Type your message..."
+          disabled={contactId === null}
+        />
+
+        <button
+          onClick={sendMessage}
+          className={`rounded px-4 py-1 text-sm text-white ${
+            contactId === null ? "bg-gray-400" : "bg-blue-600"
+          }`}
+          disabled={contactId === null}
+        >
+          Send
+        </button>
+      </div>
+    </div>
   );
 };
 
