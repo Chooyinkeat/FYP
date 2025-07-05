@@ -32,7 +32,12 @@ export default function ChatWidget() {
             ? JSON.parse(event.data)
             : JSON.parse(await event.data.text());
         console.log("Received message: ", data);
-        if (data.type === "chat") {
+        if (
+          data.type === 0 ||
+          data.type === 1 ||
+          data.type === 2 ||
+          data.type === 3
+        ) {
           setMessages((prev) => {
             const exists = prev.some(
               (m) =>

@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import { FaPaperclip } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import type { RightPanelProps, Message } from "@/types/chatlist";
 
@@ -13,50 +14,6 @@ const RightPanel: React.FC<RightPanelProps> = ({
   const [userId, setUserId] = useState<string | null>(null);
   const numId = Number(userId);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-  const sendDB = async () => {
-    try {
-      const response = await axios.post(
-        "/api/protected/sendMessageAPI",
-        {
-          receiverId: contactId,
-          message: input.trim(),
-        },
-        {
-          withCredentials: true, // 🔒 include cookies (important!)
-        },
-      );
-      return response.data;
-    } catch (error) {
-      console.log("Error fetching user ID:", error);
-    }
-  };
-  const sendMessage = () => {
-    if (!input.trim() || !ws || contactId === null) {
-      console.log("Invalid message");
-      return;
-    }
-
-    const msgToSend: Message = {
-      type: "chat",
-      chat_id: Date.now(), // temporary unique ID
-      sender_id: numId,
-      receiver_id: contactId,
-      message: input.trim(),
-      created_date: new Date().toISOString(),
-      last_updated_date: new Date().toISOString(),
-    };
-
-    ws.send(JSON.stringify(msgToSend));
-    setMessages((prev) => [...prev, msgToSend]); // Optimistic update
-    setInput("");
-    sendDB().then((data) => {
-      if (data.success) {
-        console.log("Message sent successfully");
-      } else {
-        console.error("Failed to send message:", data.message);
-      }
-    });
-  };
 
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
@@ -65,10 +22,81 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
+    if (container) container.scrollTop = container.scrollHeight;
   }, [messages]);
+
+  const sendDB = async (msg: Message) => {
+    try {
+      const response = await axios.post(
+        "/api/protected/sendMessageAPI",
+        {
+          receiverId: msg.receiver_id,
+          message: msg.message,
+          type: msg.type,
+          mime_type: msg.mime_type,
+          file_name: msg.file_name,
+        },
+        { withCredentials: true },
+      );
+      return response.data;
+    } catch (error) {
+      console.log("Error sending message to DB:", error);
+    }
+  };
+
+  const sendMessage = () => {
+    if (!input.trim() || !ws || contactId === null) {
+      console.log("Invalid message");
+      return;
+    }
+
+    const msgToSend: Message = {
+      type: 0,
+      chat_id: Date.now(),
+      sender_id: numId,
+      receiver_id: contactId,
+      message: input.trim(),
+      created_date: new Date().toISOString(),
+      last_updated_date: new Date().toISOString(),
+    };
+
+    ws.send(JSON.stringify(msgToSend));
+    setMessages((prev) => [...prev, msgToSend]);
+    setInput("");
+    sendDB(msgToSend);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !ws || contactId === null) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+
+      let fileType: Message["type"] = 3;
+      if (file.type.startsWith("image/")) fileType = 1;
+      else if (file.type.startsWith("video/")) fileType = 2;
+
+      const fileMessage: Message = {
+        type: fileType,
+        chat_id: Date.now(),
+        sender_id: numId,
+        receiver_id: contactId,
+        message: base64,
+        mime_type: file.type,
+        file_name: file.name,
+        created_date: new Date().toISOString(),
+        last_updated_date: new Date().toISOString(),
+      };
+
+      ws.send(JSON.stringify(fileMessage));
+      setMessages((prev) => [...prev, fileMessage]);
+      sendDB(fileMessage);
+    };
+
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="flex h-screen flex-col">
@@ -87,6 +115,44 @@ const RightPanel: React.FC<RightPanelProps> = ({
         ) : (
           messages.map((msg, idx) => {
             const isSent = msg.sender_id !== contactId;
+
+            const messageBubble = () => {
+              if (msg.type === 1) {
+                return (
+                  <img
+                    src={msg.message}
+                    alt="sent-img"
+                    className="max-w-full rounded-md"
+                  />
+                );
+              } else if (msg.type === 2) {
+                return (
+                  <video controls className="max-w-full rounded-md">
+                    <source src={msg.message} type={msg.mime_type} />
+                    Your browser does not support the video tag.
+                  </video>
+                );
+              } else if (msg.type === 3) {
+                return (
+                  <a
+                    href={msg.message}
+                    download={msg.file_name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    📎 {msg.file_name}
+                  </a>
+                );
+              } else {
+                return (
+                  <p className="break-words whitespace-pre-wrap">
+                    {msg.message}
+                  </p>
+                );
+              }
+            };
+
             return (
               <div
                 key={msg.chat_id ?? idx}
@@ -101,9 +167,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
                       : "rounded-bl-none bg-gray-100 text-gray-800"
                   }`}
                 >
-                  <p className="break-words whitespace-pre-wrap">
-                    {msg.message}
-                  </p>
+                  {messageBubble()}
                   <span className="mt-1 block text-right text-[10px] text-gray-400">
                     {new Date(msg.created_date).toLocaleTimeString()}
                   </span>
@@ -116,9 +180,15 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
       {/* Input */}
       <div className="sticky bottom-0 z-10 flex items-center gap-2 border-t bg-white px-2 py-2">
-        <label className="cursor-pointer text-sm text-blue-600 hover:underline">
-          📎
-          <input type="file" className="hidden" disabled={contactId === null} />
+        <label className="cursor-pointer text-xl text-blue-600 hover:underline">
+          <FaPaperclip />
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+            onChange={handleFileUpload}
+            disabled={contactId === null}
+          />
         </label>
 
         <input

@@ -25,5 +25,8 @@ export interface Message {
   message: string;
   created_date: string;
   last_updated_date: string;
-  type?: string; // for "chat" messages via WS
+  // Optional fields for file/media messages
+  type?: 0 | 1 | 2 | 3; // defaults to 0 (text) if omitted
+  mime_type?: string; // e.g., "image/png", "video/mp4"
+  file_name?: string; // only for file uploads
 }
