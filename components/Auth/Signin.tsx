@@ -47,7 +47,7 @@ const submitForm = async (e: React.FormEvent) => {
         const data = response.data.user;
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("profile", data.profile);
-        window.location.href = "/blog"; // Change this to your desired route
+        window.location.href = "/lostItems"; // Change this to your desired route
       });
     } else {
       // Handle login error
@@ -88,7 +88,7 @@ const handleGoogleSignIn = async () => {
           const data = response.data.user;
           sessionStorage.setItem("userId", data.userId);
           sessionStorage.setItem("profile", data.profile);
-          window.location.href = "/blog"; // Change this to your desired route
+          window.location.href = "/lostItems"; // Change this to your desired route
         } else {
           Swal.fire({
             icon: "error",
@@ -138,7 +138,7 @@ const handleGithubSignIn = async () => {
           const data = response.data.user;
           sessionStorage.setItem("userId", data.userId);
           sessionStorage.setItem("profile", data.profile);
-          window.location.href = "/blog"; // Change this to your desired route
+          window.location.href = "/lostItems"; // Change this to your desired route
         } else {
           Swal.fire({
             icon: "error",
