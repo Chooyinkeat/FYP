@@ -1,8 +1,7 @@
 "use server";
+
 import pool from "@/lib/db";
 import { jwtDecode } from "jwt-decode";
-import fs from "fs";
-import path from "path";
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse, NextRequest } from "next/server";
 
@@ -32,15 +31,14 @@ export async function POST(request: NextRequest) {
   try {
     let finalMessage = message;
     let tinyIntType = 0;
+
     if (type !== 0 && mime_type && file_name) {
-      if (type === 1) {
-        tinyIntType = 1;
-      } else if (type === 2) {
-        tinyIntType = 2;
-      }
+      // Determine if it's image or video
+      if (type === 1) tinyIntType = 1;
+      else if (type === 2) tinyIntType = 2;
 
+      // Parse base64 content
       const matches = message.match(/^data:(.*);base64,(.*)$/);
-
       if (!matches || matches.length < 3) {
         return NextResponse.json(
           { success: false, message: "Invalid base64 format" },
@@ -48,25 +46,31 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const base64Data = matches[2];
-      const buffer = Buffer.from(base64Data, "base64");
-      const uploadsDir = path.join(process.cwd(), "public", "images");
-      fs.mkdirSync(uploadsDir, { recursive: true });
-      const safeFileName = `${Date.now()}-${file_name}`;
-      const filePath = path.join(uploadsDir, safeFileName);
-      fs.writeFileSync(filePath, new Uint8Array(buffer));
-      // Store public URL path in DB
-      finalMessage = `/images/${safeFileName}`;
+      const base64Data = `data:${matches[1]};base64,${matches[2]}`;
+
+      // Upload to Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(base64Data, {
+        folder: "chat",
+        public_id: `${Date.now()}-${file_name}`,
+        resource_type: "auto", // auto-detect image/video
+      });
+
+      finalMessage = uploadResult.secure_url; // Use Cloudinary URL
     }
-    // Always use finalMessage in DB
+
+    // Insert into DB
     await pool.query(
       `INSERT INTO chat (sender_id, receiver_id, message, type)
-   VALUES (?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?)`,
       [userId, receiverId, finalMessage, tinyIntType],
     );
 
     return NextResponse.json(
-      { success: true, message: "Message sent successfully" },
+      {
+        success: true,
+        message: "Message sent successfully",
+        url: finalMessage,
+      },
       { status: 200 },
     );
   } catch (error) {

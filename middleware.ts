@@ -25,5 +25,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/protected/:path*"], // your protected routes
+  matcher: [
+    "/api/protected/:path*",
+    "/submitLostItem",
+    "/profile",
+    "/error",
+    "/docs",
+  ],
 };

@@ -11,7 +11,7 @@ import Integration from "@/components/Integration";
 // import Pricing from "@/components/Pricing";
 // import Contact from "@/components/Contact";
 import Blog from "@/components/Blog";
-// import Testimonial from "@/components/Testimonial";
+import Testimonial from "@/components/Testimonial";
 export const metadata = {
   title: "Lost & Found System for Community – Final Year Project",
   description:
@@ -36,7 +36,7 @@ export default function Home() {
       <Integration />
       {/* <CTA /> */}
       {/* <FAQ /> */}
-      {/* <Testimonial /> */}
+      <Testimonial />
       {/* <Pricing /> */}
       {/* <Contact /> */}
       <Blog />

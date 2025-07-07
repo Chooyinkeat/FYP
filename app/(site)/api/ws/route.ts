@@ -19,7 +19,6 @@ export function SOCKET(
   }
 
   client.on("message", (message) => {
-    console.log("Received message:", message.toString());
     const parsedMessage = JSON.parse(message.toString());
 
     // Example: If message has a receiver_id

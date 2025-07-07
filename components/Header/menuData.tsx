@@ -23,13 +23,13 @@ const menuData: Menu[] = [
     id: 4,
     title: "Submit lost item",
     newTab: false,
-    path: "/support",
+    path: "/submitLostItem",
   },
   {
     id: 4,
     title: "Reports",
     newTab: false,
-    path: "/support",
+    path: "/submitLostItem",
   },
 ];
 
