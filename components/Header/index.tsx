@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import axios from "axios";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggler from "./ThemeToggler";
@@ -24,8 +25,11 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.clear();
-    window.location.href = "/"; // or redirect to sign-in page
+    const response = axios.post("/api/signOut");
+    response.then(() => {
+      sessionStorage.clear();
+      window.location.href = "/"; // or redirect to sign-in page
+    });
   };
 
   // Sticky menu

@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import React from "react";
-import axios from "axios";
 import BlogData from "@/components/Blog/blogData";
 import BlogItem from "@/components/Blog/BlogItem";
 export const metadata: Metadata = {
@@ -62,10 +61,11 @@ export default function LostItemsPage() {
 
               {/* Submit Lost Item Button */}
               <div className="flex justify-end md:justify-end">
-                <Link href="/submitLostItem">
-                  <button className="inline-block cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700">
-                    Submit Lost Item
-                  </button>
+                <Link
+                  href="/submitLostItem"
+                  className="inline-block cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
+                >
+                  Submit Lost Item
                 </Link>
               </div>
             </div>
@@ -73,6 +73,69 @@ export default function LostItemsPage() {
               {BlogData.slice(0, 3).map((blog, key) => (
                 <BlogItem blog={blog} key={key} />
               ))}
+            </div>
+            <div className="my-10 flex flex-col justify-center gap-4 md:flex-row md:items-center">
+              <nav aria-label="Page navigation example">
+                <ul className="inline-flex h-10 -space-x-px text-base">
+                  <li>
+                    <a
+                      href="#"
+                      className="ms-0 flex h-10 items-center justify-center rounded-s-lg border border-e-0 border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      Pre
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex h-10 items-center justify-center border border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      1
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex h-10 items-center justify-center border border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      2
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      aria-current="page"
+                      className="flex h-10 items-center justify-center border border-gray-300 bg-blue-50 px-4 text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                    >
+                      3
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex h-10 items-center justify-center border border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      4
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex h-10 items-center justify-center border border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      5
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex h-10 items-center justify-center rounded-e-lg border border-gray-300 bg-white px-4 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    >
+                      Nex
+                    </a>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>

@@ -1,17 +1,20 @@
 "use client";
+
 import { motion } from "framer-motion";
-import Image from "next/image";
+import NextImage from "next/image";
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const Submit = () => {
-  const [hasMounted, setHasMounted] = React.useState(false);
-
   const [status, setStatus] = useState("Lost");
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
   const [files, setFiles] = React.useState<File[]>([]);
+
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[]) => {
       if (files.length + acceptedFiles.length > 5) {
         Swal.fire({
           icon: "error",
@@ -20,15 +23,11 @@ const Submit = () => {
         });
         return;
       }
-
-      const imageFiles = acceptedFiles.slice(0, 5 - files.length); // keep within limit
-      setFiles((prev) => [...prev, ...imageFiles]);
+      // ✅ Update the state with new files
+      setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     },
     [files],
   );
-  const removeFile = (name: string) => {
-    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
-  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -38,27 +37,79 @@ const Submit = () => {
     multiple: true,
   });
 
-  React.useEffect(() => {
-    setHasMounted(true);
-  }, []);
-  if (!hasMounted) {
-    return null;
-  }
+  const removeFile = (name: string) => {
+    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
+  };
+
+  // submit form handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!category || !location || files.length === 0) {
+      console.log("Category:", category);
+      console.log("Location:", location);
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Form",
+        text: "Please fill all fields and upload at least one image.",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("category", category);
+    formData.append("location", location);
+    formData.append("status", status);
+
+    files.forEach((file) => {
+      formData.append("images", file); // backend should expect "images" as an array
+    });
+
+    try {
+      const response = await axios.post("/api/protected/upload", formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status !== 200) {
+        throw new Error("Failed to upload files");
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Your data has been submitted!",
+      });
+
+      // Reset form
+      setCategory("");
+      setLocation("");
+      setStatus("Lost");
+      setFiles([]);
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        text: "Something went wrong. Please try again later.",
+      });
+      console.log(err);
+    }
+  };
 
   return (
     <>
-      {/* <!-- ===== Contact Start ===== --> */}
       <section id="support" className="px-4 md:px-8 2xl:px-0">
         <div className="max-w-c-1390 relative mx-auto px-7.5 pt-10 lg:px-15 lg:pt-15 xl:px-20 xl:pt-20">
           <div className="absolute top-0 left-0 -z-1 h-2/3 w-full rounded-lg bg-linear-to-t from-transparent to-[#dee7ff47] dark:bg-linear-to-t dark:to-[#252A42]"></div>
           <div className="absolute bottom-[-255px] left-0 -z-1 h-full w-full">
-            <Image
+            <NextImage
               src="./images/shape/shape-dotted-light.svg"
               alt="Dotted"
               className="dark:hidden"
               fill
             />
-            <Image
+            <NextImage
               src="./images/shape/shape-dotted-dark.svg"
               alt="Dotted"
               className="hidden dark:block"
@@ -91,16 +142,11 @@ const Submit = () => {
 
               <form method="POST">
                 <div className="mb-7.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
-                  {/* Title */}
-                  <input
-                    type="text"
-                    placeholder="Title"
-                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-hidden lg:w-1/2 dark:focus:placeholder:text-white"
-                    name="title"
-                  />
                   {/* Category */}
                   <select
                     name="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
                   >
                     <option value="">Select Category</option>
@@ -115,45 +161,40 @@ const Submit = () => {
                     <option value="bags">Bags & Luggage</option>
                     <option value="others">Others</option>
                   </select>
-                </div>
-                <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
                   {/* Location */}
                   <input
                     type="text"
+                    value={location} // ✅ binds the state to the input
+                    onChange={(e) => setLocation(e.target.value)} //
                     placeholder="Location"
                     className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-hidden lg:w-1/2 dark:focus:placeholder:text-white"
                     name="location"
                   />
-                  {/* Radio button */}
-                  {["Lost", "Found"].map((option) => (
-                    <label
-                      key={option}
-                      className={`cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition ${
-                        status === option
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="status"
-                        value={option}
-                        className="sr-only"
-                        checked={status === option}
-                        onChange={() => setStatus(option)}
-                      />
-                      {option}
-                    </label>
-                  ))}
                 </div>
-                {/* Description */}
-                <div className="mb-11.5 flex">
-                  <textarea
-                    placeholder="Description"
-                    rows={4}
-                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent focus:placeholder:text-black focus-visible:outline-hidden dark:focus:placeholder:text-white"
-                    name="description"
-                  ></textarea>
+                <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
+                  <div className="w-1/2">
+                    {["Lost", "Found"].map((option) => (
+                      <label
+                        key={option}
+                        className={`mx-5 cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition ${
+                          status === option
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="status"
+                          value={option}
+                          className="sr-only"
+                          checked={status === option}
+                          onChange={() => setStatus(option)}
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="w-1/2"></div>
                 </div>
                 {/* Dropzone input */}
                 <div
@@ -205,6 +246,7 @@ const Submit = () => {
                 {/* Submit button */}
                 <div className="flex flex-wrap gap-4 xl:justify-between">
                   <button
+                    onClick={handleSubmit}
                     aria-label="send message"
                     className="hover:bg-blackho dark:bg-btndark inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
                   >
@@ -285,7 +327,6 @@ const Submit = () => {
           </div>
         </div>
       </section>
-      {/* <!-- ===== Contact End ===== --> */}
     </>
   );
 };
