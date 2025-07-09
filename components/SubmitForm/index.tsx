@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import NextImage from "next/image";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -10,9 +10,8 @@ import axios from "axios";
 const Submit = () => {
   const [status, setStatus] = useState("Lost");
   const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
   const [files, setFiles] = React.useState<File[]>([]);
-
+  // React dropzone setup
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (files.length + acceptedFiles.length > 5) {
@@ -28,7 +27,6 @@ const Submit = () => {
     },
     [files],
   );
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -36,9 +34,26 @@ const Submit = () => {
     },
     multiple: true,
   });
-
   const removeFile = (name: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
+  };
+
+  // convert file to images
+  // Utility to convert file to <img> element
+  const createImageElement = (file: File): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        img.src = reader.result as string;
+      };
+
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+
+      reader.readAsDataURL(file);
+    });
   };
 
   // submit form handler
@@ -46,8 +61,6 @@ const Submit = () => {
     e.preventDefault();
 
     if (!category || !location || files.length === 0) {
-      console.log("Category:", category);
-      console.log("Location:", location);
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
@@ -58,7 +71,6 @@ const Submit = () => {
 
     const formData = new FormData();
     formData.append("category", category);
-    formData.append("location", location);
     formData.append("status", status);
 
     files.forEach((file) => {
@@ -84,7 +96,6 @@ const Submit = () => {
 
       // Reset form
       setCategory("");
-      setLocation("");
       setStatus("Lost");
       setFiles([]);
     } catch (err) {
@@ -161,7 +172,7 @@ const Submit = () => {
                     <option value="bags">Bags & Luggage</option>
                     <option value="others">Others</option>
                   </select>
-                  {/* Location */}
+                  {/* Location
                   <input
                     type="text"
                     value={location} // ✅ binds the state to the input
@@ -169,7 +180,7 @@ const Submit = () => {
                     placeholder="Location"
                     className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-hidden lg:w-1/2 dark:focus:placeholder:text-white"
                     name="location"
-                  />
+                  /> */}
                 </div>
                 <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
                   <div className="w-1/2">
@@ -246,6 +257,7 @@ const Submit = () => {
                 {/* Submit button */}
                 <div className="flex flex-wrap gap-4 xl:justify-between">
                   <button
+                    type="submit"
                     onClick={handleSubmit}
                     aria-label="send message"
                     className="hover:bg-blackho dark:bg-btndark inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"

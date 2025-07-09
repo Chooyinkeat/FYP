@@ -21,11 +21,10 @@ export async function POST(request: NextRequest) {
   const req = request as NextRequest;
   const formData = await req.formData();
   const category = formData.get("category") as string;
-  const location = formData.get("location") as string;
   const status = formData.get("status") as string;
   const images = formData.getAll("images") as File[];
 
-  if (!category || !location || !status) {
+  if (!category || !status) {
     return NextResponse.json(
       {
         success: false,
@@ -48,11 +47,11 @@ export async function POST(request: NextRequest) {
   try {
     let sql = "";
     if (status == "Lost") {
-      sql = `INSERT INTO lost_item (category, location, status, payload, user_id)
-   VALUES (?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO lost_item (category, status, payload, user_id)
+   VALUES (?, ?, ?, ?)`;
     } else {
-      sql = `INSERT INTO found_item (category, location, status, payload, user_id)
-   VALUES (?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO found_item (category, status, payload, user_id)
+   VALUES (?, ?, ?, ?)`;
     }
 
     const uploadedImageUrls: string[] = [];
@@ -76,7 +75,6 @@ export async function POST(request: NextRequest) {
 
     await pool.query(sql, [
       category,
-      location,
       0,
       JSON.stringify(payload), // this is where image URLs go
       userId,
