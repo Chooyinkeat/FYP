@@ -1,16 +1,20 @@
 "use client";
-
-import { motion } from "framer-motion";
-import NextImage from "next/image";
-import React, { useState, useCallback, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
-import Swal from "sweetalert2";
 import axios from "axios";
+import Swal from "sweetalert2";
+import NextImage from "next/image";
+import { motion } from "framer-motion";
+import { useDropzone } from "react-dropzone";
+import React, { useState, useCallback } from "react";
+import { AIResponse } from "@/types/airesponse";
 
 const Submit = () => {
+  // Lost and found form state
   const [status, setStatus] = useState("Lost");
   const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
   const [files, setFiles] = React.useState<File[]>([]);
+
   // React dropzone setup
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -37,74 +41,154 @@ const Submit = () => {
   const removeFile = (name: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
-
-  // convert file to images
-  // Utility to convert file to <img> element
-  const createImageElement = (file: File): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        img.src = reader.result as string;
-      };
-
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-
-      reader.readAsDataURL(file);
-    });
-  };
+  // Gemini AI response state
+  const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // submit form handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!category || !location || files.length === 0) {
+    const formData = new FormData();
+    formData.append("status", status);
+
+    // LOST ITEM HANDLING
+    if (status === "Lost") {
+      // Validation: category/location/description required
+      if (!category || !location || !description) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Fields",
+          text: "Please provide category, location, and description.",
+        });
+        return;
+      }
+
+      formData.append("category", category);
+      formData.append("location", location);
+      formData.append("description", description);
+
+      files.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      try {
+        const response = await axios.post(
+          "/api/protected/uploadLostItemAPI",
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          Swal.fire({
+            icon: "success",
+            title: "Form Submitted",
+            text: "Your lost item has been reported successfully.",
+          });
+          // Reset form fields
+          setCategory("");
+          setLocation("");
+          setDescription("");
+          setFiles([]);
+          setStatus("Lost"); // optional: reset radio
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Submission Failed",
+          text: "Failed to upload lost item.",
+        });
+        console.log(err);
+      }
+      return;
+    }
+
+    // FOUND ITEM HANDLING
+    if (files.length === 0) {
       Swal.fire({
         icon: "warning",
-        title: "Incomplete Form",
-        text: "Please fill all fields and upload at least one image.",
+        title: "Missing Images",
+        text: "Please upload at least one image to report a found item.",
       });
       return;
     }
 
-    const formData = new FormData();
-    formData.append("category", category);
-    formData.append("status", status);
-
     files.forEach((file) => {
-      formData.append("images", file); // backend should expect "images" as an array
+      formData.append("images", file);
     });
 
     try {
-      const response = await axios.post("/api/protected/upload", formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
+      Swal.fire({
+        title: "Analyzing Image...",
+        text: "Please wait while the AI processes your image.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
         },
       });
+      const response = await axios.post(
+        "/api/protected/analyzeImage",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
       if (response.status !== 200) {
-        throw new Error("Failed to upload files");
+        throw new Error("Failed to analyze image.");
       }
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Your data has been submitted!",
-      });
-
-      // Reset form
-      setCategory("");
-      setStatus("Lost");
-      setFiles([]);
+      setAiResponses(response.data.data);
+      setShowModal(true);
+      setCurrentIndex(0);
     } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Upload Failed",
-        text: "Something went wrong. Please try again later.",
+        text: "An error occurred while analyzing the image.",
       });
-      console.log(err);
+      console.error(err);
+    } finally {
+      Swal.close();
+    }
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!files.length || !aiResponses.length) return;
+    const formData = new FormData();
+    formData.append("status", status); // from your radio button state
+    formData.append("metadata", JSON.stringify(aiResponses)); // Gemini results
+    files.forEach((file) => {
+      formData.append("images", file); // must match getAll("images")
+    });
+    try {
+      const response = await axios.post(
+        "/api/protected/uploadFoundItemAPI",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (response.status !== 200) {
+        throw new Error("Failed to upload files");
+      }
+      setAiResponses([]); // reset if needed
+      return response; // return the response for further handling
+    } catch (err) {
+      console.log("Unexpected error: ", err);
     }
   };
 
@@ -152,61 +236,72 @@ const Submit = () => {
               </h2>
 
               <form method="POST">
-                <div className="mb-7.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
-                  {/* Category */}
-                  <select
-                    name="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="electronics">
-                      Electronics (e.g., phone, laptop)
-                    </option>
-                    <option value="documents">
-                      Important Documents (e.g., ID, passport)
-                    </option>
-                    <option value="apparel">Clothing & Accessories</option>
-                    <option value="keys-wallets">Keys / Wallets</option>
-                    <option value="bags">Bags & Luggage</option>
-                    <option value="others">Others</option>
-                  </select>
-                  {/* Location
-                  <input
-                    type="text"
-                    value={location} // ✅ binds the state to the input
-                    onChange={(e) => setLocation(e.target.value)} //
-                    placeholder="Location"
-                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-hidden lg:w-1/2 dark:focus:placeholder:text-white"
-                    name="location"
-                  /> */}
-                </div>
                 <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
-                  <div className="w-1/2">
-                    {["Lost", "Found"].map((option) => (
-                      <label
-                        key={option}
-                        className={`mx-5 cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition ${
-                          status === option
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="status"
-                          value={option}
-                          className="sr-only"
-                          checked={status === option}
-                          onChange={() => setStatus(option)}
-                        />
-                        {option}
-                      </label>
-                    ))}
-                  </div>
-                  <div className="w-1/2"></div>
+                  {/* Status Radio Buttons */}
+                  {["Lost", "Found"].map((option) => (
+                    <label
+                      key={option}
+                      className={`mx-5 cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition ${
+                        status === option
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="status"
+                        value={option}
+                        className="sr-only"
+                        checked={status === option}
+                        onChange={() => setStatus(option)}
+                      />
+                      {option}
+                    </label>
+                  ))}
                 </div>
+                {status === "Lost" && files.length === 0 && (
+                  <>
+                    <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                      <select
+                        name="category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                      >
+                        <option value="">Select Category</option>
+                        <option value="electronics">
+                          Electronics (e.g., phone, laptop)
+                        </option>
+                        <option value="documents">
+                          Important Documents (e.g., ID, passport)
+                        </option>
+                        <option value="apparel">Clothing & Accessories</option>
+                        <option value="keys-wallets">Keys / Wallets</option>
+                        <option value="bags">Bags & Luggage</option>
+                        <option value="others">Others</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={location}
+                        name="location"
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Where was it lost? (e.g., library, parking lot)"
+                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                      />
+                    </div>
+                    <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                      <textarea
+                        name="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describe the lost item in detail"
+                        rows={4}
+                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
+                      ></textarea>
+                    </div>
+                  </>
+                )}
+
                 {/* Dropzone input */}
                 <div
                   {...getRootProps()}
@@ -279,6 +374,152 @@ const Submit = () => {
                   </button>
                 </div>
               </form>
+              {/* Modal for AI response */}
+              {showModal && aiResponses.length > 0 && (
+                <div className="bg-opacity-60 fixed inset-0 z-50 flex items-center justify-center bg-black">
+                  <div className="relative w-full max-w-xl rounded-lg bg-white p-8 shadow-lg dark:bg-gray-900">
+                    {/* Close Button */}
+                    <button
+                      className="absolute top-3 right-3 text-xl font-bold text-black dark:text-white"
+                      onClick={() => setShowModal(false)}
+                    >
+                      ✕
+                    </button>
+
+                    <div
+                      id="controls-carousel"
+                      className="relative w-full"
+                      data-carousel="static"
+                    >
+                      <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
+                        <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
+                          {aiResponses.map((res, index) => (
+                            <div
+                              key={index}
+                              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                                index === currentIndex
+                                  ? "z-10 opacity-100"
+                                  : "z-0 opacity-0"
+                              }`}
+                              data-carousel-item
+                            >
+                              <div className="max-h-[22rem] overflow-y-auto p-4 text-black md:max-h-[24rem] dark:text-white">
+                                <h2 className="mb-4 text-lg font-semibold">
+                                  📷 {res.filename}
+                                </h2>
+
+                                <ul className="mb-4 space-y-1 text-sm sm:text-base">
+                                  <li>
+                                    <strong>Item Type:</strong>{" "}
+                                    {res.metadata.item_type}
+                                  </li>
+                                  <li>
+                                    <strong>Color:</strong> {res.metadata.color}
+                                  </li>
+                                  <li>
+                                    <strong>Brand:</strong> {res.metadata.brand}
+                                  </li>
+                                  <li>
+                                    <strong>Material:</strong>{" "}
+                                    {res.metadata.material}
+                                  </li>
+                                  <li>
+                                    <strong>Condition:</strong>{" "}
+                                    {res.metadata.condition}
+                                  </li>
+                                </ul>
+
+                                <h3 className="mb-2 text-base font-medium">
+                                  Verification Questions:
+                                </h3>
+                                <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base">
+                                  {res.questions.map((q, i) => (
+                                    <li key={i}>
+                                      <strong>Q:</strong> {q.question}
+                                      <br />
+                                      <strong>A:</strong> {q.answer}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* <!-- Slider controls --> */}
+                      <button
+                        type="button"
+                        className="group absolute start-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"
+                        onClick={() =>
+                          setCurrentIndex((prev) =>
+                            prev > 0 ? prev - 1 : aiResponses.length - 1,
+                          )
+                        }
+                      >
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
+                          <svg
+                            className="h-4 w-4 text-white rtl:rotate-180 dark:text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 6 10"
+                          ></svg>
+                          <span className="sr-only">Previous</span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="group absolute end-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"
+                        onClick={() =>
+                          setCurrentIndex((prev) =>
+                            prev < aiResponses.length - 1 ? prev + 1 : 0,
+                          )
+                        }
+                      >
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
+                          <svg
+                            className="h-4 w-4 text-white rtl:rotate-180 dark:text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 6 10"
+                          ></svg>
+                          <span className="sr-only">Next</span>
+                        </span>
+                      </button>
+                      {/* Footer Buttons */}
+                      <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                        <button
+                          onClick={() => {
+                            setShowModal(false);
+                            setCurrentIndex(0); // reset if needed
+                          }}
+                          className="w-full rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 sm:w-auto"
+                        >
+                          ✕ Close
+                        </button>
+
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          {currentIndex + 1} of {aiResponses.length}
+                        </span>
+
+                        <button
+                          onClick={async () => {
+                            const success = await handleConfirmUpload();
+                            if (success && success.status === 200) {
+                              setShowModal(false);
+                              setCurrentIndex(0);
+                            }
+                          }}
+                          className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:w-auto"
+                        >
+                          ✅ Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
 
             <motion.div
