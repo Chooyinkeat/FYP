@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import React from "react";
-import BlogData from "@/components/Blog/blogData";
-import BlogItem from "@/components/Blog/BlogItem";
+import LostList from "@/components/LostList";
 export const metadata: Metadata = {
   title: "Lost Items | VisionVault",
   description:
@@ -62,7 +61,7 @@ export default function LostItemsPage() {
               {/* Submit Lost Item Button */}
               <div className="flex justify-end md:justify-end">
                 <Link
-                  href="/submitLostItem"
+                  href="/submitItem"
                   className="inline-block cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
                 >
                   Submit Lost Item
@@ -70,10 +69,9 @@ export default function LostItemsPage() {
               </div>
             </div>
             <div className="grid grid-cols-1 gap-7.5 md:grid-cols-2 lg:grid-cols-3 xl:gap-10">
-              {BlogData.slice(0, 3).map((blog, key) => (
-                <BlogItem blog={blog} key={key} />
-              ))}
+              <LostList />
             </div>
+            {/* Pagination */}
             <div className="my-10 flex flex-col justify-center gap-4 md:flex-row md:items-center">
               <nav aria-label="Page navigation example">
                 <ul className="inline-flex h-10 -space-x-px text-base">

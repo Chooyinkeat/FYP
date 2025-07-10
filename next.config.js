@@ -7,6 +7,7 @@ const nextConfig = {
     domains: [
       "lh3.googleusercontent.com", // for Google profile photos
       "avatars.githubusercontent.com", // for GitHub profile photos
+      "res.cloudinary.com",
     ],
     remotePatterns: [
       {
