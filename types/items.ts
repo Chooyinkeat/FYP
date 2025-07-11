@@ -23,4 +23,5 @@ export interface LostItem {
   imageUrl: string[];
   description: string;
   status: number;
+  userId: string;
 }

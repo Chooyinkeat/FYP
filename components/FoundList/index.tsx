@@ -63,17 +63,14 @@ const FoundList = () => {
           viewport={{ once: true }}
           className="animate_top shadow-solid-8 dark:bg-blacksection rounded-lg bg-white p-4 pb-9"
         >
-          <Link
-            href={`/blog/${index}`}
-            className="relative block aspect-368/239"
-          >
+          <div className="relative block aspect-368/239">
             <Image
-              src={item.imageUrl[0]} // ✅ Use first image
-              alt={item.question[0]?.metadata.item_type || "Found item"}
+              src="/images/blog/img_1.webp"
+              alt={"Found item"}
               fill
               className="rounded-md object-cover"
             />
-          </Link>
+          </div>
 
           <div className="px-4">
             <h3 className="hover:text-primary dark:hover:text-primary xl:text-itemtitle2 mt-7.5 mb-3.5 line-clamp-2 inline-block text-lg font-medium text-black duration-300 dark:text-white">
@@ -85,6 +82,48 @@ const FoundList = () => {
               {item.question[0]?.questions[0]?.question ||
                 "No question available"}
             </p>
+            <div className="mt-5 flex items-center justify-between lg:mt-7 xl:mt-6">
+              <button
+                type="button"
+                className="me-2 inline-flex cursor-pointer items-center rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                <svg
+                  className="me-2 h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-5.2-5.2M11 17a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"
+                  />
+                </svg>
+                Verify Item
+              </button>
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Alert Founder
+                <svg
+                  className="ms-2 h-4 w-4 rtl:rotate-180"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14V11a6 6 0 1 0-12 0v3c0 .538-.214 1.055-.595 1.595L4 17h5m6 0a3 3 0 1 1-6 0h6z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </motion.div>
       ))}
