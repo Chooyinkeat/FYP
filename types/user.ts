@@ -1,20 +1,7 @@
-import exp from "constants";
-
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  emailVerified: boolean;
-  // and more...
+export interface User {
+  userId: string;
+  username: string;
+  email: string;
+  contact: string;
+  profile: string;
 }
-
-interface UserProfile {
-  uid: string;
-  name: string;
-  bio?: string;
-  image?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-export type { User, UserProfile };

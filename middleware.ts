@@ -28,6 +28,8 @@ export const config = {
   matcher: [
     "/api/protected/:path*",
     "/submitItem",
+    "/foundItems",
+    "/lostItems/:path*",
     "/profile",
     "/error",
     "/docs",

@@ -64,7 +64,7 @@ export default function FoundItemsPage() {
                   href="/submitItem"
                   className="inline-block cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
                 >
-                  Submit Lost Item
+                  Submit Found Item
                 </Link>
               </div>
             </div>
