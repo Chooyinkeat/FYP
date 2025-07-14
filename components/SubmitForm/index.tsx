@@ -4,16 +4,48 @@ import Swal from "sweetalert2";
 import NextImage from "next/image";
 import { motion } from "framer-motion";
 import { useDropzone } from "react-dropzone";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { AIResponse } from "@/types/airesponse";
+import MyMap from "@/components/MapWrapper";
 
 const Submit = () => {
   // Lost and found form state
   const [status, setStatus] = useState("Lost");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
   const [files, setFiles] = React.useState<File[]>([]);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  // Leaflet map state
+  const [mapPosition, setMapPosition] = useState<[number, number]>([
+    3.139, 101.6869,
+  ]); // Default to KL
+  const [location, setLocation] = useState<string>(""); // Will store coordinates or address
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const [lat, lon] = mapPosition;
+
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`,
+        );
+        const data = await response.json();
+
+        if (data && data.display_name) {
+          setLocation(data.display_name);
+        } else {
+          setLocation("Address not found");
+        }
+      } catch (error) {
+        console.error("Error reverse geocoding:", error);
+        setLocation("Error fetching location");
+      }
+    };
+
+    fetchAddress();
+  }, [mapPosition]);
 
   // React dropzone setup
   const onDrop = useCallback(
@@ -41,6 +73,7 @@ const Submit = () => {
   const removeFile = (name: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
+
   // Gemini AI response state
   const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -55,20 +88,19 @@ const Submit = () => {
 
     // LOST ITEM HANDLING
     if (status === "Lost") {
-      // Validation: category/location/description required
-      if (!category || !location || !description) {
+      if (!category || !location || !description || !time || !date) {
         Swal.fire({
           icon: "warning",
-          title: "Missing Fields",
-          text: "Please provide category, location, and description.",
+          title: "Missing Information",
+          text: "Please fill in all fields before submitting.",
         });
         return;
       }
-
       formData.append("category", category);
       formData.append("location", location);
       formData.append("description", description);
-
+      formData.append("date", date);
+      formData.append("time", time);
       files.forEach((file) => {
         formData.append("images", file);
       });
@@ -95,6 +127,8 @@ const Submit = () => {
           setCategory("");
           setLocation("");
           setDescription("");
+          setDate("");
+          setTime("");
           setFiles([]);
           setStatus("Lost"); // optional: reset radio
         }
@@ -110,11 +144,11 @@ const Submit = () => {
     }
 
     // FOUND ITEM HANDLING
-    if (files.length === 0) {
+    if (files.length === 0 || !date || !time) {
       Swal.fire({
         icon: "warning",
-        title: "Missing Images",
-        text: "Please upload at least one image to report a found item.",
+        title: "Missing fields",
+        text: "Please upload at least one image and select the date and time when the item was found.",
       });
       return;
     }
@@ -164,8 +198,11 @@ const Submit = () => {
   };
 
   const handleConfirmUpload = async () => {
-    if (!files.length || !aiResponses.length) return;
+    if (!files.length || !aiResponses.length || !date || !time) return;
     const formData = new FormData();
+    formData.append("date", date);
+    formData.append("time", time);
+    formData.append("location", location);
     formData.append("status", status); // from your radio button state
     formData.append("metadata", JSON.stringify(aiResponses)); // Gemini results
     files.forEach((file) => {
@@ -254,6 +291,7 @@ const Submit = () => {
                         className="sr-only"
                         checked={status === option}
                         onChange={() => setStatus(option)}
+                        required
                       />
                       {option}
                     </label>
@@ -261,6 +299,7 @@ const Submit = () => {
                 </div>
                 {status === "Lost" && files.length === 0 && (
                   <>
+                    {/* Category */}
                     <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
                       <select
                         name="category"
@@ -280,15 +319,8 @@ const Submit = () => {
                         <option value="bags">Bags & Luggage</option>
                         <option value="others">Others</option>
                       </select>
-                      <input
-                        type="text"
-                        value={location}
-                        name="location"
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Where was it lost? (e.g., library, parking lot)"
-                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
-                      />
                     </div>
+                    {/* Description */}
                     <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
                       <textarea
                         name="description"
@@ -297,11 +329,54 @@ const Submit = () => {
                         placeholder="Describe the lost item in detail"
                         rows={4}
                         className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
+                        required
                       ></textarea>
                     </div>
                   </>
                 )}
-
+                {/* Date picker and time picker */}
+                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                  <div className="flex w-full flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                    <input
+                      type="date"
+                      name="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                      required
+                    />
+                    <input
+                      type="time"
+                      name="time"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                      required
+                    />
+                  </div>
+                </div>
+                {/* Location */}
+                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                  <input
+                    type="text"
+                    value={location}
+                    name="location"
+                    readOnly
+                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee mt-4 w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
+                    placeholder="Location coordinates will appear here"
+                  />
+                </div>
+                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                  <MyMap
+                    position={mapPosition}
+                    zoom={20}
+                    onLocationSelect={(lat, lng) => {
+                      setMapPosition([lat, lng]);
+                      setLocation(`${lat}, ${lng}`);
+                    }}
+                    editable={true}
+                  />
+                </div>
                 {/* Dropzone input */}
                 <div
                   {...getRootProps()}
@@ -374,6 +449,7 @@ const Submit = () => {
                   </button>
                 </div>
               </form>
+
               {/* Modal for AI response */}
               {showModal && aiResponses.length > 0 && (
                 <div className="bg-opacity-60 fixed inset-0 z-50 flex items-center justify-center bg-black">
