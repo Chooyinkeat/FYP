@@ -20,8 +20,9 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const metadataJson = formData.get("metadata") as string; // from clientside confirmation
   const images = formData.getAll("images") as File[];
-
-  if (!metadataJson || images.length === 0) {
+  const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
+  if (!metadataJson || images.length === 0 || !date || !time) {
     return NextResponse.json(
       { success: false, message: "Missing required fields" },
       { status: 400 },
@@ -52,6 +53,8 @@ export async function POST(request: NextRequest) {
         imageUrl: uploadResult.secure_url,
         metadata: aiResults[i]?.metadata || {},
         questions: aiResults[i]?.questions || [],
+        date: date,
+        time: time,
       });
     }
 

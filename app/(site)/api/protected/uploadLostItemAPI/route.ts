@@ -21,9 +21,11 @@ export async function POST(request: NextRequest) {
   const category = formData.get("category") as string;
   const location = formData.get("location") as string;
   const description = formData.get("description") as string;
+  const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
   const images = formData.getAll("images") as File[];
 
-  if (!category || !location || !description) {
+  if (!category || !location || !description || !date || !time) {
     return NextResponse.json(
       { success: false, message: "Missing required fields" },
       { status: 400 },
@@ -36,6 +38,8 @@ export async function POST(request: NextRequest) {
       category: category || "",
       location: location || "",
       description: description || "",
+      date: date || "",
+      time: time || "",
     };
     if (images.length !== 0) {
       // Upload each image to Cloudinary

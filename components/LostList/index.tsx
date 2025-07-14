@@ -60,6 +60,8 @@ const LostList = () => {
           category: string;
           location: string;
           description: string;
+          date: string;
+          time: string;
         } | null = null;
 
         try {
@@ -81,20 +83,6 @@ const LostList = () => {
             viewport={{ once: true }}
             className="animate_top shadow-solid-8 dark:bg-blacksection rounded-lg bg-white p-4 pb-9"
           >
-            {/* <Link
-              href="/lostItems/lostItems-details"
-              className="relative block aspect-[368/239]"
-              onClick={() => {
-                localStorage.setItem("selectedLostItem", JSON.stringify(item));
-              }}
-            >
-              <Image
-                src={item.imageUrl[0] || "/images/blog/img_1.webp"} // optional fallback
-                alt={parsedDescription?.category || "Lost item"}
-                fill
-                className="rounded-md object-cover"
-              />
-            </Link> */}
             <Link
               href="/lostItems/lostItems-details"
               className="relative block aspect-[368/239]"
@@ -128,13 +116,8 @@ const LostList = () => {
                   Category : {parsedDescription?.category || "Unknown Category"}
                 </Link>
               </h3>
-              <p className="line-clamp-3">
-                Location :{" "}
-                {parsedDescription?.location || "No location available"}
-              </p>
-              <p className="line-clamp-3">
-                Description :{" "}
-                {parsedDescription?.description || "No description available"}
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Location: {parsedDescription?.location || "Unknown Location"}
               </p>
               <div className="mt-5 flex items-center justify-between lg:mt-7 xl:mt-6">
                 <Link

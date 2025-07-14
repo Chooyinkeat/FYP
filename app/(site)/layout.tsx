@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Lines from "@/components/Lines";
