@@ -7,6 +7,10 @@ import Image from "next/image";
 import Swal from "sweetalert2";
 import { useDropzone } from "react-dropzone";
 import MyMap from "@/components/MapWrapper";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+
 const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -138,83 +142,139 @@ const LostDetails = () => {
           <div className="md:w-1/2 lg:w-[32%]">
             <div className="animate_top border-stroke shadow-solid-13 dark:border-strokedark dark:bg-blacksection mb-10 rounded-md border bg-white p-9">
               {user && (
-                <ul className="space-y-2">
-                  <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div className="mt-5 flex flex-col items-center pb-10">
-                      <img
-                        className="mb-3 h-24 w-24 rounded-full object-cover shadow-lg"
-                        src={user.profile || "/images/default_pic.png"} // fallback if profile is missing
-                        alt={user.username + " profile"}
-                      />
-                      <h5 className="mb-1 text-xl font-medium text-gray-900 dark:text-white">
-                        Name: {user.username}
+                <div className="flex justify-center">
+                  <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-gradient-to-br from-white via-blue-50 to-blue-100 p-6 shadow-xl dark:border-gray-700 dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
+                    <div className="flex flex-col items-center">
+                      <div className="relative">
+                        <img
+                          className="h-28 w-28 rounded-full border-4 border-blue-500 object-cover shadow-lg"
+                          src={user.profile || "/images/default_pic.png"}
+                          alt={user.username + " profile"}
+                        />
+                      </div>
+                      <h5 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+                        {user.username}
                       </h5>
-                      <span className="my-3 text-sm text-gray-500 dark:text-gray-400">
-                        Email: {user.email}
-                      </span>
-                      <span className="my-3 text-sm text-gray-500 dark:text-gray-400">
-                        Phone: {user.contact}
-                      </span>
+                      <div className="mt-2 flex flex-col items-center gap-1">
+                        <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                          <svg
+                            className="h-4 w-4 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M12 14v7m0 0H7m5 0h5"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            />
+                          </svg>
+                          {user.email}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                          <svg
+                            className="h-4 w-4 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M2 8.5C2 6.015 4.015 4 6.5 4h11C19.985 4 22 6.015 22 8.5v7c0 2.485-2.015 4.5-4.5 4.5h-11C4.015 20 2 17.985 2 15.5v-7Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M6 9h.01M12 15h.01M18 9h.01"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          {user.contact}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </ul>
+                </div>
               )}
             </div>
           </div>
           <div className="lg:w-2/3">
-            <div className="animate_top border-stroke shadow-solid-13 dark:border-strokedark dark:bg-blacksection rounded-md border bg-white p-7.5 md:p-10">
-              <div className="mb-10 w-full overflow-hidden">
-                <div className="relative aspect-97/60 w-full sm:aspect-97/44">
-                  <Image
-                    src={item.imageUrl[0] || "/images/blog/img_1.webp"}
-                    alt={parsedDescription.category}
-                    fill
-                    className="rounded-md object-cover object-center"
-                  />
+            <div className="animate_top border-stroke dark:border-strokedark dark:bg-blacksection rounded-2xl border bg-white p-8 shadow-lg md:p-12">
+              <div className="mb-8 w-full overflow-hidden">
+                <div className="relative aspect-[16/9] w-full rounded-lg shadow-md">
+                  <Swiper
+                    pagination={{ clickable: true }}
+                    className="h-full w-full cursor-pointer rounded-md"
+                  >
+                    {(item.imageUrl.length > 0
+                      ? item.imageUrl
+                      : ["/images/blog/img_1.webp"]
+                    ).map((imgUrl, i) => (
+                      <SwiperSlide key={i}>
+                        <Image
+                          src={imgUrl}
+                          alt={`Lost item ${i + 1}`}
+                          fill
+                          className="rounded-md object-cover"
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
                 </div>
               </div>
 
-              <h2 className="2xl:text-sectiontitle2 mt-11 mb-5 text-3xl font-semibold text-black dark:text-white">
-                Category: {parsedDescription.category}
+              <h2 className="mt-8 mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+                Category:{" "}
+                <span className="font-semibold text-blue-600 dark:text-blue-400">
+                  {parsedDescription.category}
+                </span>
               </h2>
-              <div className="blog-details">
-                <p>Description: {parsedDescription.description}</p>
+              <div className="mb-4 text-lg text-gray-700 dark:text-gray-200">
+                <p className="mb-2">
+                  <span className="font-semibold">Description:</span>{" "}
+                  {parsedDescription.description}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Date:</span>{" "}
+                  {parsedDescription.date}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Time:</span>{" "}
+                  {parsedDescription.time}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Location:</span>{" "}
+                  {parsedDescription.location}
+                </p>
               </div>
-              <div className="blog-details">
-                <span className="text-black dark:text-white">Date: </span>{" "}
-                {parsedDescription.date}
+              <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                <MyMap
+                  position={mapPosition}
+                  zoom={20}
+                  onLocationSelect={(lat, lng) => {
+                    setMapPosition([lat, lng]);
+                    setLocation(`${lat}, ${lng}`);
+                  }}
+                  editable={false}
+                />
               </div>
-              <div className="blog-details">
-                <span className="text-black dark:text-white">Time: </span>{" "}
-                {parsedDescription.time}
-              </div>
-              <div className="blog-details">
-                <span className="text-black dark:text-white">Location: </span>{" "}
-                {parsedDescription.location}
-              </div>
-              <MyMap
-                position={mapPosition}
-                zoom={20}
-                onLocationSelect={(lat, lng) => {
-                  setMapPosition([lat, lng]);
-                  setLocation(`${lat}, ${lng}`);
-                }}
-                editable={false}
-              />
               <label
                 htmlFor="dropzone"
                 className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Upload image if you have found the item:
               </label>
-              {/* Dropzone */}
               <div
                 {...getRootProps()}
-                className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded border-2 border-dashed ${
+                className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors duration-200 ${
                   isDragActive
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-400 dark:border-gray-600"
-                } p-4 text-center text-gray-500 dark:text-gray-300`}
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
+                } p-6 text-center text-gray-500 dark:text-gray-300`}
               >
                 <input {...getInputProps()} />
                 {files.length > 0 ? (
@@ -226,7 +286,7 @@ const LostDetails = () => {
                       >
                         <button
                           onClick={() => removeFile(file.name)}
-                          className="absolute -top-1 -right-1 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white hover:bg-red-600"
+                          className="absolute -top-2 -right-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
                           title="Remove"
                         >
                           ✕
@@ -234,7 +294,7 @@ const LostDetails = () => {
                         <img
                           src={URL.createObjectURL(file)}
                           alt="Preview"
-                          className="h-20 w-20 rounded object-cover"
+                          className="h-20 w-20 rounded object-cover shadow"
                         />
                         <p className="max-w-[80px] truncate text-center text-xs text-black dark:text-white">
                           {file.name}
@@ -256,9 +316,8 @@ const LostDetails = () => {
               <div className="flex flex-wrap gap-4 xl:justify-between">
                 <button
                   type="submit"
-                  // onClick={handleSubmit}
                   aria-label="send message"
-                  className="hover:bg-blackho dark:bg-btndark inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                 >
                   Submit
                   <svg

@@ -178,13 +178,22 @@ const Submit = () => {
         },
       );
 
-      if (response.status !== 200) {
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Image analyzed successfully",
+          text: "Please review the results and confirm the upload.",
+        });
+      } else {
         throw new Error("Failed to analyze image.");
       }
 
       setAiResponses(response.data.data);
       setShowModal(true);
       setCurrentIndex(0);
+      setDate("");
+      setTime("");
+      setFiles([]);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -366,6 +375,7 @@ const Submit = () => {
                     placeholder="Location coordinates will appear here"
                   />
                 </div>
+                {/* Leaflet map */}
                 <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
                   <MyMap
                     position={mapPosition}
@@ -430,7 +440,7 @@ const Submit = () => {
                     type="submit"
                     onClick={handleSubmit}
                     aria-label="send message"
-                    className="hover:bg-blackho dark:bg-btndark inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
+                    className="hover:bg-blackho dark:bg-btndark inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
                   >
                     Submit
                     <svg
@@ -452,146 +462,125 @@ const Submit = () => {
 
               {/* Modal for AI response */}
               {showModal && aiResponses.length > 0 && (
-                <div className="bg-opacity-60 fixed inset-0 z-50 flex items-center justify-center bg-black">
-                  <div className="relative w-full max-w-xl rounded-lg bg-white p-8 shadow-lg dark:bg-gray-900">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                  <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900 overflow-y-auto max-h-[90vh] flex flex-col">
                     {/* Close Button */}
                     <button
-                      className="absolute top-3 right-3 text-xl font-bold text-black dark:text-white"
+                      className="absolute top-4 right-4 text-2xl font-bold text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       onClick={() => setShowModal(false)}
+                      aria-label="Close modal"
                     >
                       ✕
                     </button>
 
-                    <div
-                      id="controls-carousel"
-                      className="relative w-full"
-                      data-carousel="static"
-                    >
-                      <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
-                        <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
-                          {aiResponses.map((res, index) => (
-                            <div
-                              key={index}
-                              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                                index === currentIndex
-                                  ? "z-10 opacity-100"
-                                  : "z-0 opacity-0"
-                              }`}
-                              data-carousel-item
-                            >
-                              <div className="max-h-[22rem] overflow-y-auto p-4 text-black md:max-h-[24rem] dark:text-white">
-                                <h2 className="mb-4 text-lg font-semibold">
-                                  📷 {res.filename}
-                                </h2>
-
-                                <ul className="mb-4 space-y-1 text-sm sm:text-base">
-                                  <li>
-                                    <strong>Item Type:</strong>{" "}
-                                    {res.metadata.item_type}
+                    {/* Carousel */}
+                    <div className="flex-1 flex flex-col">
+                      <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+                        {aiResponses.map((res, index) => (
+                          <div
+                            key={index}
+                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                              index === currentIndex ? "z-10 opacity-100" : "z-0 opacity-0"
+                            }`}
+                            data-carousel-item
+                          >
+                            <div className="max-h-[22rem] overflow-y-auto p-4 text-black md:max-h-[24rem] dark:text-white">
+                              <h2 className="mb-4 text-lg font-semibold">
+                                📷 {res.filename}
+                              </h2>
+                              <ul className="mb-4 space-y-1 text-sm sm:text-base">
+                                <li>
+                                  <strong>Item Type:</strong> {res.metadata.item_type}
+                                </li>
+                                <li>
+                                  <strong>Color:</strong> {res.metadata.color}
+                                </li>
+                                <li>
+                                  <strong>Brand:</strong> {res.metadata.brand}
+                                </li>
+                                <li>
+                                  <strong>Material:</strong> {res.metadata.material}
+                                </li>
+                                <li>
+                                  <strong>Condition:</strong> {res.metadata.condition}
+                                </li>
+                              </ul>
+                              <h3 className="mb-2 text-base font-medium">
+                                Verification Questions:
+                              </h3>
+                              <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base">
+                                {res.questions.map((q, i) => (
+                                  <li key={i}>
+                                    <strong>Q:</strong> {q.question}
+                                    <br />
+                                    <strong>A:</strong> {q.answer}
                                   </li>
-                                  <li>
-                                    <strong>Color:</strong> {res.metadata.color}
-                                  </li>
-                                  <li>
-                                    <strong>Brand:</strong> {res.metadata.brand}
-                                  </li>
-                                  <li>
-                                    <strong>Material:</strong>{" "}
-                                    {res.metadata.material}
-                                  </li>
-                                  <li>
-                                    <strong>Condition:</strong>{" "}
-                                    {res.metadata.condition}
-                                  </li>
-                                </ul>
-
-                                <h3 className="mb-2 text-base font-medium">
-                                  Verification Questions:
-                                </h3>
-                                <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base">
-                                  {res.questions.map((q, i) => (
-                                    <li key={i}>
-                                      <strong>Q:</strong> {q.question}
-                                      <br />
-                                      <strong>A:</strong> {q.answer}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
+                                ))}
+                              </ul>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                      {/* <!-- Slider controls --> */}
-                      <button
-                        type="button"
-                        className="group absolute start-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"
-                        onClick={() =>
-                          setCurrentIndex((prev) =>
-                            prev > 0 ? prev - 1 : aiResponses.length - 1,
-                          )
-                        }
-                      >
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
-                          <svg
-                            className="h-4 w-4 text-white rtl:rotate-180 dark:text-gray-800"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 6 10"
-                          ></svg>
-                          <span className="sr-only">Previous</span>
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className="group absolute end-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"
-                        onClick={() =>
-                          setCurrentIndex((prev) =>
-                            prev < aiResponses.length - 1 ? prev + 1 : 0,
-                          )
-                        }
-                      >
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
-                          <svg
-                            className="h-4 w-4 text-white rtl:rotate-180 dark:text-gray-800"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 6 10"
-                          ></svg>
-                          <span className="sr-only">Next</span>
-                        </span>
-                      </button>
-                      {/* Footer Buttons */}
-                      <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <button
-                          onClick={() => {
-                            setShowModal(false);
-                            setCurrentIndex(0); // reset if needed
-                          }}
-                          className="w-full rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 sm:w-auto"
-                        >
-                          ✕ Close
-                        </button>
 
+                      {/* Carousel Controls */}
+                      <div className="flex justify-between items-center mb-4">
+                        <button
+                          type="button"
+                          className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onClick={() =>
+                            setCurrentIndex((prev) =>
+                              prev > 0 ? prev - 1 : aiResponses.length - 1
+                            )
+                          }
+                          aria-label="Previous"
+                        >
+                          <svg className="h-5 w-5 text-black dark:text-white" fill="none" viewBox="0 0 6 10">
+                            <path d="M5 1L1 5l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           {currentIndex + 1} of {aiResponses.length}
                         </span>
-
                         <button
-                          onClick={async () => {
-                            const success = await handleConfirmUpload();
-                            if (success && success.status === 200) {
-                              setShowModal(false);
-                              setCurrentIndex(0);
-                            }
-                          }}
-                          className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:w-auto"
+                          type="button"
+                          className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onClick={() =>
+                            setCurrentIndex((prev) =>
+                              prev < aiResponses.length - 1 ? prev + 1 : 0
+                            )
+                          }
+                          aria-label="Next"
                         >
-                          ✅ Confirm
+                          <svg className="h-5 w-5 text-black dark:text-white" fill="none" viewBox="0 0 6 10">
+                            <path d="M1 9l4-4-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
                         </button>
                       </div>
+                    </div>
+
+                    {/* Footer Buttons */}
+                    <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                      <button
+                        onClick={() => {
+                          setShowModal(false);
+                          setCurrentIndex(0);
+                        }}
+                        className="w-full sm:w-auto rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                      >
+                        ✕ Close
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const success = await handleConfirmUpload();
+                          if (success && success.status === 200) {
+                            setShowModal(false);
+                            setCurrentIndex(0);
+                          }
+                        }}
+                        className="w-full sm:w-auto rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                      >
+                        ✅ Confirm
+                      </button>
                     </div>
                   </div>
                 </div>

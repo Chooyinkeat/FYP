@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
   const images = formData.getAll("images") as File[];
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
-  if (!metadataJson || images.length === 0 || !date || !time) {
+  const location = formData.get("location") as string;
+  if (!metadataJson || images.length === 0 || !date || !time || !location) {
     return NextResponse.json(
       { success: false, message: "Missing required fields" },
       { status: 400 },
@@ -30,10 +31,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const aiResults = JSON.parse(metadataJson); // Must match earlier Gemini structure
-
+    const aiResults = JSON.parse(metadataJson);
+    // Inject date, time, location into each result
+    const enhancedResults = aiResults.map((entry) => ({
+      ...entry,
+      date,
+      time,
+      location,
+    }));
     const imageUrls: string[] = [];
-    const uploadedResults: any[] = [];
 
     for (let i = 0; i < images.length; i++) {
       const file = images[i];
@@ -49,18 +55,11 @@ export async function POST(request: NextRequest) {
       });
 
       imageUrls.push(uploadResult.secure_url);
-      uploadedResults.push({
-        imageUrl: uploadResult.secure_url,
-        metadata: aiResults[i]?.metadata || {},
-        questions: aiResults[i]?.questions || [],
-        date: date,
-        time: time,
-      });
     }
 
     await pool.query(
       `INSERT INTO found_item (status, image_url_payload, question_payload, user_id) VALUES (?, ?, ?, ?)`,
-      [0, JSON.stringify(imageUrls), JSON.stringify(aiResults), userId],
+      [0, JSON.stringify(imageUrls), JSON.stringify(enhancedResults), userId],
     );
 
     return NextResponse.json({

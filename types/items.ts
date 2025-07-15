@@ -17,6 +17,9 @@ interface QuestionBlock {
     question: string;
     answer: string;
   }[];
+  date: string; // ✅ Add this
+  time: string; // ✅ Add this
+  location: string; // ✅ Add this
 }
 
 export interface LostItem {
