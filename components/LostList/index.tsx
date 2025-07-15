@@ -1,5 +1,7 @@
 "use client";
 
+import "swiper/css";
+import "swiper/css/pagination";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Image from "next/image";
@@ -8,8 +10,6 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { LostItem } from "@/types/items";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
 
 const LostList = () => {
   const [lostItems, setLostItems] = useState<LostItem[]>([]);
@@ -92,7 +92,7 @@ const LostList = () => {
             >
               <Swiper
                 pagination={{ clickable: true }}
-                className="h-full w-full rounded-md"
+                className="h-full w-full cursor-pointer rounded-md"
               >
                 {(item.imageUrl.length > 0
                   ? item.imageUrl

@@ -2,7 +2,6 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { FoundItem } from "@/types/items";
@@ -29,6 +28,7 @@ const FoundList = () => {
     fetchFoundItems()
       .then((data) => {
         if (data?.success && data.foundItems.length > 0) {
+          console.log("Found items fetched successfully: ", data.foundItems);
           setFoundItems(data.foundItems);
         } else {
           Swal.fire({
@@ -73,14 +73,14 @@ const FoundList = () => {
           </div>
 
           <div className="px-4">
-            <h3 className="hover:text-primary dark:hover:text-primary xl:text-itemtitle2 mt-7.5 mb-3.5 line-clamp-2 inline-block text-lg font-medium text-black duration-300 dark:text-white">
-              <Link href={`/blog/blog-details/${index}`}>
-                {item.question[0]?.metadata.item_type || "Unknown Item"}
-              </Link>
-            </h3>
-            <p className="line-clamp-3">
-              {item.question[0]?.questions[0]?.question ||
-                "No question available"}
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Location: {item.question[0]?.location || "Unknown Location"}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Date: {item.question[0]?.date || "N/A"}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Time: {item.question[0]?.time || "N/A"}
             </p>
             <div className="mt-5 flex items-center justify-between lg:mt-7 xl:mt-6">
               <button

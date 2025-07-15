@@ -10,9 +10,7 @@ export const metadata: Metadata = {
 const ProfilePage = () => {
   return (
     <>
-      {/* <!-- ===== Profile Page Start ===== --> */}
       <Profile />
-      {/* <!-- ===== Profile Page End ===== --> */}
     </>
   );
 };

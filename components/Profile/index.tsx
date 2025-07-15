@@ -20,10 +20,10 @@ const Profile = () => {
   const postProfileData = async () => {
     try {
       const response = await axios.get("/api/protected/fetchProfileAPI", {
-        withCredentials: true, // 🔒 include cookies (important!)
+        withCredentials: true,
       });
 
-      return response.data; // Assuming your API returns the user data in this format
+      return response.data;
     } catch (error) {
       console.error("Failed to fetch profile:", error);
     }
@@ -50,9 +50,8 @@ const Profile = () => {
   useEffect(() => {
     postProfileData().then((data) => {
       if (data?.success) {
-        setUserData(data.user); // or however your API returns it
+        setUserData(data.user);
         if (data.user.profile) {
-          // Only set if profile exists
           setImagePreview(
             data.user.profile.startsWith("http") ||
               data.user.profile.startsWith("/images")
@@ -75,7 +74,6 @@ const Profile = () => {
       formData.append("file_input", profileFile);
     }
 
-    // 1. Validate user inputs
     if (!Validator.isEmailValid(userData.email)) {
       return Swal.fire({
         icon: "error",
@@ -97,9 +95,9 @@ const Profile = () => {
         "/api/protected/updateProfileAPI",
         formData,
         {
-          withCredentials: true, // ✅ This is important
+          withCredentials: true,
           headers: {
-            "Content-Type": "multipart/form-data", // important
+            "Content-Type": "multipart/form-data",
           },
         },
       );
