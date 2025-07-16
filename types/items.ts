@@ -23,6 +23,7 @@ interface QuestionBlock {
 }
 
 export interface LostItem {
+  category: string;
   imageUrl: string[];
   description: string;
   status: number;
