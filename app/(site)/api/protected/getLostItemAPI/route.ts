@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get recent 18 lost items
     const [rows] = await pool.query(
-      `SELECT image_payload, description_payload, status, user_id FROM lost_item WHERE status = 0 ORDER BY created_date DESC LIMIT 18`,
+      `SELECT category,image_payload, description_payload, status, user_id FROM lost_item WHERE status = 0 ORDER BY created_date DESC LIMIT 18`,
     );
     if ((rows as any[]).length === 0) {
       return NextResponse.json(
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     const lostItems = (rows as any[]).map((item) => ({
+      category: item.category,
       imageUrl: JSON.parse(item.image_payload),
       description: item.description_payload,
       status: item.status,

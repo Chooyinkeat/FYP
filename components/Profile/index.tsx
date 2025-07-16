@@ -6,7 +6,6 @@ import SidebarLink from "@/components/Docs/SidebarLink";
 import axios from "axios";
 import Validator from "@/lib/validation";
 import Swal from "sweetalert2";
-
 const Profile = () => {
   const [userData, setUserData] = useState({
     username: "",
@@ -17,7 +16,7 @@ const Profile = () => {
   const [imagePreview, setImagePreview] = useState("/images/default.png");
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
-  const postProfileData = async () => {
+  const fetchProfileData = async () => {
     try {
       const response = await axios.get("/api/protected/fetchProfileAPI", {
         withCredentials: true,
@@ -48,7 +47,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    postProfileData().then((data) => {
+    fetchProfileData().then((data) => {
       if (data?.success) {
         setUserData(data.user);
         if (data.user.profile) {
@@ -126,9 +125,7 @@ const Profile = () => {
           <div className="-mx-4 flex flex-wrap">
             <div className="w-full px-4 lg:w-1/4">
               <div className="shadow-solid-4 dark:border-strokedark dark:bg-blacksection sticky top-[74px] rounded-lg border border-white p-4 transition-all">
-                <ul className="space-y-2">
-                  <SidebarLink />
-                </ul>
+                <SidebarLink />
               </div>
             </div>
 
