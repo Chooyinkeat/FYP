@@ -55,7 +55,7 @@ const LostDetails = () => {
   const [mapPosition, setMapPosition] = useState<[number, number]>([
     3.139, 101.6869,
   ]); // Default to KL
-  const [location, setLocation] = useState<string>(""); // Will store coordinates or address
+
   const fetchUserData = async (userId: string) => {
     try {
       const response = await axios.post(
@@ -67,6 +67,57 @@ const LostDetails = () => {
     } catch (error) {
       console.log("Error fetching user data:", error);
       return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (files.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "No images selected",
+        text: "Please upload at least one image.",
+      });
+      return;
+    }
+    const formData = new FormData();
+    if (item && item.imageUrl) {
+      formData.append("imageUrl", JSON.stringify(item.imageUrl));
+    }
+    files.forEach((file) => {
+      formData.append("userImages", file); // must match getAll("images")
+    });
+    try {
+      Swal.fire({
+        title: "Analyzing Image...",
+        text: "Please wait while the AI processes your image.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const response = await axios.post(
+        "/api/protected/analyzeImage",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Images submitted successfully",
+          text: response.data.data,
+        });
+        console.log("Analysis results: ", response.data);
+        setFiles([]);
+      }
+    } catch (error) {
+      console.log("Unexpected error: ", error);
     }
   };
 
@@ -257,7 +308,6 @@ const LostDetails = () => {
                   zoom={20}
                   onLocationSelect={(lat, lng) => {
                     setMapPosition([lat, lng]);
-                    setLocation(`${lat}, ${lng}`);
                   }}
                   editable={false}
                 />
@@ -268,73 +318,75 @@ const LostDetails = () => {
               >
                 Upload image if you have found the item:
               </label>
-              <div
-                {...getRootProps()}
-                className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors duration-200 ${
-                  isDragActive
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
-                } p-6 text-center text-gray-500 dark:text-gray-300`}
-              >
-                <input {...getInputProps()} />
-                {files.length > 0 ? (
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {files.map((file, idx) => (
-                      <div
-                        key={idx}
-                        className="relative flex flex-col items-center gap-1"
-                      >
-                        <button
-                          onClick={() => removeFile(file.name)}
-                          className="absolute -top-2 -right-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
-                          title="Remove"
-                        >
-                          ✕
-                        </button>
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt="Preview"
-                          className="h-20 w-20 rounded object-cover shadow"
-                        />
-                        <p className="max-w-[80px] truncate text-center text-xs text-black dark:text-white">
-                          {file.name}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : isDragActive ? (
-                  <p>Drop your images here...</p>
-                ) : (
-                  <p>Drag & drop up to 5 image files, or click to select</p>
-                )}
-              </div>
-              {files.length > 0 && (
-                <div className="mb-4 text-sm text-black dark:text-white">
-                  Selected file: {files[0].name}
-                </div>
-              )}
-              <div className="flex flex-wrap gap-4 xl:justify-between">
-                <button
-                  type="submit"
-                  aria-label="send message"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+              <form onSubmit={handleSubmit}>
+                <div
+                  {...getRootProps()}
+                  className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors duration-200 ${
+                    isDragActive
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
+                  } p-6 text-center text-gray-500 dark:text-gray-300`}
                 >
-                  Submit
-                  <svg
-                    className="fill-white"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <input {...getInputProps()} />
+                  {files.length > 0 ? (
+                    <div className="flex flex-wrap justify-center gap-4">
+                      {files.map((file, idx) => (
+                        <div
+                          key={idx}
+                          className="relative flex flex-col items-center gap-1"
+                        >
+                          <button
+                            onClick={() => removeFile(file.name)}
+                            className="absolute -top-2 -right-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
+                            title="Remove"
+                          >
+                            ✕
+                          </button>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="Preview"
+                            className="h-20 w-20 rounded object-cover shadow"
+                          />
+                          <p className="max-w-[80px] truncate text-center text-xs text-black dark:text-white">
+                            {file.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : isDragActive ? (
+                    <p>Drop your images here...</p>
+                  ) : (
+                    <p>Drag & drop up to 5 image files, or click to select</p>
+                  )}
+                </div>
+                {files.length > 0 && (
+                  <div className="mb-4 text-sm text-black dark:text-white">
+                    Selected file: {files[0].name}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-4 xl:justify-between">
+                  <button
+                    type="submit"
+                    aria-label="send message"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                   >
-                    <path
-                      d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
-                      fill=""
-                    />
-                  </svg>
-                </button>
-              </div>
+                    Submit
+                    <svg
+                      className="fill-white"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
+                        fill=""
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </>

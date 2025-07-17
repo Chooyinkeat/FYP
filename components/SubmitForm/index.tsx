@@ -172,7 +172,7 @@ const Submit = () => {
         },
       });
       const response = await axios.post(
-        "/api/protected/analyzeImage",
+        "/api/protected/getImageMetaData",
         formData,
         {
           withCredentials: true,
@@ -232,9 +232,6 @@ const Submit = () => {
           },
         },
       );
-      if (response.status !== 200) {
-        throw new Error("Failed to upload files");
-      }
       setAiResponses([]); // reset if needed
       return response; // return the response for further handling
     } catch (err) {
