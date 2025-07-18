@@ -37,8 +37,8 @@ const submitForm = async (e: React.FormEvent) => {
   };
   try {
     const response = await axios.post("/api/loginApi", jsonData);
-    if (response.data.success) {
-      // Handle successful login (e.g., redirect or show a success message)
+    console.log("Response: ", response.data);
+    if (response.data.status === 200) {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -47,10 +47,9 @@ const submitForm = async (e: React.FormEvent) => {
         const data = response.data.user;
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("profile", data.profile);
-        window.location.href = "/lostItems"; // Change this to your desired route
+        window.location.href = "/lostItems";
       });
     } else {
-      // Handle login error
       Swal.fire({
         icon: "error",
         title: "Login Failed",

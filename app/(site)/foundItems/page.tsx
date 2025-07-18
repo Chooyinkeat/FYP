@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import FoundList from "@/components/FoundList";
-import SearchForm from "@/components/SearchForm";
 export const metadata: Metadata = {
   title: "Found Items | VisionVault",
   description:

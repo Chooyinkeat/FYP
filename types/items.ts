@@ -29,3 +29,11 @@ export interface LostItem {
   status: number;
   userId: string;
 }
+
+export interface Description {
+  category: string;
+  location: string;
+  description: string;
+  date: string;
+  time: string;
+}

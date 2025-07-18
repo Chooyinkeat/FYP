@@ -26,14 +26,14 @@ const Footer = () => {
                   <Image
                     width={110}
                     height={80}
-                    src="/images/logo/logo-light.svg"
+                    src="/images/fyp_header.png"
                     alt="Lost & Found Logo"
                     className="dark:hidden"
                   />
                   <Image
                     width={110}
                     height={80}
-                    src="/images/logo/logo-dark.svg"
+                    src="/images/fyp_header.png"
                     alt="Lost & Found Logo"
                     className="hidden dark:block"
                   />
@@ -179,7 +179,6 @@ const Footer = () => {
                   <p className="mb-4 w-[90%]">
                     Stay informed about updates and new features.
                   </p>
-                  
                 </motion.div>
               </div>
             </div>
@@ -244,27 +243,8 @@ const Footer = () => {
               transition={{ duration: 1, delay: 0.1 }}
               viewport={{ once: true }}
               className="animate_top"
-            >
-              {/* <ul className="flex items-center gap-5">
-                <li>
-                  <a href="#" aria-label="GitHub">
-                    <img src="/icons/github.svg" width="24" />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" aria-label="LinkedIn">
-                    <img src="/icons/linkedin.svg" width="24" />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" aria-label="Email">
-                    <img src="/icons/email.svg" width="24" />
-                  </a>
-                </li>
-              </ul> */}
-            </motion.div>
+            ></motion.div>
           </div>
-          {/* Footer Bottom */}
         </div>
       </footer>
     </>
