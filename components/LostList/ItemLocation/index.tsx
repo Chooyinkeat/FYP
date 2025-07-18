@@ -42,7 +42,7 @@ const ItemLocation = ({ location }: ItemLocationProps) => {
 
   return (
     <>
-      <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="relative z-0 mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
         {mapPosition[0] !== 0 && mapPosition[1] !== 0 && (
           <MyMap
             position={mapPosition}

@@ -6,6 +6,7 @@
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
+    "worker": "ts-node worker/jobWorker.ts",
     "lint": "next lint",
     "prepare": "next-ws patch"
   },
