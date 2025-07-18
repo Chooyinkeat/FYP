@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import { User } from "@/types/user";
+import { useEffect, useState } from "react";
 
 const fetchUserData = async (userId: string) => {
   try {
@@ -14,6 +14,19 @@ const fetchUserData = async (userId: string) => {
   } catch (error) {
     console.log("Error fetching user data:", error);
     return null;
+  }
+};
+
+const notifyOwner = async (email: string) => {
+  try {
+    const response = await axios.post(
+      "/api/protected/fetchUserAPI",
+      { email: email },
+      { withCredentials: true },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error notifying owner:", error);
   }
 };
 

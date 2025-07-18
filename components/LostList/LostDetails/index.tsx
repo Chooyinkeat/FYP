@@ -137,6 +137,8 @@ const LostDetails = () => {
       }
     } catch (error) {
       console.log("Unexpected error: ", error);
+    } finally {
+      Swal.close();
     }
   };
 
@@ -170,7 +172,6 @@ const LostDetails = () => {
     <>
       {item && parsedDescription ? (
         <>
-          <UserProfile userId={item.userId} />
           <div className="lg:w-2/3">
             <div className="animate_top border-stroke dark:border-strokedark dark:bg-blacksection rounded-2xl border bg-white p-8 shadow-lg md:p-12">
               <div className="mb-8 w-full overflow-hidden">
@@ -246,7 +247,7 @@ const LostDetails = () => {
                         >
                           <button
                             onClick={() => removeFile(file.name)}
-                            className="absolute -top-2 -right-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
+                            className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
                             title="Remove"
                           >
                             ✕
@@ -298,6 +299,7 @@ const LostDetails = () => {
               </form>
             </div>
           </div>
+          <UserProfile userId={item.userId} />
           <AnalysisModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
