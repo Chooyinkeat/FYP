@@ -2,28 +2,69 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { LostItem } from "@/types/items";
 import axios from "axios";
-import { User } from "@/types/user";
+import { Description } from "@/types/items";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { useDropzone } from "react-dropzone";
-import MyMap from "@/components/MapWrapper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
+import UserProfile from "@/components/LostList/userProfile";
+import ItemLocation from "@/components/LostList/ItemLocation";
+
+const AnalysisModal = ({
+  open,
+  onClose,
+  results,
+}: {
+  open: boolean;
+  onClose: () => void;
+  results: any[];
+}) => {
+  if (!open) return null;
+  return (
+    <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+        <button
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="mb-4 text-center text-xl font-bold">
+          Image Analysis Results
+        </h2>
+        <div className="max-h-96 space-y-4 overflow-y-auto">
+          {results.length === 0 ? (
+            <p>No results to display.</p>
+          ) : (
+            results.map((result, idx) => (
+              <div key={idx} className="border-b pb-2">
+                <div className="font-semibold">
+                  User Image {result.userImageIndex + 1} vs Lost Image{" "}
+                  {result.lostImageIndex + 1}
+                </div>
+                <div className="text-sm whitespace-pre-line">
+                  {result.similarityScore}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [parsedDescription, setParsedDescription] = useState<{
-    category: string;
-    location: string;
-    description: string;
-    date: string;
-    time: string;
-  } | null>(null);
-
+  const [parsedDescription, setParsedDescription] =
+    useState<Description | null>(null);
   // Dropzone state
   const [files, setFiles] = React.useState<File[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<any[]>([]);
+
   // React dropzone setup
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -49,25 +90,6 @@ const LostDetails = () => {
   });
   const removeFile = (name: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
-  };
-
-  // Map state
-  const [mapPosition, setMapPosition] = useState<[number, number]>([
-    3.139, 101.6869,
-  ]); // Default to KL
-
-  const fetchUserData = async (userId: string) => {
-    try {
-      const response = await axios.post(
-        "/api/protected/fetchUserAPI",
-        { userId },
-        { withCredentials: true },
-      );
-      return response.data;
-    } catch (error) {
-      console.log("Error fetching user data:", error);
-      return null;
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,40 +130,14 @@ const LostDetails = () => {
         },
       );
       if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Images submitted successfully",
-          text: response.data.data,
-        });
-        console.log("Analysis results: ", response.data);
+        setAnalysisResults(response.data.data); // assuming response.data.data is the array
+        setModalOpen(true);
+        console.log("Analysis results: ", response.data.data);
         setFiles([]);
       }
     } catch (error) {
       console.log("Unexpected error: ", error);
     }
-  };
-
-  const geocodeAddress = async (
-    address: string,
-  ): Promise<[number, number] | null> => {
-    try {
-      const url = new URL("https://nominatim.openstreetmap.org/search");
-      url.searchParams.set("q", address);
-      url.searchParams.set("format", "json");
-      url.searchParams.set("limit", "1");
-
-      const res = await fetch(url.toString());
-      const data = await res.json();
-
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        return [lat, lon];
-      }
-    } catch (err) {
-      console.error("Geocoding failed:", err);
-    }
-    return null;
   };
 
   useEffect(() => {
@@ -150,26 +146,10 @@ const LostDetails = () => {
       try {
         const parsed: LostItem = JSON.parse(stored);
         setItem(parsed);
-
-        // Fetch user data if needed
-        fetchUserData(parsed.userId).then((data) => {
-          if (data.status === 200) {
-            setUser(data.user);
-          }
-        });
         const desc = JSON.parse(parsed.description);
         setParsedDescription(desc);
-
-        // 🧠 Forward geocode the location to lat/lng
-        geocodeAddress(desc.location).then((coords) => {
-          if (coords) {
-            setMapPosition(coords);
-          } else {
-            console.warn("Could not geocode address:", desc.location);
-          }
-        });
       } catch (err) {
-        console.error("Failed to load or parse lost item:", err);
+        console.log("Failed to load or parse lost item:", err);
       }
     }
   }, []);
@@ -190,69 +170,7 @@ const LostDetails = () => {
     <>
       {item && parsedDescription ? (
         <>
-          <div className="md:w-1/2 lg:w-[32%]">
-            <div className="animate_top border-stroke shadow-solid-13 dark:border-strokedark dark:bg-blacksection mb-10 rounded-md border bg-white p-9">
-              {user && (
-                <div className="flex justify-center">
-                  <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-gradient-to-br from-white via-blue-50 to-blue-100 p-6 shadow-xl dark:border-gray-700 dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
-                    <div className="flex flex-col items-center">
-                      <div className="relative">
-                        <img
-                          className="h-28 w-28 rounded-full border-4 border-blue-500 object-cover shadow-lg"
-                          src={user.profile || "/images/default_pic.png"}
-                          alt={user.username + " profile"}
-                        />
-                      </div>
-                      <h5 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-                        {user.username}
-                      </h5>
-                      <div className="mt-2 flex flex-col items-center gap-1">
-                        <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
-                          <svg
-                            className="h-4 w-4 text-blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M12 14v7m0 0H7m5 0h5"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                          {user.email}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
-                          <svg
-                            className="h-4 w-4 text-blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M2 8.5C2 6.015 4.015 4 6.5 4h11C19.985 4 22 6.015 22 8.5v7c0 2.485-2.015 4.5-4.5 4.5h-11C4.015 20 2 17.985 2 15.5v-7Z"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M6 9h.01M12 15h.01M18 9h.01"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          {user.contact}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <UserProfile userId={item.userId} />
           <div className="lg:w-2/3">
             <div className="animate_top border-stroke dark:border-strokedark dark:bg-blacksection rounded-2xl border bg-white p-8 shadow-lg md:p-12">
               <div className="mb-8 w-full overflow-hidden">
@@ -302,16 +220,7 @@ const LostDetails = () => {
                   {parsedDescription.location}
                 </p>
               </div>
-              <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                <MyMap
-                  position={mapPosition}
-                  zoom={20}
-                  onLocationSelect={(lat, lng) => {
-                    setMapPosition([lat, lng]);
-                  }}
-                  editable={false}
-                />
-              </div>
+              <ItemLocation location={parsedDescription.location} />
               <label
                 htmlFor="dropzone"
                 className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -389,6 +298,11 @@ const LostDetails = () => {
               </form>
             </div>
           </div>
+          <AnalysisModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            results={analysisResults}
+          />
         </>
       ) : (
         <div className="text-center text-gray-500">Loading item details...</div>

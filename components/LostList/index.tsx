@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback } from "react";
 import { LostItem } from "@/types/items";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { debounce } from "lodash";
+import { Description } from "@/types/items";
 
 const LostList = () => {
   const [lostItems, setLostItems] = useState<LostItem[]>([]);
@@ -152,13 +153,7 @@ const LostList = () => {
 
       <div className="grid grid-cols-1 gap-7.5 md:grid-cols-2 lg:grid-cols-3 xl:gap-10">
         {lostItems.map((item, index) => {
-          let parsedDescription: {
-            category: string;
-            location: string;
-            description: string;
-            date: string;
-            time: string;
-          } | null = null;
+          let parsedDescription: Description | null = null;
 
           try {
             parsedDescription = JSON.parse(item.description);
@@ -226,8 +221,7 @@ const LostList = () => {
                     {parsedDescription?.location || "Unknown Location"}
                   </span>
                 </p>
-                {/* Add more details if needed */}
-                <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-between">
+                <div className="mt-6 flex justify-end">
                   <Link
                     href="/lostItems/lostItems-details"
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
@@ -254,26 +248,6 @@ const LostList = () => {
                     </svg>
                     View details
                   </Link>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-800"
-                  >
-                    Alert Owner
-                    <svg
-                      className="h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14V11a6 6 0 1 0-12 0v3c0 .538-.214 1.055-.595 1.595L4 17h5m6 0a3 3 0 1 1-6 0h6z"
-                      />
-                    </svg>
-                  </button>
                 </div>
               </div>
             </motion.div>

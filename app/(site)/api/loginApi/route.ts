@@ -8,7 +8,6 @@ const JWT_hour = process.env.JWT_EXPIRATION || "1h";
 
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
-
   if (!email || !password) {
     return NextResponse.json({
       success: false,
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
     if ((rows as any[]).length === 0) {
       return NextResponse.json({
         success: false,
-        message: "Invalid email or password",
+        message: "No result found for this email",
       });
     }
 
@@ -37,6 +36,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         message: "Invalid email or password",
+        status: 401,
       });
     }
 
@@ -46,8 +46,6 @@ export async function POST(request: NextRequest) {
       { expiresIn: JWT_hour },
     );
 
-    // ✅ Set the cookie correctly on the response
-    // for public access, use secure and sameSite attributes
     const response = NextResponse.json({
       success: true,
       message: "Logged in",
@@ -55,9 +53,8 @@ export async function POST(request: NextRequest) {
         userId: user.user_id,
         profile: user.profile,
       },
+      status: 200,
     });
-    // Set the token in the cookie
-    // Ensure the cookie is set with httpOnly, secure, and sameSite attributes
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
