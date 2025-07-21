@@ -20,7 +20,7 @@ const fetchUserData = async (userId: string) => {
 const notifyOwner = async (email: string) => {
   try {
     const response = await axios.post(
-      "/api/protected/fetchUserAPI",
+      "/api/protected/notifyUserAPI",
       { email: email },
       { withCredentials: true },
     );
@@ -105,6 +105,7 @@ const UserProfile = ({ userId }: { userId: string }) => {
                   <button
                     type="button"
                     className="mt-5 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none lg:mt-5 xl:mt-5 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-800"
+                    onClick={() => notifyOwner(user.email)}
                   >
                     Alert Owner
                     <svg

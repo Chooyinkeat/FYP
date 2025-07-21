@@ -1,24 +1,31 @@
-// worker/jobWorker.ts
 import { Worker } from "bullmq";
 import connection from "../lib/redis";
+import sendEmail from "./jobs/sendEmailjob";
+import dotenv from "dotenv";
+dotenv.config();
 
 const worker = new Worker(
   "exampleQueue",
   async (job) => {
-    console.log(`Processing job ID ${job.id}`, job.data);
-
-    // Your background job logic here
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate delay
-
-    console.log(`Job ${job.id} done!`);
+    switch (job.name) {
+      case "sendEmail":
+        await sendEmail(job.data);
+        break;
+      // 🔧 Add more job types here
+      // case "resizeImage":
+      //   await resizeImage(job.data);
+      //   break;
+      default:
+        throw new Error(`Unknown job: ${job.name}`);
+    }
   },
   { connection },
 );
 
 worker.on("completed", (job) => {
-  console.log(`Job ${job.id} completed`);
+  console.log(`✅ Job ${job.id} completed`);
 });
 
 worker.on("failed", (job, err) => {
-  console.error(`Job ${job?.id} failed`, err);
+  console.error(`❌ Job ${job?.id} failed:`, err);
 });

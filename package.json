@@ -6,7 +6,7 @@
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "worker": "ts-node worker/jobWorker.ts",
+    "worker": "npx tsx worker/jobworker.ts",
     "lint": "next lint",
     "prepare": "next-ws patch"
   },
@@ -18,6 +18,7 @@
     "bullmq": "^5.56.1",
     "cloudinary": "^2.7.0",
     "colorthief": "^2.6.0",
+    "dotenv": "^17.2.0",
     "firebase": "^11.9.1",
     "flowbite-datepicker": "^1.3.2",
     "framer-motion": "^12.0.6",
@@ -41,6 +42,7 @@
     "react-leaflet": "^5.0.0",
     "sweetalert2": "^11.6.13",
     "swiper": "^9.4.1",
+    "tsx": "^4.20.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {
@@ -56,6 +58,6 @@
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.1.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.7.3"
   }
 }
