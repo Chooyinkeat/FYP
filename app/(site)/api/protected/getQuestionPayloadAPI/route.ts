@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Found items fetched successfully",
-      foundItems,
+      data: foundItems,
       status: 200,
     });
   } catch (error) {

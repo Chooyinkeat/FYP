@@ -1,11 +1,11 @@
 "use client";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useDropzone } from "react-dropzone";
+import { useSearchParams } from "next/navigation";
+import React, { useCallback, useState } from "react";
 import UserProfile from "@/components/LostList/userProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
-import { useDropzone } from "react-dropzone";
-import React, { useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 
 const FoundItemDetails = () => {
   const searchParams = useSearchParams();
@@ -16,8 +16,12 @@ const FoundItemDetails = () => {
   const category = searchParams.get("category");
   const userId = searchParams.get("userId");
 
-  const [files, setFiles] = React.useState<File[]>([]);
-  // React dropzone setup
+  const [files, setFiles] = useState<File[]>([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [questionPayload, setQuestionPayload] = useState<any[]>([]);
+  // Add state for user answers
+  const [userAnswers, setUserAnswers] = useState<string[][]>([]);
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (files.length + acceptedFiles.length > 5) {
@@ -76,8 +80,10 @@ const FoundItemDetails = () => {
         formData,
         { withCredentials: true },
       );
-      console.log("Verification response: ", response.data);
-      return response.data;
+      if (response.data.status == 200) {
+        setResults(response.data.data);
+        setFiles([]);
+      }
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -89,14 +95,24 @@ const FoundItemDetails = () => {
     }
   };
 
-  const getQuestionPayload = async () => {
+  const getQuestionPayload = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const response = await axios.post(
         `/api/protected/getQuestionPayloadAPI`,
         { foundId: foundId },
         { withCredentials: true },
       );
-      return response.data.foundItems;
+      console.log("Question results: ", response.data.data);
+      setQuestionPayload(response.data.data);
+      // Initialize userAnswers state based on questions
+      if (response.data.data && response.data.data[0]?.questionPayload) {
+        setUserAnswers(
+          response.data.data[0].questionPayload.map((item: any) =>
+            item.questions.map(() => ""),
+          ),
+        );
+      }
     } catch (error) {
       console.log("Error fetching question payload:", error);
       Swal.fire({
@@ -139,27 +155,29 @@ const FoundItemDetails = () => {
           >
             Upload image if you have found the item:
           </label>
-          <form method="POST">
+          <form method="POST" className="mx-auto w-full max-w-2xl">
             <div
               {...getRootProps()}
-              className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors duration-200 ${
+              className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors duration-200 focus-within:ring-2 focus-within:ring-blue-400 sm:min-h-48 md:min-h-56 ${
                 isDragActive
                   ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                   : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
               } p-6 text-center text-gray-500 dark:text-gray-300`}
+              tabIndex={0}
             >
               <input {...getInputProps()} />
               {files.length > 0 ? (
-                <div className="flex flex-wrap justify-center gap-4">
+                <div className="flex w-full flex-wrap justify-center gap-4">
                   {files.map((file, idx) => (
                     <div
                       key={idx}
-                      className="relative flex flex-col items-center gap-1"
+                      className="relative flex flex-col items-center gap-1 rounded-lg bg-white p-2 shadow-md dark:bg-gray-900"
                     >
                       <button
                         onClick={() => removeFile(file.name)}
-                        className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
+                        className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none"
                         title="Remove"
+                        type="button"
                       >
                         ✕
                       </button>
@@ -175,9 +193,16 @@ const FoundItemDetails = () => {
                   ))}
                 </div>
               ) : isDragActive ? (
-                <p>Drop your images here...</p>
+                <p className="text-blue-600 dark:text-blue-400">
+                  Drop your images here...
+                </p>
               ) : (
-                <p>Drag & drop up to 5 image files, or click to select</p>
+                <p className="text-sm sm:text-base">
+                  Drag & drop up to 5 image files, or{" "}
+                  <span className="cursor-pointer text-blue-600 underline">
+                    click to select
+                  </span>
+                </p>
               )}
             </div>
             {files.length > 0 && (
@@ -185,12 +210,12 @@ const FoundItemDetails = () => {
                 Selected file: {files[0].name}
               </div>
             )}
-            <div className="flex flex-wrap gap-4 xl:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row xl:justify-between">
               <button
                 type="submit"
                 onClick={verifyFoundItem}
                 aria-label="send message"
-                className="inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none sm:w-auto dark:bg-blue-500 dark:hover:bg-blue-600"
               >
                 Submit
                 <svg
@@ -207,26 +232,98 @@ const FoundItemDetails = () => {
                   />
                 </svg>
               </button>
+              <button
+                type="button"
+                onClick={getQuestionPayload}
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border border-blue-600 bg-white px-8 py-3 font-semibold text-blue-600 shadow hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none sm:w-auto dark:bg-transparent dark:text-blue-400 dark:hover:bg-blue-900"
+              >
+                Get Questions Without Image
+                <svg
+                  className="fill-current"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z" />
+                </svg>
+              </button>
             </div>
           </form>
-          {/* Place this outside the form */}
-          <button
-            type="button"
-            onClick={getQuestionPayload}
-            className="mt-4 inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-blue-600 bg-white px-8 py-3 font-semibold text-blue-600 shadow hover:bg-blue-50 dark:bg-transparent dark:text-blue-400 dark:hover:bg-blue-900"
-          >
-            Get Questions Without Image
-            <svg
-              className="fill-current"
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z" />
-            </svg>
-          </button>
+          {/* Display Image Analysis Results   */}
+          {results.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                Image Analysis Results
+              </h3>
+              {results.map((result, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow dark:bg-blue-900/30"
+                >
+                  <div className="font-medium text-blue-800 dark:text-blue-200">
+                    User Image #{result.userImageIndex + 1} vs Lost Image #
+                    {result.lostImageIndex + 1}
+                  </div>
+                  <div
+                    className="mt-2 text-sm text-gray-800 dark:text-gray-100"
+                    dangerouslySetInnerHTML={{
+                      __html: result.similarityScore.replace(/\n/g, "<br/>"),
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Claim Questions Section */}
+          {questionPayload.length > 0 &&
+            questionPayload[0]?.questionPayload && (
+              <form
+                method="POST"
+                className="mx-auto mt-8 max-w-3xl space-y-8 rounded-xl bg-white p-6 shadow dark:bg-gray-900"
+              >
+                <h2 className="mb-4 text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  Answer the following questions to claim this item
+                </h2>
+                {questionPayload[0].questionPayload.map(
+                  (item: any, itemIdx: number) => (
+                    <div
+                      key={item.filename}
+                      className="mb-6 rounded-lg border bg-blue-50 p-4 dark:bg-blue-900/20"
+                    >
+                      <div className="mb-4 flex flex-col items-center gap-4 md:flex-row"></div>
+                      <div>
+                        <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">
+                          Questions:
+                        </h3>
+                        <div className="space-y-4">
+                          {item.questions.map((q: any, qIdx: number) => (
+                            <div key={q.question}>
+                              <label className="mb-1 block font-medium text-gray-800 dark:text-gray-100">
+                                {qIdx + 1}. {q.question}
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                value={userAnswers[itemIdx]?.[qIdx] || ""}
+                                required
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ),
+                )}
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 md:w-auto dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
+                  Submit Answers
+                </button>
+              </form>
+            )}
         </div>
       </div>
       <UserProfile userId={userId || ""} />

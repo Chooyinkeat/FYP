@@ -76,52 +76,51 @@ export async function POST(request: NextRequest) {
     const base64Images = await Promise.all(
       imageUrls.map(async (url: string) => await convertUrlToBase64(url)),
     );
+    const results: {
+      userImageIndex: number;
+      lostImageIndex: number;
+      similarityScore: string;
+    }[] = [];
 
-    // const results: {
-    //   userImageIndex: number;
-    //   lostImageIndex: number;
-    //   similarityScore: string;
-    // }[] = [];
+    for (let i = 0; i < base64UserImages.length; i++) {
+      for (let j = 0; j < base64Images.length; j++) {
+        const promptParts: Part[] = [
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64UserImages[i].split(",")[1],
+            },
+          },
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64Images[j].split(",")[1],
+            },
+          },
+          {
+            text: "How visually similar are these two images on a scale from 0 to 100?",
+          },
+        ];
 
-    // for (let i = 0; i < base64UserImages.length; i++) {
-    //   for (let j = 0; j < base64Images.length; j++) {
-    //     const promptParts: Part[] = [
-    //       {
-    //         inlineData: {
-    //           mimeType: "image/jpeg",
-    //           data: base64UserImages[i].split(",")[1],
-    //         },
-    //       },
-    //       {
-    //         inlineData: {
-    //           mimeType: "image/jpeg",
-    //           data: base64Images[j].split(",")[1],
-    //         },
-    //       },
-    //       {
-    //         text: "How visually similar are these two images on a scale from 0 to 100?",
-    //       },
-    //     ];
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: promptParts }],
+        });
 
-    //     const result = await model.generateContent({
-    //       contents: [{ role: "user", parts: promptParts }],
-    //     });
+        const response = result.response.text();
+        results.push({
+          userImageIndex: i,
+          lostImageIndex: j,
+          similarityScore: response,
+        });
+      }
+    }
 
-    //     const response = result.response.text();
-    //     results.push({
-    //       userImageIndex: i,
-    //       lostImageIndex: j,
-    //       similarityScore: response,
-    //     });
-    //   }
-    // }
-
-    // return NextResponse.json({
-    //   success: true,
-    //   status: 200,
-    //   data: results,
-    //   message: "Image analysis successful",
-    // });
+    return NextResponse.json({
+      success: true,
+      status: 200,
+      data: results,
+      message: "Image analysis and comparison completed",
+    });
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Internal server error" },

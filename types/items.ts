@@ -38,3 +38,23 @@ export interface Description {
   date: string;
   time: string;
 }
+
+export interface LostItemTable {
+  category: string;
+  description: {
+    location: string;
+    date: string;
+    time: string;
+  };
+  status: number;
+  lostId: string;
+}
+
+export interface FoundItemTable {
+  category: string;
+  location: string;
+  date: string;
+  time: string;
+  status: number;
+  foundId: string;
+}

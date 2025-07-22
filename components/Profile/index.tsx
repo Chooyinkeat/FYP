@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import CameraIcon from "@heroicons/react/24/outline/CameraIcon";
-import SidebarLink from "@/components/Docs/SidebarLink";
 import axios from "axios";
-import Validator from "@/lib/validation";
+import Image from "next/image";
 import Swal from "sweetalert2";
+import Validator from "@/lib/validation";
+import React, { useState, useEffect } from "react";
+import CameraIcon from "@heroicons/react/24/outline/CameraIcon";
+import Table from "@/components/Profile/Table";
+
 const Profile = () => {
   const [userData, setUserData] = useState({
     username: "",
@@ -123,13 +124,16 @@ const Profile = () => {
       <section className="pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24">
         <div className="container mx-auto">
           <div className="-mx-4 flex flex-wrap">
-            <div className="w-full px-4 lg:w-1/4">
+            <div className="w-full px-4 lg:w-3/5">
               <div className="shadow-solid-4 dark:border-strokedark dark:bg-blacksection sticky top-[74px] rounded-lg border border-white p-4 transition-all">
-                <SidebarLink />
+                <h2 className="text-dark mb-6 text-2xl font-bold dark:text-white">
+                  Submitted results
+                </h2>
+                <Table />
               </div>
             </div>
 
-            <div className="w-full px-4 lg:w-3/4">
+            <div className="w-full px-4 lg:w-2/5">
               <div className="blog-details blog-details-docs shadow-three dark:bg-gray-dark rounded-xs bg-white px-8 py-11 sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]">
                 <div className="relative z-1">
                   <form className="mx-auto max-w-md" onSubmit={handleSubmit}>

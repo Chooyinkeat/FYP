@@ -14,149 +14,14 @@ import "swiper/css/navigation";
 import UserProfile from "@/components/LostList/userProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 
-// const AnalysisModal = ({
-//   open,
-//   onClose,
-//   results,
-// }: {
-//   open: boolean;
-//   onClose: () => void;
-//   results: any[];
-// }) => {
-//   if (!open) return null;
-//   return (
-//     <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
-//       <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
-//         <button
-//           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-//           onClick={onClose}
-//         >
-//           ✕
-//         </button>
-//         <h2 className="mb-4 text-center text-xl font-bold">
-//           Image Analysis Results
-//         </h2>
-//         <div className="relative max-h-96">
-//           {results.length === 0 ? (
-//             <p>No results to display.</p>
-//           ) : (
-//             <>
-//               {/* Custom Navigation Buttons */}
-//               <button
-//                 id="custom-swiper-prev"
-//                 className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full bg-blue-600 p-2 text-white shadow hover:bg-blue-700 focus:outline-none"
-//                 style={{ transform: "translateY(-50%)" }}
-//                 aria-label="Previous"
-//               >
-//                 {/* Left Arrow SVG */}
-//                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-//                   <path
-//                     d="M15 19l-7-7 7-7"
-//                     stroke="currentColor"
-//                     strokeWidth="2"
-//                     strokeLinecap="round"
-//                     strokeLinejoin="round"
-//                   />
-//                 </svg>
-//               </button>
-//               <button
-//                 id="custom-swiper-next"
-//                 className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full bg-blue-600 p-2 text-white shadow hover:bg-blue-700 focus:outline-none"
-//                 style={{ transform: "translateY(-50%)" }}
-//                 aria-label="Next"
-//               >
-//                 {/* Right Arrow SVG */}
-//                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-//                   <path
-//                     d="M9 5l7 7-7 7"
-//                     stroke="currentColor"
-//                     strokeWidth="2"
-//                     strokeLinecap="round"
-//                     strokeLinejoin="round"
-//                   />
-//                 </svg>
-//               </button>
-//               <Swiper
-//                 modules={[Navigation, Pagination]}
-//                 navigation={{
-//                   prevEl: "#custom-swiper-prev",
-//                   nextEl: "#custom-swiper-next",
-//                 }}
-//                 pagination={{ clickable: true }}
-//                 className="h-full w-full"
-//               >
-//                 {results.map((result, idx) => (
-//                   <SwiperSlide key={idx}>
-//                     <div className="flex h-72 flex-col items-center justify-center">
-//                       <div className="mb-2 font-semibold">
-//                         User Image {result.userImageIndex + 1} vs Lost Image{" "}
-//                         {result.lostImageIndex + 1}
-//                       </div>
-//                       <div className="text-center text-sm whitespace-pre-line">
-//                         {result.similarityScore}
-//                       </div>
-//                     </div>
-//                   </SwiperSlide>
-//                 ))}
-//               </Swiper>
-//             </>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-const AnalysisModal = ({
-  open,
-  onClose,
-  results,
-}: {
-  open: boolean;
-  onClose: () => void;
-  results: any[];
-}) => {
-  if (!open) return null;
-  return (
-    <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
-        <button
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-        <h2 className="mb-4 text-center text-xl font-bold">
-          Image Analysis Results
-        </h2>
-        <div className="max-h-96 space-y-4 overflow-y-auto">
-          {results.length === 0 ? (
-            <p>No results to display.</p>
-          ) : (
-            results.map((result, idx) => (
-              <div key={idx} className="border-b pb-2">
-                <div className="font-semibold">
-                  User Image {result.userImageIndex + 1} vs Lost Image{" "}
-                  {result.lostImageIndex + 1}
-                </div>
-                <div className="text-sm whitespace-pre-line">
-                  {result.similarityScore}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+
 const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
   const [parsedDescription, setParsedDescription] =
     useState<Description | null>(null);
   // Dropzone state
   const [files, setFiles] = React.useState<File[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any[]>([]);
+  const [results, setResults] = useState<any[]>([]);
 
   // React dropzone setup
   const onDrop = useCallback(
@@ -223,8 +88,7 @@ const LostDetails = () => {
         },
       );
       if (response.status === 200) {
-        setAnalysisResults(response.data.data); // assuming response.data.data is the array
-        setModalOpen(true);
+        setResults(response.data.data); // assuming response.data.data is the array
         console.log("Analysis results: ", response.data.data);
         setFiles([]);
       }
@@ -324,24 +188,25 @@ const LostDetails = () => {
               <form onSubmit={handleSubmit}>
                 <div
                   {...getRootProps()}
-                  className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors duration-200 ${
-                    isDragActive
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
-                  } p-6 text-center text-gray-500 dark:text-gray-300`}
+                  className={`mb-7 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors duration-200 focus-within:ring-2 focus-within:ring-blue-400 min-h-40 sm:min-h-48 md:min-h-56 ${isDragActive
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
+                    } p-6 text-center text-gray-500 dark:text-gray-300`}
+                  tabIndex={0}
                 >
                   <input {...getInputProps()} />
                   {files.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-4">
+                    <div className="flex flex-wrap justify-center gap-4 w-full">
                       {files.map((file, idx) => (
                         <div
                           key={idx}
-                          className="relative flex flex-col items-center gap-1"
+                          className="relative flex flex-col items-center gap-1 bg-white dark:bg-gray-900 rounded-lg p-2 shadow-md"
                         >
                           <button
                             onClick={() => removeFile(file.name)}
-                            className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
+                            className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
                             title="Remove"
+                            type="button"
                           >
                             ✕
                           </button>
@@ -357,9 +222,9 @@ const LostDetails = () => {
                       ))}
                     </div>
                   ) : isDragActive ? (
-                    <p>Drop your images here...</p>
+                    <p className="text-blue-600 dark:text-blue-400">Drop your images here...</p>
                   ) : (
-                    <p>Drag & drop up to 5 image files, or click to select</p>
+                    <p className="text-sm sm:text-base">Drag & drop up to 5 image files, or <span className="underline cursor-pointer text-blue-600">click to select</span></p>
                   )}
                 </div>
                 {files.length > 0 && (
@@ -390,14 +255,28 @@ const LostDetails = () => {
                   </button>
                 </div>
               </form>
+              {results.length > 0 && (
+                <div className="mt-6 space-y-4">
+                  <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">Image Analysis Results</h3>
+                  {results.map((result, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/30 p-4 shadow"
+                    >
+                      <div className="font-medium text-blue-800 dark:text-blue-200">
+                        User Image #{result.userImageIndex + 1} vs Lost Image #{result.lostImageIndex + 1}
+                      </div>
+                      <div
+                        className="mt-2 text-sm text-gray-800 dark:text-gray-100"
+                        dangerouslySetInnerHTML={{ __html: result.similarityScore.replace(/\n/g, "<br/>") }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <UserProfile userId={item.userId} />
-          <AnalysisModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            results={analysisResults}
-          />
         </>
       ) : (
         <div className="text-center text-gray-500">Loading item details...</div>
