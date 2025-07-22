@@ -218,9 +218,14 @@ const LostList = () => {
                     Location:
                   </span>
                   <span className="ml-1">
-                    {parsedDescription?.location || "Unknown Location"}
+                    {parsedDescription?.location
+                      ? parsedDescription.location.length > 50
+                        ? parsedDescription.location.slice(0, 50) + "..."
+                        : parsedDescription.location
+                      : "Unknown Location"}
                   </span>
                 </p>
+
                 <div className="mt-6 flex justify-end">
                   <Link
                     href="/lostItems/lostItems-details"

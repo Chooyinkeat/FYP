@@ -132,7 +132,7 @@ export default function ChatWidget() {
               {selectedChat === null ? (
                 <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500">
                   <Image
-                    src="/images/default_pic.png"
+                    src="/images/favicon.ico"
                     alt="Welcome"
                     className="mb-4 h-32"
                     width={128}

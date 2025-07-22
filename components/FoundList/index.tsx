@@ -4,9 +4,12 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FoundItem } from "@/types/items";
+import { debounce } from "lodash";
+
 const FoundList = () => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [foundItems, setFoundItems] = useState<FoundItem[]>([]);
 
   const fetchFoundItems = async () => {
@@ -24,11 +27,43 @@ const FoundList = () => {
     }
   };
 
+  const searchItems = async (category: string) => {
+    try {
+      const response = await axios.post(
+        "/api/protected/searchFoundItemAPI",
+        { category },
+        { withCredentials: true },
+      );
+      return response.data;
+    } catch (error) {
+      console.log("Error searching items:", error);
+    }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
+      if (query.trim() === "") {
+        const data = await fetchFoundItems();
+        if (data?.success) {
+          setFoundItems(data.foundItems);
+        }
+        return;
+      }
+
+      const data = await searchItems(query);
+      if (data?.success) {
+        setFoundItems(data.data);
+      } else {
+        setFoundItems([]);
+      }
+    }, 500), // 500ms debounce delay
+    [],
+  );
+
   useEffect(() => {
     fetchFoundItems()
       .then((data) => {
         if (data?.success && data.foundItems.length > 0) {
-          console.log("Found items fetched successfully: ", data.foundItems);
           setFoundItems(data.foundItems);
         } else {
           Swal.fire({
@@ -48,9 +83,78 @@ const FoundList = () => {
       });
   }, []);
 
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const convertDate = (date: string) => {
+    const d = new Date(date); // Keep the full ISO string to preserve timezone
+    const readableDate = d.toLocaleDateString("en-MY", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    return readableDate;
+  };
+
+  const convertTime = (time: string) => {
+    const today = new Date(); // Use today's date
+    const [hours, minutes, seconds] = time.split(":");
+    today.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+    return today.toLocaleTimeString("en-MY", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true, // Set to false if you want 24-hour format
+    });
+  };
+
   return (
     <>
-      <div className="md:item-end mb-10 flex flex-col justify-end gap-4 md:flex-row">
+      <div className="mb-10 flex flex-col justify-center gap-4 md:flex-row md:items-center">
+        <div className="w-full max-w-md">
+          <label
+            htmlFor="default-search"
+            className="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Search
+          </label>
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+              <svg
+                className="h-4 w-4 text-gray-500 dark:text-gray-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                />
+              </svg>
+            </div>
+            <input
+              type="search"
+              id="default-search"
+              name="category"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                debouncedSearch(e.target.value);
+              }}
+              className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-4 ps-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              placeholder="Search Lost Items..."
+              required
+            />
+          </div>
+        </div>
+        {/* Submit Lost Item Button */}
         <div className="flex justify-end md:justify-end">
           <Link
             href="/submitItem"
@@ -88,28 +192,44 @@ const FoundList = () => {
             <div className="px-6 py-5">
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Category:
+                  <span className="ml-1 font-semibold text-gray-800 dark:text-gray-100">
+                    {item.category || "Unknown Category"}
+                  </span>
+                </p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   Location:
                   <span className="ml-1 font-semibold text-gray-800 dark:text-gray-100">
-                    {item.question[0]?.location || "Unknown Location"}
+                    {item.location || "Unknown Location"}
                   </span>
                 </p>
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   Date:
                   <span className="ml-1 font-semibold text-gray-800 dark:text-gray-100">
-                    {item.question[0]?.date || "N/A"}
+                    {convertDate(item.date) || "N/A"}
                   </span>
                 </p>
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   Time:
                   <span className="ml-1 font-semibold text-gray-800 dark:text-gray-100">
-                    {item.question[0]?.time || "N/A"}
+                    {convertTime(item.time) || "N/A"}
                   </span>
                 </p>
               </div>
               <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+                <Link
+                  href={`/foundItems/claimItemForm?foundId=${encodeURIComponent(
+                    item.foundId,
+                  )}&location=${encodeURIComponent(
+                    item.location,
+                  )}&date=${encodeURIComponent(
+                    convertDate(item.date),
+                  )}&time=${encodeURIComponent(
+                    convertTime(item.time),
+                  )}&category=${encodeURIComponent(
+                    item.category,
+                  )}&userId=${encodeURIComponent(item.userId)}`}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
                 >
                   <svg
                     className="h-4 w-4"
@@ -126,7 +246,7 @@ const FoundList = () => {
                     />
                   </svg>
                   Claim Item
-                </button>
+                </Link>
               </div>
             </div>
           </motion.div>
