@@ -1,7 +1,7 @@
 "use server";
 import pool from "@/lib/db";
-import { NextResponse, NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
+import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get recent 18 found items
     const [rows] = await pool.query(
-      `SELECT image_url_payload, question_payload, status FROM found_item WHERE status = 0 ORDER BY created_date DESC LIMIT 18`,
+      `SELECT category, location, date, time, status, found_id, user_id FROM found_item WHERE status = 0 ORDER BY created_date DESC LIMIT 18`,
     );
     if ((rows as any[]).length === 0) {
       return NextResponse.json(
@@ -28,9 +28,13 @@ export async function GET(request: NextRequest) {
     }
 
     const foundItems = (rows as any[]).map((item) => ({
-      imageUrl: JSON.parse(item.image_url_payload),
-      question: JSON.parse(item.question_payload),
+      category: item.category,
+      location: item.location,
+      date: item.date,
+      time: item.time,
       status: item.status,
+      foundId: item.found_id,
+      userId: item.user_id,
     }));
 
     return NextResponse.json({

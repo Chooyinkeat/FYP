@@ -1,17 +1,111 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { LostItem } from "@/types/items";
-import axios from "axios";
 import { Description } from "@/types/items";
+import axios from "axios";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { useDropzone } from "react-dropzone";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 import UserProfile from "@/components/LostList/userProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 
+// const AnalysisModal = ({
+//   open,
+//   onClose,
+//   results,
+// }: {
+//   open: boolean;
+//   onClose: () => void;
+//   results: any[];
+// }) => {
+//   if (!open) return null;
+//   return (
+//     <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
+//       <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+//         <button
+//           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+//           onClick={onClose}
+//         >
+//           ✕
+//         </button>
+//         <h2 className="mb-4 text-center text-xl font-bold">
+//           Image Analysis Results
+//         </h2>
+//         <div className="relative max-h-96">
+//           {results.length === 0 ? (
+//             <p>No results to display.</p>
+//           ) : (
+//             <>
+//               {/* Custom Navigation Buttons */}
+//               <button
+//                 id="custom-swiper-prev"
+//                 className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full bg-blue-600 p-2 text-white shadow hover:bg-blue-700 focus:outline-none"
+//                 style={{ transform: "translateY(-50%)" }}
+//                 aria-label="Previous"
+//               >
+//                 {/* Left Arrow SVG */}
+//                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+//                   <path
+//                     d="M15 19l-7-7 7-7"
+//                     stroke="currentColor"
+//                     strokeWidth="2"
+//                     strokeLinecap="round"
+//                     strokeLinejoin="round"
+//                   />
+//                 </svg>
+//               </button>
+//               <button
+//                 id="custom-swiper-next"
+//                 className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full bg-blue-600 p-2 text-white shadow hover:bg-blue-700 focus:outline-none"
+//                 style={{ transform: "translateY(-50%)" }}
+//                 aria-label="Next"
+//               >
+//                 {/* Right Arrow SVG */}
+//                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+//                   <path
+//                     d="M9 5l7 7-7 7"
+//                     stroke="currentColor"
+//                     strokeWidth="2"
+//                     strokeLinecap="round"
+//                     strokeLinejoin="round"
+//                   />
+//                 </svg>
+//               </button>
+//               <Swiper
+//                 modules={[Navigation, Pagination]}
+//                 navigation={{
+//                   prevEl: "#custom-swiper-prev",
+//                   nextEl: "#custom-swiper-next",
+//                 }}
+//                 pagination={{ clickable: true }}
+//                 className="h-full w-full"
+//               >
+//                 {results.map((result, idx) => (
+//                   <SwiperSlide key={idx}>
+//                     <div className="flex h-72 flex-col items-center justify-center">
+//                       <div className="mb-2 font-semibold">
+//                         User Image {result.userImageIndex + 1} vs Lost Image{" "}
+//                         {result.lostImageIndex + 1}
+//                       </div>
+//                       <div className="text-center text-sm whitespace-pre-line">
+//                         {result.similarityScore}
+//                       </div>
+//                     </div>
+//                   </SwiperSlide>
+//                 ))}
+//               </Swiper>
+//             </>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 const AnalysisModal = ({
   open,
   onClose,
@@ -55,7 +149,6 @@ const AnalysisModal = ({
     </div>
   );
 };
-
 const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
   const [parsedDescription, setParsedDescription] =

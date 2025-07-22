@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const aiResults = JSON.parse(metadataJson);
-    // Inject date, time, location into each result
+    const category = aiResults.category;
+
     const enhancedResults = aiResults.map((entry) => ({
       ...entry,
       date,
@@ -44,7 +45,6 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < images.length; i++) {
       const file = images[i];
       const buffer = Buffer.from(await file.arrayBuffer());
-
       const uploadResult: any = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream({ folder: "lost-and-found" }, (err, result) => {
@@ -53,13 +53,18 @@ export async function POST(request: NextRequest) {
           })
           .end(buffer);
       });
-
       imageUrls.push(uploadResult.secure_url);
     }
 
     await pool.query(
-      `INSERT INTO found_item (status, image_url_payload, question_payload, user_id) VALUES (?, ?, ?, ?)`,
-      [0, JSON.stringify(imageUrls), JSON.stringify(enhancedResults), userId],
+      `INSERT INTO found_item (status, category, image_url_payload, question_payload, user_id) VALUES (?, ?, ?, ?, ?)`,
+      [
+        0,
+        category,
+        JSON.stringify(imageUrls),
+        JSON.stringify(enhancedResults),
+        userId,
+      ],
     );
 
     return NextResponse.json({

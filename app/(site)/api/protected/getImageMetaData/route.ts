@@ -20,6 +20,7 @@ async function analyzeImageWithGemini(image: File) {
 
   const result = await model.generateContent([
     `Analyze this image and return metadata and 3 verification questions:\n\nFormat:\n{
+      "category": "...",
       "metadata": {
         "item_type": "...",
         "color": "...",

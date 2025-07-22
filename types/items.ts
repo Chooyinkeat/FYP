@@ -1,10 +1,14 @@
 export interface FoundItem {
-  imageUrl: string[];
-  question: QuestionBlock[];
+  category: string;
+  foundId: string;
   status: number;
+  date: string;
+  time: string;
+  location: string;
+  userId: string;
 }
 
-interface QuestionBlock {
+export interface QuestionBlock {
   filename: string;
   metadata: {
     item_type: string;
@@ -17,9 +21,6 @@ interface QuestionBlock {
     question: string;
     answer: string;
   }[];
-  date: string; // ✅ Add this
-  time: string; // ✅ Add this
-  location: string; // ✅ Add this
 }
 
 export interface LostItem {
