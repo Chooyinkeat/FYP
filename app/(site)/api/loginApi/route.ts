@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = jwt.sign(
-      { userId: user.user_id, email: user.email }, // use actual column name from your DB
+      { userId: user.user_id, email: user.email },
       JWT_SECRET,
       { expiresIn: JWT_hour },
     );
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 60 * 3,
     });
 
     return response;

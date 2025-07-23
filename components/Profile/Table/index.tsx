@@ -59,6 +59,7 @@ const Table = () => {
     } else {
       fetchItems("1").then((response) => {
         if (response.success && response.status === 200) {
+          console.log("Found items fetched: ", response.data);
           setFoundItems(response.data);
         } else {
           setFoundItems([]);
@@ -134,7 +135,7 @@ const Table = () => {
                   >
                     <td className="px-6 py-4">
                       <Link
-                        href={`/profile`}
+                        href={`/lostItems/lostItems-details?id=${item.lostId}`}
                         className="text-blue-600 hover:underline"
                       >
                         {item.category}
@@ -181,7 +182,17 @@ const Table = () => {
                 >
                   <td className="px-6 py-4">
                     <Link
-                      href={`/profile`}
+                      href={`/foundItems/claimItemForm?foundId=${encodeURIComponent(
+                        item.foundId,
+                      )}&location=${encodeURIComponent(
+                        item.location,
+                      )}&date=${encodeURIComponent(
+                        convertDate(item.date),
+                      )}&time=${encodeURIComponent(
+                        convertTime(item.time),
+                      )}&category=${encodeURIComponent(
+                        item.category,
+                      )}&userId=${encodeURIComponent(item.userId)}`}
                       className="text-blue-600 hover:underline"
                     >
                       {item.category}

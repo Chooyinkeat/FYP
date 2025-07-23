@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import { LostItem } from "@/types/items";
 import { Description } from "@/types/items";
 import axios from "axios";
@@ -14,6 +14,23 @@ import "swiper/css/navigation";
 import UserProfile from "@/components/LostList/userProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 
+const fetchDetails = async (id: string) => {
+  try {
+    const response = await axios.post(
+      "/api/protected/getLostItemAPI/getSingleItemAPI",
+      { id },
+      { withCredentials: true },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching item details:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to fetch item details.",
+    });
+  }
+};
 
 const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
@@ -100,23 +117,30 @@ const LostDetails = () => {
   };
 
   useEffect(() => {
-    const stored = localStorage.getItem("selectedLostItem");
-    if (stored) {
-      try {
-        const parsed: LostItem = JSON.parse(stored);
-        setItem(parsed);
-        const desc = JSON.parse(parsed.description);
-        setParsedDescription(desc);
-      } catch (err) {
-        console.log("Failed to load or parse lost item:", err);
-      }
-    }
-  }, []);
+    const query = new URLSearchParams(window.location.search);
+    const id = query.get("id");
 
-  useEffect(() => {
-    return () => {
-      localStorage.removeItem("selectedLostItem");
-    };
+    if (id) {
+      fetchDetails(id)
+        .then((response) => {
+          if (response.success && response.status === 200) {
+            console.log("Item details: ", response.data);
+            const item = response.data[0];
+            setItem(item);
+            const desc = JSON.parse(item.description);
+            setParsedDescription(desc);
+          } else {
+            Swal.fire({
+              icon: "info",
+              title: "No Item Found",
+              text: "The requested item does not exist.",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching item details:", error);
+        });
+    }
   }, []);
 
   if (!item || !parsedDescription) {
@@ -188,23 +212,24 @@ const LostDetails = () => {
               <form onSubmit={handleSubmit}>
                 <div
                   {...getRootProps()}
-                  className={`mb-7 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors duration-200 focus-within:ring-2 focus-within:ring-blue-400 min-h-40 sm:min-h-48 md:min-h-56 ${isDragActive
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
-                    } p-6 text-center text-gray-500 dark:text-gray-300`}
+                  className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors duration-200 focus-within:ring-2 focus-within:ring-blue-400 sm:min-h-48 md:min-h-56 ${
+                    isDragActive
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800"
+                  } p-6 text-center text-gray-500 dark:text-gray-300`}
                   tabIndex={0}
                 >
                   <input {...getInputProps()} />
                   {files.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-4 w-full">
+                    <div className="flex w-full flex-wrap justify-center gap-4">
                       {files.map((file, idx) => (
                         <div
                           key={idx}
-                          className="relative flex flex-col items-center gap-1 bg-white dark:bg-gray-900 rounded-lg p-2 shadow-md"
+                          className="relative flex flex-col items-center gap-1 rounded-lg bg-white p-2 shadow-md dark:bg-gray-900"
                         >
                           <button
                             onClick={() => removeFile(file.name)}
-                            className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
+                            className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none"
                             title="Remove"
                             type="button"
                           >
@@ -222,9 +247,16 @@ const LostDetails = () => {
                       ))}
                     </div>
                   ) : isDragActive ? (
-                    <p className="text-blue-600 dark:text-blue-400">Drop your images here...</p>
+                    <p className="text-blue-600 dark:text-blue-400">
+                      Drop your images here...
+                    </p>
                   ) : (
-                    <p className="text-sm sm:text-base">Drag & drop up to 5 image files, or <span className="underline cursor-pointer text-blue-600">click to select</span></p>
+                    <p className="text-sm sm:text-base">
+                      Drag & drop up to 5 image files, or{" "}
+                      <span className="cursor-pointer text-blue-600 underline">
+                        click to select
+                      </span>
+                    </p>
                   )}
                 </div>
                 {files.length > 0 && (
@@ -257,18 +289,26 @@ const LostDetails = () => {
               </form>
               {results.length > 0 && (
                 <div className="mt-6 space-y-4">
-                  <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">Image Analysis Results</h3>
+                  <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                    Image Analysis Results
+                  </h3>
                   {results.map((result, idx) => (
                     <div
                       key={idx}
-                      className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/30 p-4 shadow"
+                      className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow dark:bg-blue-900/30"
                     >
                       <div className="font-medium text-blue-800 dark:text-blue-200">
-                        User Image #{result.userImageIndex + 1} vs Lost Image #{result.lostImageIndex + 1}
+                        User Image #{result.userImageIndex + 1} vs Lost Image #
+                        {result.lostImageIndex + 1}
                       </div>
                       <div
                         className="mt-2 text-sm text-gray-800 dark:text-gray-100"
-                        dangerouslySetInnerHTML={{ __html: result.similarityScore.replace(/\n/g, "<br/>") }}
+                        dangerouslySetInnerHTML={{
+                          __html: result.similarityScore.replace(
+                            /\n/g,
+                            "<br/>",
+                          ),
+                        }}
                       />
                     </div>
                   ))}
