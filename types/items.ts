@@ -24,6 +24,7 @@ export interface QuestionBlock {
 }
 
 export interface LostItem {
+  lostId: string;
   category: string;
   imageUrl: string[];
   description: string;
@@ -57,4 +58,5 @@ export interface FoundItemTable {
   time: string;
   status: number;
   foundId: string;
+  userId: string;
 }

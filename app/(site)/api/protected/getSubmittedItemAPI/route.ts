@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
 
   let sqlQuery = "";
   if (type === "0") {
-    sqlQuery = `SELECT lost_id, category, description_payload, status FROM lost_item WHERE user_id = ? ORDER BY created_date DESC`;
+    sqlQuery = `SELECT * FROM lost_item WHERE user_id = ? ORDER BY created_date DESC`;
   } else if (type === "1") {
-    sqlQuery = `SELECT found_id, category, location, date, time, status FROM found_item WHERE user_id = ? ORDER BY created_date DESC`;
+    sqlQuery = `SELECT * FROM found_item WHERE user_id = ? ORDER BY created_date DESC`;
   }
 
   try {
@@ -47,9 +47,11 @@ export async function POST(request: NextRequest) {
           description: JSON.parse(item.description_payload),
           status: item.status,
           lostId: item.lost_id,
+          userId: item.user_id,
         };
       } else if (type === "1") {
         return {
+          userId: item.user_id,
           category: item.category,
           status: item.status,
           location: item.location,
