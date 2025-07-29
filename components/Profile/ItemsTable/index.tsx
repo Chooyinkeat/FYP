@@ -94,6 +94,17 @@ const Table = () => {
           />
           <span className="ml-2">Found items</span>
         </label>
+        <label className="inline-flex items-center">
+          <input
+            type="radio"
+            className="form-radio text-blue-600"
+            name="itemType"
+            value="match"
+            // checked={selectedType === "match"}
+            // onChange={() => setSelectedType("match")}
+          />
+          <span className="ml-2">Match results</span>
+        </label>
       </div>
       <div className="relative overflow-x-auto">
         <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
