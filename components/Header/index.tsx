@@ -18,10 +18,32 @@ const Header = () => {
   const [profile, setProfile] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUserId = sessionStorage.getItem("userId");
-    const storedProfile = sessionStorage.getItem("profile");
-    setUserId(storedUserId);
-    setProfile(storedProfile);
+    const checkToken = async () => {
+      try {
+        const res = await axios.get("/api/protected/check", {
+          withCredentials: true, // include cookies in request
+        });
+
+        if (res.data.success) {
+          setUserId(res.data.userId);
+          setProfile(res.data.profile);
+        } else {
+          // Token is invalid or expired
+          console.log("⚠️ JWT token invalid or expired");
+          sessionStorage.removeItem("userId");
+          sessionStorage.removeItem("profile");
+        }
+      } catch (err) {
+        console.error("Error checking token:", err);
+
+        // ✅ Also handle network/other errors by clearing session
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("profile");
+        window.location.href = "/auth/signin";
+      }
+    };
+
+    checkToken();
   }, []);
 
   const handleLogout = () => {
