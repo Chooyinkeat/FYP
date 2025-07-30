@@ -267,8 +267,7 @@ const LostDetails = () => {
                 <div className="flex flex-wrap gap-4 xl:justify-between">
                   <button
                     type="submit"
-                    aria-label="send message"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                    className="inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                   >
                     Submit
                     <svg
