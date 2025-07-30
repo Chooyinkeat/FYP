@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 if (!process.env.GOOGLE_GEMINI_API_KEY) {
   throw new Error("Missing GOOGLE_API_KEY environment variable");
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
     const aiData = await analyzeImageWithGemini(image);
     results.push({
       filename: image.name,
+      category: aiData.category,
       metadata: aiData.metadata || {},
       questions: aiData.questions || [],
     });

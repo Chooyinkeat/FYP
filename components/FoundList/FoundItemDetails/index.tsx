@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import UserProfile from "@/components/LostList/userProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
+import ClaimQuestionForm from "@/components/FoundList/Question";
 
 const FoundItemDetails = () => {
   const searchParams = useSearchParams();
@@ -19,7 +20,6 @@ const FoundItemDetails = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [questionPayload, setQuestionPayload] = useState<any[]>([]);
-  // Add state for user answers
   const [userAnswers, setUserAnswers] = useState<string[][]>([]);
 
   const onDrop = useCallback(
@@ -103,9 +103,8 @@ const FoundItemDetails = () => {
         { foundId: foundId },
         { withCredentials: true },
       );
-      console.log("Question results: ", response.data.data);
+      console.log("Question Payload Response: ", response.data.data);
       setQuestionPayload(response.data.data);
-      // Initialize userAnswers state based on questions
       if (response.data.data && response.data.data[0]?.questionPayload) {
         setUserAnswers(
           response.data.data[0].questionPayload.map((item: any) =>
@@ -251,7 +250,6 @@ const FoundItemDetails = () => {
               </button>
             </div>
           </form>
-          {/* Display Image Analysis Results   */}
           {results.length > 0 && (
             <div className="mt-6 space-y-4">
               <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
@@ -276,53 +274,13 @@ const FoundItemDetails = () => {
               ))}
             </div>
           )}
-          {/* Claim Questions Section */}
           {questionPayload.length > 0 &&
             questionPayload[0]?.questionPayload && (
-              <form
-                method="POST"
-                className="mx-auto mt-8 max-w-3xl space-y-8 rounded-xl bg-white p-6 shadow dark:bg-gray-900"
-              >
-                <h2 className="mb-4 text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  Answer the following questions to claim this item
-                </h2>
-                {questionPayload[0].questionPayload.map(
-                  (item: any, itemIdx: number) => (
-                    <div
-                      key={item.filename}
-                      className="mb-6 rounded-lg border bg-blue-50 p-4 dark:bg-blue-900/20"
-                    >
-                      <div className="mb-4 flex flex-col items-center gap-4 md:flex-row"></div>
-                      <div>
-                        <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">
-                          Questions:
-                        </h3>
-                        <div className="space-y-4">
-                          {item.questions.map((q: any, qIdx: number) => (
-                            <div key={q.question}>
-                              <label className="mb-1 block font-medium text-gray-800 dark:text-gray-100">
-                                {qIdx + 1}. {q.question}
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                value={userAnswers[itemIdx]?.[qIdx] || ""}
-                                required
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ),
-                )}
-                <button
-                  type="submit"
-                  className="w-full rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 md:w-auto dark:bg-blue-500 dark:hover:bg-blue-600"
-                >
-                  Submit Answers
-                </button>
-              </form>
+              <ClaimQuestionForm
+                questionPayload={questionPayload[0].questionPayload}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+              />
             )}
         </div>
       </div>

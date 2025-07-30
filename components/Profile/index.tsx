@@ -6,7 +6,6 @@ import Validator from "@/lib/validation";
 import React, { useState, useEffect } from "react";
 import CameraIcon from "@heroicons/react/24/outline/CameraIcon";
 import Table from "@/components/Profile/ItemsTable";
-import MatchTable from "@/components/Profile/MatchTable";
 
 const Profile = () => {
   const [userData, setUserData] = useState({

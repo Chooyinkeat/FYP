@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-
+  console.log("Received metadata:", date, time, location);
   try {
     const aiResults = JSON.parse(metadataJson);
-    const category = aiResults.category;
+    const category = aiResults[0].category;
 
     const enhancedResults = aiResults.map((entry) => ({
       ...entry,
@@ -57,12 +57,15 @@ export async function POST(request: NextRequest) {
     }
 
     await pool.query(
-      `INSERT INTO found_item (status, category, image_url_payload, question_payload, user_id) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO found_item (status, category, image_url_payload, question_payload, location, date, time, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         0,
         category,
         JSON.stringify(imageUrls),
         JSON.stringify(enhancedResults),
+        location,
+        date,
+        time,
         userId,
       ],
     );

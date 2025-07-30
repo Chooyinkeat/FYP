@@ -9,7 +9,6 @@ import { AIResponse } from "@/types/airesponse";
 import MyMap from "@/components/MapWrapper";
 
 const Submit = () => {
-  // Lost and found form state
   const [status, setStatus] = useState("Lost");
   const [category, setCategory] = useState("");
   const [otherCategory, setOtherCategory] = useState("");
@@ -18,10 +17,9 @@ const Submit = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
-  // Leaflet map state
   const [mapPosition, setMapPosition] = useState<[number, number]>([
     3.139, 101.6869,
-  ]); // Default to KL
+  ]);
   const [location, setLocation] = useState<string>(""); // Will store coordinates or address
 
   useEffect(() => {
@@ -75,12 +73,10 @@ const Submit = () => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
 
-  // Gemini AI response state
   const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // submit form handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -195,9 +191,6 @@ const Submit = () => {
       setAiResponses(response.data.data);
       setShowModal(true);
       setCurrentIndex(0);
-      setDate("");
-      setTime("");
-      setFiles([]);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -211,7 +204,15 @@ const Submit = () => {
   };
 
   const handleConfirmUpload = async () => {
-    if (!files.length || !aiResponses.length || !date || !time) return;
+    if (!files.length || !aiResponses.length || !date || !time || !location) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information",
+        text: "Please ensure all fields are filled before confirming upload.",
+      });
+      console.log(files, aiResponses, date, time);
+      return;
+    }
     const formData = new FormData();
     formData.append("date", date);
     formData.append("time", time);
@@ -233,7 +234,7 @@ const Submit = () => {
         },
       );
       setAiResponses([]); // reset if needed
-      return response; // return the response for further handling
+      console.log("Upload successful: ", response.data);
     } catch (err) {
       console.log("Unexpected error: ", err);
     }
@@ -472,10 +473,9 @@ const Submit = () => {
                 </div>
               </form>
 
-              {/* Modal for AI response */}
               {showModal && aiResponses.length > 0 && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                  <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
+                  <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
                     {/* Close Button */}
                     <button
                       className="absolute top-4 right-4 text-2xl font-bold text-black focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
@@ -485,9 +485,9 @@ const Submit = () => {
                       ✕
                     </button>
 
-                    {/* Carousel */}
-                    <div className="flex flex-1 flex-col">
-                      <div className="relative mb-4 aspect-video overflow-hidden rounded-lg">
+                    {/* Carousel Content - Scrollable */}
+                    <div className="flex-1 overflow-y-auto">
+                      <div className="relative min-h-[22rem]">
                         {aiResponses.map((res, index) => (
                           <div
                             key={index}
@@ -498,7 +498,7 @@ const Submit = () => {
                             }`}
                             data-carousel-item
                           >
-                            <div className="max-h-[22rem] overflow-y-auto p-4 text-black md:max-h-[24rem] dark:text-white">
+                            <div className="overflow-y-auto p-4 text-black dark:text-white">
                               <h2 className="mb-4 text-lg font-semibold">
                                 📷 {res.filename}
                               </h2>
@@ -538,61 +538,61 @@ const Submit = () => {
                           </div>
                         ))}
                       </div>
+                    </div>
 
-                      {/* Carousel Controls */}
-                      <div className="mb-4 flex items-center justify-between">
-                        <button
-                          type="button"
-                          className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
-                          onClick={() =>
-                            setCurrentIndex((prev) =>
-                              prev > 0 ? prev - 1 : aiResponses.length - 1,
-                            )
-                          }
-                          aria-label="Previous"
+                    {/* Carousel Controls */}
+                    <div className="mt-4 flex items-center justify-between">
+                      <button
+                        type="button"
+                        className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
+                        onClick={() =>
+                          setCurrentIndex((prev) =>
+                            prev > 0 ? prev - 1 : aiResponses.length - 1,
+                          )
+                        }
+                        aria-label="Previous"
+                      >
+                        <svg
+                          className="h-5 w-5 text-black dark:text-white"
+                          fill="none"
+                          viewBox="0 0 6 10"
                         >
-                          <svg
-                            className="h-5 w-5 text-black dark:text-white"
-                            fill="none"
-                            viewBox="0 0 6 10"
-                          >
-                            <path
-                              d="M5 1L1 5l4 4"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                          {currentIndex + 1} of {aiResponses.length}
-                        </span>
-                        <button
-                          type="button"
-                          className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
-                          onClick={() =>
-                            setCurrentIndex((prev) =>
-                              prev < aiResponses.length - 1 ? prev + 1 : 0,
-                            )
-                          }
-                          aria-label="Next"
+                          <path
+                            d="M5 1L1 5l4 4"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {currentIndex + 1} of {aiResponses.length}
+                      </span>
+                      <button
+                        type="button"
+                        className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
+                        onClick={() =>
+                          setCurrentIndex((prev) =>
+                            prev < aiResponses.length - 1 ? prev + 1 : 0,
+                          )
+                        }
+                        aria-label="Next"
+                      >
+                        <svg
+                          className="h-5 w-5 text-black dark:text-white"
+                          fill="none"
+                          viewBox="0 0 6 10"
                         >
-                          <svg
-                            className="h-5 w-5 text-black dark:text-white"
-                            fill="none"
-                            viewBox="0 0 6 10"
-                          >
-                            <path
-                              d="M1 9l4-4-4-4"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                          <path
+                            d="M1 9l4-4-4-4"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
                     </div>
 
                     {/* Footer Buttons */}
@@ -607,12 +607,10 @@ const Submit = () => {
                         ✕ Close
                       </button>
                       <button
-                        onClick={async () => {
-                          const success = await handleConfirmUpload();
-                          if (success && success.status === 200) {
-                            setShowModal(false);
-                            setCurrentIndex(0);
-                          }
+                        onClick={() => {
+                          handleConfirmUpload();
+                          setShowModal(false);
+                          setCurrentIndex(0);
                         }}
                         className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:w-auto"
                       >
