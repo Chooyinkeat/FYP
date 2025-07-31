@@ -132,7 +132,6 @@ const Profile = () => {
                 <Table />
               </div>
             </div>
-
             <div className="w-full px-4 lg:w-2/5">
               <div className="blog-details blog-details-docs shadow-three dark:bg-gray-dark rounded-xs bg-white px-8 py-11 sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]">
                 <div className="relative z-1">

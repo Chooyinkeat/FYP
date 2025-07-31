@@ -4,6 +4,7 @@ import {
   Marker,
   TileLayer,
   useMapEvents,
+  useMap,
   Popup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,6 +17,14 @@ interface MyMapProps {
   onLocationSelect: (lat: number, lng: number) => void;
   editable?: boolean;
 }
+
+const ChangeMapView = ({ coords }: { coords: [number, number] }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(coords, map.getZoom());
+  }, [coords, map]);
+  return null;
+};
 
 const LocationMarker = ({
   onLocationSelect,
@@ -60,7 +69,8 @@ const MyMap: React.FC<MyMapProps> = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {/* <Marker position={markerPosition} /> */}
+
+        <ChangeMapView coords={markerPosition} />
         <Marker position={markerPosition}>
           <Popup>Selected location</Popup>
         </Marker>

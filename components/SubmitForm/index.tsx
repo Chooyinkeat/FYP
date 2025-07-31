@@ -20,7 +20,36 @@ const Submit = () => {
   const [mapPosition, setMapPosition] = useState<[number, number]>([
     3.139, 101.6869,
   ]);
-  const [location, setLocation] = useState<string>(""); // Will store coordinates or address
+  const [location, setLocation] = useState<string>("");
+
+  const handleForwardGeocode = async () => {
+    if (!location.trim()) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          location,
+        )}`,
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        setMapPosition([parseFloat(lat), parseFloat(lon)]);
+        setLocation(display_name); // normalize the input to display name
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "Location not found",
+          text: "Please enter a valid address or location.",
+        });
+        setLocation(""); // clear the input if no results
+        setMapPosition([3.139, 101.6869]); // reset to default position
+      }
+    } catch (error) {
+      console.error("Forward geocoding error:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -383,9 +412,10 @@ const Submit = () => {
                     type="text"
                     value={location}
                     name="location"
-                    readOnly
+                    onChange={(e) => setLocation(e.target.value)}
+                    onBlur={handleForwardGeocode}
+                    placeholder="Enter address or location..."
                     className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee mt-4 w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
-                    placeholder="Location coordinates will appear here"
                   />
                 </div>
                 {/* Leaflet map */}
@@ -394,8 +424,7 @@ const Submit = () => {
                     position={mapPosition}
                     zoom={20}
                     onLocationSelect={(lat, lng) => {
-                      setMapPosition([lat, lng]);
-                      setLocation(`${lat}, ${lng}`);
+                      setMapPosition([lat, lng]); // Only update the coordinates
                     }}
                     editable={true}
                   />
