@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get recent 18 found items
     const [rows] = await pool.query(
-      `SELECT category, location, date, time, status, found_id, user_id FROM found_item WHERE status = 0 ORDER BY created_date DESC LIMIT 18`,
+      `SELECT category, location, date, time, status, found_id, user_id FROM found_item WHERE status = 0 ORDER BY created_date`,
     );
     if ((rows as any[]).length === 0) {
       return NextResponse.json(

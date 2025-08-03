@@ -2,15 +2,15 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Error Page - Solid SaaS Boilerplate",
+  title: "Error Page - Lost and Found System",
 
   // other metadata
-  description: "This is Error page for Solid Pro"
+  description: "This is Error page for Lost and Found System",
 };
 
 const ErroPage = () => {
   return (
-    <section className="overflow-hidden pb-25 pt-45 lg:pb-32.5 lg:pt-50 xl:pb-37.5 xl:pt-55">
+    <section className="overflow-hidden pt-45 pb-25 lg:pt-50 lg:pb-32.5 xl:pt-55 xl:pb-37.5">
       <div className="animate_top mx-auto max-w-[518px] text-center">
         <Image
           src="/images/shape/404.svg"
@@ -20,17 +20,24 @@ const ErroPage = () => {
           height={400}
         />
 
-        <h2 className="mb-5 text-2xl font-semibold text-black dark:text-white md:text-4xl">
+        {/* <h2 className="mb-5 text-2xl font-semibold text-black md:text-4xl dark:text-white">
           This Page Does Not Exist
         </h2>
         <p className="mb-7.5">
           The page you were looking for appears to have been moved, deleted or
           does not exist.
+        </p> */}
+        <h2 className="mb-5 text-2xl font-semibold text-black md:text-4xl dark:text-white">
+          Something Went Wrong
+        </h2>
+        <p className="mb-7.5">
+          A system error occurred. Please try again later or contact support if
+          the problem persists.
         </p>
 
         <a
           href="/"
-          className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho"
+          className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
         >
           Return to Home
           <svg

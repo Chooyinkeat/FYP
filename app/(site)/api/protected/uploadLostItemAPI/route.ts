@@ -58,9 +58,10 @@ export async function POST(request: NextRequest) {
       }
     }
     await pool.query(
-      `INSERT INTO lost_item (status, image_payload, description_payload, user_id) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO lost_item (status, category,image_payload, description_payload, user_id) VALUES (?, ?, ?, ?, ?)`,
       [
         0,
+        category,
         JSON.stringify(imageUrls),
         JSON.stringify(descriptionPayload),
         userId,
