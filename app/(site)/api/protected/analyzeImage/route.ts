@@ -63,7 +63,11 @@ export async function POST(request: NextRequest) {
     userImageIndex: number;
     lostImageIndex: number;
     similarityScore: string;
+    score: number;
   }[] = [];
+
+  let totalScore = 0;
+  let count = 0;
 
   for (let i = 0; i < base64UserImages.length; i++) {
     for (let j = 0; j < base64Images.length; j++) {
@@ -90,13 +94,30 @@ export async function POST(request: NextRequest) {
       });
 
       const response = result.response.text();
+
+      // Extract score using regex like: "25/100" or "rate them around **15**"
+      const match =
+        response.match(/(\d{1,3})\s*\/\s*100/) ||
+        response.match(/\*\*(\d{1,3})\*\*/);
+      const numericScore = match ? parseInt(match[1]) : 0;
+
+      totalScore += numericScore;
+      count++;
+
       results.push({
         userImageIndex: i,
         lostImageIndex: j,
         similarityScore: response,
+        score: numericScore,
       });
     }
   }
+  const averageScore = count > 0 ? totalScore / count : 0;
 
-  return NextResponse.json({ success: true, data: results, status: 200 });
+  return NextResponse.json({
+    success: true,
+    data: results,
+    averageScore,
+    status: 200,
+  });
 }

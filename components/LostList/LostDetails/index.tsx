@@ -36,6 +36,7 @@ const LostDetails = () => {
   const [item, setItem] = useState<LostItem | null>(null);
   const [parsedDescription, setParsedDescription] =
     useState<Description | null>(null);
+  const [averageScore, setAverageScore] = useState(0);
   // Dropzone state
   const [files, setFiles] = React.useState<File[]>([]);
   const [results, setResults] = useState<any[]>([]);
@@ -67,6 +68,32 @@ const LostDetails = () => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
 
+  const notifyUser = async (formData: FormData, userId: string) => {
+    formData.append("userId", userId);
+    try {
+      const response = await axios.post(
+        "/api/protected/notifyUserAPI",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (response.status === 200) {
+        setFiles([]);
+        Swal.fire({
+          icon: "success",
+          title: "Notification Sent",
+          text: "The owner has been notified successfully.",
+        });
+      }
+    } catch (error) {
+      console.log("Unexpected error (notifyUser): ", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (files.length === 0) {
@@ -78,41 +105,42 @@ const LostDetails = () => {
       return;
     }
     const formData = new FormData();
-    if (item && item.imageUrl) {
-      formData.append("imageUrl", JSON.stringify(item.imageUrl));
-    }
     files.forEach((file) => {
       formData.append("userImages", file); // must match getAll("images")
     });
-    try {
-      Swal.fire({
-        title: "Analyzing Image...",
-        text: "Please wait while the AI processes your image.",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-      const response = await axios.post(
-        "/api/protected/analyzeImage",
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
+    if (item && item.imageUrl && item.imageUrl.length > 0) {
+      formData.append("imageUrl", JSON.stringify(item.imageUrl));
+      try {
+        Swal.fire({
+          title: "Analyzing Image...",
+          text: "Please wait while the AI processes your image.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
           },
-        },
-      );
-      if (response.status === 200) {
-        setResults(response.data.data); // assuming response.data.data is the array
-        console.log("Analysis results: ", response.data.data);
-        setFiles([]);
+        });
+        const response = await axios.post(
+          "/api/protected/analyzeImage",
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+        if (response.status === 200) {
+          setResults(response.data.data);
+          setAverageScore(response.data.averageScore);
+        }
+      } catch (error) {
+        console.log("Unexpected error: ", error);
+      } finally {
+        Swal.close();
       }
-    } catch (error) {
-      console.log("Unexpected error: ", error);
-    } finally {
-      Swal.close();
+    } else {
+      await notifyUser(formData, item?.userId || "");
     }
   };
 
@@ -124,7 +152,6 @@ const LostDetails = () => {
       fetchDetails(id)
         .then((response) => {
           if (response.success && response.status === 200) {
-            console.log("Item details: ", response.data);
             const item = response.data[0];
             setItem(item);
             const desc = JSON.parse(item.description);
@@ -203,12 +230,16 @@ const LostDetails = () => {
                 </p>
               </div>
               <ItemLocation location={parsedDescription.location} />
+
               <label
                 htmlFor="dropzone"
                 className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Upload image if you have found the item:
+                {item?.imageUrl?.length > 0
+                  ? "Upload image to check similarity:"
+                  : "Upload image to notify user: "}
               </label>
+
               <form onSubmit={handleSubmit}>
                 <div
                   {...getRootProps()}
@@ -259,11 +290,13 @@ const LostDetails = () => {
                     </p>
                   )}
                 </div>
+
                 {files.length > 0 && (
                   <div className="mb-4 text-sm text-black dark:text-white">
                     Selected file: {files[0].name}
                   </div>
                 )}
+
                 <div className="flex flex-wrap gap-4 xl:justify-between">
                   <button
                     type="submit"
@@ -291,11 +324,30 @@ const LostDetails = () => {
                   <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
                     Image Analysis Results
                   </h3>
+                  <div className="font-medium text-blue-800 dark:text-blue-200">
+                    🧮 Average Similarity Score: {averageScore.toFixed(2)} / 100
+                  </div>
+                  {averageScore >= 80 && (
+                    <button
+                      className="mt-4 mb-6 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+                      onClick={async () => {
+                        const formData = new FormData();
+                        files.forEach((file) => {
+                          formData.append("userImages", file); // must match getAll("images")
+                        });
+                        await notifyUser(formData, item.userId);
+                      }}
+                    >
+                      🔔 Notify Owner
+                    </button>
+                  )}
                   {results.map((result, idx) => (
                     <div
                       key={idx}
                       className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow dark:bg-blue-900/30"
                     >
+                      <p>User #{idx + 1}</p>
+
                       <div className="font-medium text-blue-800 dark:text-blue-200">
                         User Image #{result.userImageIndex + 1} vs Lost Image #
                         {result.lostImageIndex + 1}

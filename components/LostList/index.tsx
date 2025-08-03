@@ -150,7 +150,6 @@ const LostList = () => {
           </Link>
         </div>
       </div>
-
       <div className="grid grid-cols-1 gap-7.5 md:grid-cols-2 lg:grid-cols-3 xl:gap-10">
         {lostItems.map((item, index) => {
           let parsedDescription: Description | null = null;
@@ -209,7 +208,6 @@ const LostList = () => {
 
               <div className="flex flex-1 flex-col px-6 py-5">
                 <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-black dark:text-white">
-                  {/* Optional: Overlay for quick action or badge */}
                   Category : {item.category || "Unknown Category"}
                 </h3>
                 <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">

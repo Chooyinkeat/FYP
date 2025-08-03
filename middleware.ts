@@ -28,9 +28,8 @@ export const config = {
     "/api/protected/:path*",
     "/submitItem",
     "/foundItems",
-    "/lostItems/:path*",
+    "/lostItems",
     "/profile",
-    "/error",
     "/docs",
   ],
 };
