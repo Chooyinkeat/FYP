@@ -2,6 +2,7 @@ import { Worker } from "bullmq";
 import connection from "../lib/redis";
 import sendEmail from "./jobs/sendEmailjob";
 import dotenv from "dotenv";
+import notifyFounder from "./jobs/notifyFounder";
 dotenv.config();
 
 const worker = new Worker(
@@ -10,11 +11,9 @@ const worker = new Worker(
     switch (job.name) {
       case "sendEmail":
         await sendEmail(job.data);
+      case "notifyFounder":
+        await notifyFounder(job.data.email, job.data.results);
         break;
-      // 🔧 Add more job types here
-      // case "resizeImage":
-      //   await resizeImage(job.data);
-      //   break;
       default:
         throw new Error(`Unknown job: ${job.name}`);
     }

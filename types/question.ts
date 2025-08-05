@@ -3,14 +3,22 @@ export interface Question {
   answer: string;
 }
 
+export interface QuestionLevels {
+  level_1: Question[];
+  level_2: Question[];
+}
+
 export interface QuestionPayloadItem {
   filename: string;
-  questions: Question[];
+  questions: QuestionLevels;
 }
 
 export interface Props {
   questionPayload: QuestionPayloadItem[];
-  userAnswers: string[][];
-  setUserAnswers: React.Dispatch<React.SetStateAction<string[][]>>;
-  onSubmitAnswers?: (userAnswers: string[][]) => void;
+  userAnswers: Record<string, string>[];
+  setUserAnswers: React.Dispatch<
+    React.SetStateAction<Record<string, string>[]>
+  >;
+  onSubmitAnswers?: (userAnswers: Record<string, string>[]) => void;
+  userId: string | null;
 }

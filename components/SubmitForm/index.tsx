@@ -16,6 +16,7 @@ const Submit = () => {
   const [files, setFiles] = React.useState<File[]>([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [selectedQuestions, setSelectedQuestions] = useState({});
 
   const [mapPosition, setMapPosition] = useState<[number, number]>([
     3.139, 101.6869,
@@ -111,8 +112,6 @@ const Submit = () => {
 
     const formData = new FormData();
     formData.append("status", status);
-
-    // LOST ITEM HANDLING
     if (status === "Lost") {
       const finalCategory =
         category === "others" ? otherCategory.trim() : category;
@@ -152,14 +151,13 @@ const Submit = () => {
             title: "Form Submitted",
             text: "Your lost item has been reported successfully.",
           });
-          // Reset form fields
           setCategory("");
           setLocation("");
           setDescription("");
           setDate("");
           setTime("");
           setFiles([]);
-          setStatus("Lost"); // optional: reset radio
+          setStatus("Lost");
         }
       } catch (err) {
         Swal.fire({
@@ -206,18 +204,12 @@ const Submit = () => {
           },
         },
       );
-
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Image analyzed successfully",
-          text: "Please review the results and confirm the upload.",
-        });
-      } else {
-        throw new Error("Failed to analyze image.");
-      }
-
-      setAiResponses(response.data.data);
+      const aiData = response.data.data;
+      const aiDataWithPreview = aiData.map((item: any, index: number) => ({
+        ...item,
+        previewUrl: URL.createObjectURL(files[index]), // This assumes order is preserved
+      }));
+      setAiResponses(aiDataWithPreview);
       setShowModal(true);
       setCurrentIndex(0);
     } catch (err) {
@@ -239,17 +231,37 @@ const Submit = () => {
         title: "Missing Information",
         text: "Please ensure all fields are filled before confirming upload.",
       });
-      console.log(files, aiResponses, date, time);
       return;
     }
     const formData = new FormData();
     formData.append("date", date);
     formData.append("time", time);
     formData.append("location", location);
-    formData.append("status", status); // from your radio button state
-    formData.append("metadata", JSON.stringify(aiResponses)); // Gemini results
+    formData.append("status", status);
+
+    const filteredResponses = aiResponses.map((res, resIndex) => {
+      const selectedLevel1 = res.questions.level_1.filter(
+        (_, i) => selectedQuestions[`l1-${resIndex}-${i}`],
+      );
+      const selectedLevel2 = res.questions.level_2.filter(
+        (_, i) => selectedQuestions[`l2-${resIndex}-${i}`],
+      );
+      console.log("Selected Questions:", res.metadata);
+      return {
+        filename: res.filename,
+        category: res.category,
+        metadata: res.metadata,
+        questions: {
+          level_1: selectedLevel1,
+          level_2: selectedLevel2,
+        },
+      };
+    });
+
+    formData.append("metadata", JSON.stringify(filteredResponses));
+
     files.forEach((file) => {
-      formData.append("images", file); // must match getAll("images")
+      formData.append("images", file);
     });
     try {
       const response = await axios.post(
@@ -262,8 +274,15 @@ const Submit = () => {
           },
         },
       );
-      setAiResponses([]); // reset if needed
-      console.log("Upload successful: ", response.data);
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Upload Successful",
+          text: "Your found item has been reported successfully.",
+        });
+        setAiResponses([]);
+        setFiles([]);
+      }
     } catch (err) {
       console.log("Unexpected error: ", err);
     }
@@ -528,9 +547,15 @@ const Submit = () => {
                             data-carousel-item
                           >
                             <div className="overflow-y-auto p-4 text-black dark:text-white">
-                              <h2 className="mb-4 text-lg font-semibold">
-                                📷 {res.filename}
-                              </h2>
+                              <img
+                                src={res.previewUrl}
+                                alt={res.filename}
+                                className="mb-4 w-full rounded-lg object-contain shadow"
+                              />
+                              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                {res.filename}
+                              </p>
+
                               <ul className="mb-4 space-y-1 text-sm sm:text-base">
                                 <li>
                                   <strong>Item Type:</strong>{" "}
@@ -546,22 +571,79 @@ const Submit = () => {
                                   <strong>Material:</strong>{" "}
                                   {res.metadata.material}
                                 </li>
-                                <li>
-                                  <strong>Condition:</strong>{" "}
-                                  {res.metadata.condition}
-                                </li>
                               </ul>
                               <h3 className="mb-2 text-base font-medium">
                                 Verification Questions:
                               </h3>
                               <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base">
-                                {res.questions.map((q, i) => (
-                                  <li key={i}>
-                                    <strong>Q:</strong> {q.question}
-                                    <br />
-                                    <strong>A:</strong> {q.answer}
-                                  </li>
-                                ))}
+                                <>
+                                  {/* level_1 */}
+                                  {res.questions.level_1.map((q, i) => (
+                                    <li
+                                      key={`l1-${i}`}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        id={`l1-checkbox-${index}-${i}`}
+                                        className="mt-1"
+                                        checked={
+                                          selectedQuestions[
+                                            `l1-${index}-${i}`
+                                          ] || false
+                                        }
+                                        onChange={(e) =>
+                                          setSelectedQuestions((prev) => ({
+                                            ...prev,
+                                            [`l1-${index}-${i}`]:
+                                              e.target.checked,
+                                          }))
+                                        }
+                                      />
+                                      <label
+                                        htmlFor={`l1-checkbox-${index}-${i}`}
+                                      >
+                                        <strong>Q (Level 1):</strong>{" "}
+                                        {q.question}
+                                        <br />
+                                        <strong>A:</strong> {q.answer}
+                                      </label>
+                                    </li>
+                                  ))}
+                                  {/* level_2 */}
+                                  {res.questions.level_2.map((q, i) => (
+                                    <li
+                                      key={`l2-${i}`}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        id={`l2-checkbox-${index}-${i}`}
+                                        className="mt-1"
+                                        checked={
+                                          selectedQuestions[
+                                            `l2-${index}-${i}`
+                                          ] || false
+                                        }
+                                        onChange={(e) =>
+                                          setSelectedQuestions((prev) => ({
+                                            ...prev,
+                                            [`l2-${index}-${i}`]:
+                                              e.target.checked,
+                                          }))
+                                        }
+                                      />
+                                      <label
+                                        htmlFor={`l2-checkbox-${index}-${i}`}
+                                      >
+                                        <strong>Q (Level 2):</strong>{" "}
+                                        {q.question}
+                                        <br />
+                                        <strong>A:</strong> {q.answer}
+                                      </label>
+                                    </li>
+                                  ))}
+                                </>
                               </ul>
                             </div>
                           </div>

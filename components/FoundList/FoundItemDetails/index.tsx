@@ -20,7 +20,7 @@ const FoundItemDetails = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [questionPayload, setQuestionPayload] = useState<any[]>([]);
-  const [userAnswers, setUserAnswers] = useState<string[][]>([]);
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>[]>([]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -81,8 +81,10 @@ const FoundItemDetails = () => {
         { withCredentials: true },
       );
       if (response.data.status == 200) {
+        console.log("Image verification successful: ", response.data.data);
         setResults(response.data.data);
-        setFiles([]);
+
+        // setFiles([]);
       }
     } catch (error) {
       Swal.fire({
@@ -103,13 +105,13 @@ const FoundItemDetails = () => {
         { foundId: foundId },
         { withCredentials: true },
       );
-      console.log("Question Payload Response: ", response.data.data);
       setQuestionPayload(response.data.data);
       if (response.data.data && response.data.data[0]?.questionPayload) {
         setUserAnswers(
-          response.data.data[0].questionPayload.map((item: any) =>
-            item.questions.map(() => ""),
-          ),
+          response.data.data[0].questionPayload.map((item: any) => {
+            const allQuestions = Object.values(item.questions).flat();
+            return allQuestions.map(() => "");
+          }),
         );
       }
     } catch (error) {
@@ -280,6 +282,7 @@ const FoundItemDetails = () => {
                 questionPayload={questionPayload[0].questionPayload}
                 userAnswers={userAnswers}
                 setUserAnswers={setUserAnswers}
+                userId={userId}
               />
             )}
         </div>

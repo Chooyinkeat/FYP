@@ -131,6 +131,7 @@ const LostDetails = () => {
           },
         );
         if (response.status === 200) {
+          console.log("Image analysis response: ", response.data);
           setResults(response.data.data);
           setAverageScore(response.data.averageScore);
         }
@@ -346,12 +347,42 @@ const LostDetails = () => {
                       key={idx}
                       className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow dark:bg-blue-900/30"
                     >
-                      <p>User #{idx + 1}</p>
-
-                      <div className="font-medium text-blue-800 dark:text-blue-200">
+                      {/* <div className="font-medium text-blue-800 dark:text-blue-200">
                         User Image #{result.userImageIndex + 1} vs Lost Image #
                         {result.lostImageIndex + 1}
+                      </div> */}
+                      <div className="flex items-center gap-4">
+                        {/* User Image */}
+                        <div className="flex flex-col items-center">
+                          <p className="text-xs text-blue-800 dark:text-blue-200">
+                            User Image #{result.userImageIndex + 1}
+                          </p>
+                          <img
+                            src={URL.createObjectURL(
+                              files[result.userImageIndex],
+                            )}
+                            alt={`User Image ${result.userImageIndex + 1}`}
+                            className="h-24 w-24 rounded border object-cover shadow"
+                          />
+                        </div>
+
+                        <div className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                          vs
+                        </div>
+
+                        {/* Lost Image */}
+                        <div className="flex flex-col items-center">
+                          <p className="text-xs text-blue-800 dark:text-blue-200">
+                            Lost Image #{result.lostImageIndex + 1}
+                          </p>
+                          <img
+                            src={result.lostImageUrl}
+                            alt={`Lost Image ${result.lostImageIndex + 1}`}
+                            className="h-24 w-24 rounded border object-cover shadow"
+                          />
+                        </div>
                       </div>
+
                       <div
                         className="mt-2 text-sm text-gray-800 dark:text-gray-100"
                         dangerouslySetInnerHTML={{
