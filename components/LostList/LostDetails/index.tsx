@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { LostItem } from "@/types/items";
 import { Description } from "@/types/items";
 import axios from "axios";
@@ -31,12 +31,33 @@ const fetchDetails = async (id: string) => {
     });
   }
 };
+const updateItemStatus = async (id: string) => {
+  try {
+    const response = await axios.post(
+      "/api/protected/updateItemStatusAPI",
+      { itemId: id, type: "lost" },
+      { withCredentials: true },
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error updating item status:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to update item status.",
+    });
+  }
+};
 
 const LostDetails = () => {
+  const query = new URLSearchParams(window.location.search);
+  const id = query.get("id");
+  const [showButton, setShowButton] = useState(false);
   const [item, setItem] = useState<LostItem | null>(null);
   const [parsedDescription, setParsedDescription] =
     useState<Description | null>(null);
   const [averageScore, setAverageScore] = useState(0);
+
   // Dropzone state
   const [files, setFiles] = React.useState<File[]>([]);
   const [results, setResults] = useState<any[]>([]);
@@ -146,9 +167,6 @@ const LostDetails = () => {
   };
 
   useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    const id = query.get("id");
-
     if (id) {
       fetchDetails(id)
         .then((response) => {
@@ -157,6 +175,10 @@ const LostDetails = () => {
             setItem(item);
             const desc = JSON.parse(item.description);
             setParsedDescription(desc);
+            const sessionUserId = sessionStorage.getItem("userId");
+            if (item.userId == sessionUserId) {
+              setShowButton(true);
+            }
           } else {
             Swal.fire({
               icon: "info",
@@ -206,12 +228,59 @@ const LostDetails = () => {
                 </div>
               </div>
 
-              <h2 className="mt-8 mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-                Category:{" "}
-                <span className="font-semibold text-blue-600 dark:text-blue-400">
-                  {parsedDescription.category}
-                </span>
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="2xl:text-sectiontitle2 mt-11 mb-5 text-3xl font-semibold text-black dark:text-white">
+                  Lost Item Details
+                </h2>
+                {showButton && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      Swal.fire({
+                        title: "Are you sure?",
+                        text: "This will close the case and remove it from the list.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, close it!",
+                        cancelButtonText: "No, keep it open",
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          if (id) {
+                            updateItemStatus(id).then((data) => {
+                              if (data?.success) {
+                                Swal.fire({
+                                  icon: "success",
+                                  title: "Success",
+                                  text: "Item status updated successfully.",
+                                }).then(() => {
+                                  window.location.href = "/lostItems";
+                                });
+                              }
+                            });
+                          }
+                        }
+                      });
+                    }}
+                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-red-700 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:outline-none dark:bg-red-500 dark:hover:bg-red-600"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Close Case
+                  </button>
+                )}
+              </div>
               <div className="mb-4 text-lg text-gray-700 dark:text-gray-200">
                 <p className="mb-2">
                   <span className="font-semibold">Description:</span>{" "}

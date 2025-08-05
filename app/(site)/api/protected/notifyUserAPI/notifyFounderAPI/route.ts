@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
 
   const decoded: any = jwtDecode(token);
   const emailQueue = new Queue("exampleQueue", { connection });
-  const Id = decoded.userId;
   const { userId, results } = await request.json();
 
   if (!userId || !results) {

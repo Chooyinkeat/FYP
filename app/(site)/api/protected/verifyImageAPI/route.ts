@@ -79,9 +79,11 @@ export async function POST(request: NextRequest) {
     const results: {
       userImageIndex: number;
       lostImageIndex: number;
-      similarityScore: string;
+      similarityScore: string; // contains explanation + score as a string
+      numericScore: number; // extracted score for average calculation
     }[] = [];
 
+    // Prompt message to gemini AI
     for (let i = 0; i < base64UserImages.length; i++) {
       for (let j = 0; j < base64Images.length; j++) {
         const promptParts: Part[] = [
@@ -98,7 +100,14 @@ export async function POST(request: NextRequest) {
             },
           },
           {
-            text: "How visually similar are these two images on a scale from 0 to 100?",
+            text: `
+Compare these two images and respond with:
+
+Explanation: <brief explanation of visual similarity>
+Similarity Score: <number between 0 and 100>
+
+Only provide these two lines in your response.
+        `,
           },
         ];
 
@@ -106,19 +115,39 @@ export async function POST(request: NextRequest) {
           contents: [{ role: "user", parts: promptParts }],
         });
 
-        const response = result.response.text();
+        const response = await result.response.text();
+
+        const scoreMatch = response.match(/Similarity Score:\s*(\d+(\.\d+)?)/i);
+        const numericScore = scoreMatch ? parseFloat(scoreMatch[1]) : 0;
+
         results.push({
           userImageIndex: i,
           lostImageIndex: j,
-          similarityScore: response,
+          similarityScore: response, // includes explanation + score
+          numericScore,
         });
       }
     }
 
+    const totalScore = results.reduce(
+      (sum, item) => sum + item.numericScore,
+      0,
+    );
+    const averageScore = results.length > 0 ? totalScore / results.length : 0;
+
+    const simplifiedResults = results.map(
+      ({ userImageIndex, lostImageIndex, similarityScore }) => ({
+        userImageIndex,
+        lostImageIndex,
+        similarityScore,
+      }),
+    );
+
     return NextResponse.json({
       success: true,
       status: 200,
-      data: results,
+      data: simplifiedResults,
+      averageScore: parseFloat(averageScore.toFixed(2)), // include average
       message: "Image analysis and comparison completed",
     });
   } catch (error) {
