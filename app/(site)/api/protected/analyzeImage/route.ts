@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const userUploadImages = formData.getAll("userImages") as File[];
   const rawUrls = formData.getAll("imageUrl") as string[];
-  const imageUrls = JSON.parse(rawUrls[0]); // Now it's a string[]
+  const imageUrls = JSON.parse(rawUrls[0]);
 
   if (userUploadImages.length === 0 || imageUrls.length === 0) {
     return NextResponse.json(
@@ -64,6 +64,8 @@ export async function POST(request: NextRequest) {
     lostImageIndex: number;
     similarityScore: string;
     score: number;
+    userImageUrl?: File;
+    lostImageUrl?: string;
   }[] = [];
 
   let totalScore = 0;
@@ -95,23 +97,31 @@ export async function POST(request: NextRequest) {
 
       const response = result.response.text();
 
-      // Extract score using regex like: "25/100" or "rate them around **15**"
       const match =
         response.match(/(\d{1,3})\s*\/\s*100/) ||
-        response.match(/\*\*(\d{1,3})\*\*/);
-      const numericScore = match ? parseInt(match[1]) : 0;
+        response.match(/\*\*(\d{1,3})\*\*/) ||
+        response.match(/(\d{1,3})\s*percent/i) ||
+        response.match(/(\d{1,3})/);
 
-      totalScore += numericScore;
-      count++;
+      const numericScore = match ? Math.min(parseInt(match[1]), 100) : 0;
+
+      if (numericScore > 0) {
+        // 💡 only count valid scores
+        totalScore += numericScore;
+        count++;
+      }
 
       results.push({
         userImageIndex: i,
         lostImageIndex: j,
         similarityScore: response,
         score: numericScore,
+        userImageUrl: userUploadImages[i],
+        lostImageUrl: imageUrls[j],
       });
     }
   }
+
   const averageScore = count > 0 ? totalScore / count : 0;
 
   return NextResponse.json({

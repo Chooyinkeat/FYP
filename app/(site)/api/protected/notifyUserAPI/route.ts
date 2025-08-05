@@ -69,6 +69,13 @@ export async function POST(request: NextRequest) {
         },
       },
     );
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Notification sent successfully",
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error processing email notification:", error);
     return NextResponse.json(
@@ -76,9 +83,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    { success: true, message: "Notification sent successfully" },
-    { status: 200 },
-  );
 }

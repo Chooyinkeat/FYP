@@ -29,11 +29,9 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  console.log("Received metadata:", date, time, location);
   try {
     const aiResults = JSON.parse(metadataJson);
     const category = aiResults[0].category;
-
     const enhancedResults = aiResults.map((entry) => ({
       ...entry,
       date,

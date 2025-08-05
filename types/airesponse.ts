@@ -1,5 +1,7 @@
 export interface AIResponse {
   filename: string;
+  previewUrl: string;
+  category: string; // Added category field
   metadata: {
     item_type: string;
     color: string;
@@ -7,5 +9,8 @@ export interface AIResponse {
     material: string;
     condition: string;
   };
-  questions: { question: string; answer: string }[];
+  questions: {
+    level_1: { question: string; answer: string }[];
+    level_2: { question: string; answer: string }[];
+  };
 }

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const decoded: any = jwtDecode(token); // Already verified by middleware
+  const decoded: any = jwtDecode(token);
   const userId = decoded.userId;
 
   const { receiverId, message, type, mime_type, file_name } =

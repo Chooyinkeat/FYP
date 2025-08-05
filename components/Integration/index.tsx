@@ -8,14 +8,6 @@ const Integration = () => {
     <>
       <section className="overflow-hidden pb-10 lg:pb-25 xl:pb-15">
         <div className="max-w-c-1390 mx-auto px-4 md:px-8 2xl:px-0">
-          {/* <!-- Section Title Start --> */}
-          {/* <SectionHeader
-            headerInfo={{
-              title: `INTEGRATIONS`,
-              subtitle: `Remotely Maintain Your Data, From Anywhere, Anytime.`,
-              description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.`,
-            }}
-          /> */}
           <SectionHeader
             headerInfo={{
               title: `INTEGRATIONS`,
