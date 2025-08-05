@@ -117,6 +117,14 @@ const RightPanel: React.FC<RightPanelProps> = ({
             const isSent = msg.sender_id !== contactId;
 
             const messageBubble = () => {
+              // Detect if the message is a URL (lost/found item or any http(s) link)
+              const isUrl =
+                typeof msg.message === "string" &&
+                (msg.message.startsWith("http") ||
+                  msg.message.includes(window.location.origin) ||
+                  msg.message.includes("/lostItems/lostItems-details?id=") ||
+                  msg.message.includes("/foundItems/claimItemForm?foundId="));
+
               if (msg.type === 1) {
                 return (
                   <img
@@ -143,6 +151,40 @@ const RightPanel: React.FC<RightPanelProps> = ({
                   >
                     📎 {msg.file_name}
                   </a>
+                );
+              } else if (isUrl) {
+                // Enhanced preview card for URLs
+                const isFoundItem = msg.message.includes("/foundItems/claimItemForm?foundId=");
+                const isLostItem = msg.message.includes("/lostItems/lostItems-details?id=");
+                
+                return (
+                  <div className="flex flex-col items-start gap-2 p-2 bg-white rounded-lg shadow border border-gray-200">
+                    <img
+                      src="/images/blog/img_1.webp"
+                      alt={isFoundItem ? "Found Item Preview" : "Lost Item Preview"}
+                      className="w-32 h-20 object-cover rounded"
+                    />
+                    <a
+                      href={msg.message}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline break-all"
+                    >
+                      {msg.message}
+                    </a>
+                    <a
+                      href={msg.message}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`mt-1 inline-block px-3 py-1 text-white text-xs rounded transition ${
+                        isFoundItem 
+                          ? "bg-green-600 hover:bg-green-700" 
+                          : "bg-blue-600 hover:bg-blue-700"
+                      }`}
+                    >
+                      {isFoundItem ? "Claim Item" : "View Item"}
+                    </a>
+                  </div>
                 );
               } else {
                 return (
@@ -197,6 +239,37 @@ const RightPanel: React.FC<RightPanelProps> = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          onPaste={(e) => {
+            const pastedText = e.clipboardData.getData('text');
+            // Check if pasted text is a URL (starts with http or contains your domain)
+            const isUrl = pastedText.startsWith('http') || 
+                         pastedText.includes(window.location.origin) ||
+                         pastedText.includes('/lostItems/lostItems-details?id=') ||
+                         pastedText.includes('/foundItems/claimItemForm?foundId=');
+            if (isUrl) {
+              e.preventDefault();
+              setInput(pastedText);
+              
+              // Auto-send the URL after a short delay
+              setTimeout(() => {
+                if (pastedText.trim() && ws && contactId !== null) {
+                  const msgToSend: Message = {
+                    type: 0,
+                    chat_id: Date.now(),
+                    sender_id: numId,
+                    receiver_id: contactId,
+                    message: pastedText.trim(),
+                    created_date: new Date().toISOString(),
+                    last_updated_date: new Date().toISOString(),
+                  };
+                  ws.send(JSON.stringify(msgToSend));
+                  setMessages((prev) => [...prev, msgToSend]);
+                  setInput("");
+                  sendDB(msgToSend);
+                }
+              }, 100);
+            }
+          }}
           placeholder="Type your message..."
           disabled={contactId === null}
         />

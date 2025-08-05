@@ -216,7 +216,32 @@ const FoundList = () => {
                   </span>
                 </p>
               </div>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-between">
+                <button 
+                  onClick={async () => {
+                    const itemUrl = `${window.location.origin}/foundItems/claimItemForm?foundId=${encodeURIComponent(item.foundId)}&location=${encodeURIComponent(item.location)}&date=${encodeURIComponent(convertDate(item.date))}&time=${encodeURIComponent(convertTime(item.time))}&category=${encodeURIComponent(item.category)}&userId=${encodeURIComponent(item.userId)}`;
+                    try {
+                      await navigator.clipboard.writeText(itemUrl);
+                      Swal.fire({
+                        icon: "success",
+                        title: "URL Copied!",
+                        text: "Found item URL copied to clipboard! You can now paste it in the chat.",
+                        timer: 2000,
+                        showConfirmButton: false,
+                      });
+                    } catch (err) {
+                      console.error('Failed to copy URL:', err);
+                      Swal.fire({
+                        icon: "error",
+                        title: "Copy Failed",
+                        text: "Failed to copy URL to clipboard",
+                      });
+                    }
+                  }}
+                  className="cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition not-last:inline-flex hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 active:scale-95"
+                >
+                  Copy and Share
+                </button>
                 <Link
                   href={`/foundItems/claimItemForm?foundId=${encodeURIComponent(
                     item.foundId,

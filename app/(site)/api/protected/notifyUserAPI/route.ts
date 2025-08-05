@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const userId = formData.get("userId") as string;
   const images = formData.getAll("userImages") as File[];
-  console.log("User ID: ", userId);
-  console.log("Images: ", images);
   if (!userId || images.length === 0) {
     return NextResponse.json(
       { success: false, message: "Id is required" },

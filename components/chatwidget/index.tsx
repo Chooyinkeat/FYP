@@ -95,7 +95,7 @@ export default function ChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full bg-blue-600 px-4 py-2 text-white shadow-lg"
+          className="cursor-pointer rounded-full bg-blue-600 px-4 py-2 text-white shadow-lg transition-colors hover:bg-blue-700"
         >
           💬 Chat
         </button>
