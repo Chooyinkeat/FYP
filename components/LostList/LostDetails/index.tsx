@@ -11,7 +11,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import UserProfile from "@/components/LostList/userProfile";
+import UserProfile from "@/components/LostList/UserProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 
 const fetchDetails = async (id: string) => {
@@ -50,8 +50,7 @@ const updateItemStatus = async (id: string) => {
 };
 
 const LostDetails = () => {
-  const query = new URLSearchParams(window.location.search);
-  const id = query.get("id");
+  const [id, setId] = useState<string | null>(null);
   const [showButton, setShowButton] = useState(false);
   const [item, setItem] = useState<LostItem | null>(null);
   const [parsedDescription, setParsedDescription] =
@@ -167,6 +166,9 @@ const LostDetails = () => {
   };
 
   useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const id = query.get("id");
+    setId(id);
     if (id) {
       fetchDetails(id)
         .then((response) => {

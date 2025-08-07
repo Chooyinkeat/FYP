@@ -3,10 +3,11 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useDropzone } from "react-dropzone";
 import { useSearchParams } from "next/navigation";
-import UserProfile from "@/components/LostList/userProfile";
+import UserProfile from "@/components/LostList/UserProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 import ClaimQuestionForm from "@/components/FoundList/Question";
 import React, { useCallback, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const updateItemStatus = async (id: string) => {
   try {
@@ -27,6 +28,7 @@ const updateItemStatus = async (id: string) => {
 };
 
 const FoundItemDetails = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const foundId = searchParams.get("foundId");
   const location = searchParams.get("location");
@@ -112,7 +114,11 @@ const FoundItemDetails = () => {
         setResults(response.data.data);
         if (response.data.averageScore >= 80) {
           formData.append("userId", userId ?? "");
-          // Prompt email to notify user
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Your images are highly similar (above 80%) to the found item. The founder has been notified.",
+          });
           try {
             const response = await axios.post(
               "/api/protected/notifyUserAPI",
@@ -135,6 +141,31 @@ const FoundItemDetails = () => {
               text: "Failed to notify the user about the found item.",
             });
           }
+        } else {
+          formData.append("foundItemUserId", userId ?? "");
+          try {
+            const response = await axios.post(
+              "/api/protected/fakeClaimAPI",
+              formData,
+              {
+                withCredentials: true,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              },
+            );
+            if (response.status === 200) {
+              console.log("Fake claim API response: ", response.data);
+            } else {
+              console.log(
+                "Fake claim API failed with status: ",
+                response.data.message,
+              );
+            }
+          } catch (error) {
+            console.log("Error in fake claim API:", error);
+          }
+          setFiles([]);
         }
       }
     } catch (error) {
@@ -353,7 +384,7 @@ const FoundItemDetails = () => {
               </button>
             </div>
           </form>
-          {results.length > 0 && (
+          {/* {results.length > 0 && (
             <div className="mt-6 space-y-4">
               <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
                 Image Analysis Results
@@ -376,7 +407,7 @@ const FoundItemDetails = () => {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
           {questionPayload.length > 0 &&
             questionPayload[0]?.questionPayload && (
               <ClaimQuestionForm

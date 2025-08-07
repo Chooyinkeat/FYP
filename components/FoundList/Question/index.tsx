@@ -1,8 +1,8 @@
 "use client";
+import React from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { Props } from "@/types/question";
-import React from "react";
 import { AnswerInput, AnswerCorrect } from "@/types/verifyAnswer";
 
 const verifyAnswer = async (
