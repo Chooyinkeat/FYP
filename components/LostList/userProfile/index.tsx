@@ -30,7 +30,7 @@ const notifyOwner = async (email: string) => {
   }
 };
 
-const UserProfile = ({ userId }: { userId: string }) => {
+const UserProfile = ({ userId, className = "" }: { userId: string, className?: string }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const UserProfile = ({ userId }: { userId: string }) => {
 
   return (
     <>
-      <div className="md:w-1/2 lg:w-[32%]">
+      <div className={` ${className}`}>
         <div className="animate_top border-stroke shadow-solid-13 dark:border-strokedark dark:bg-blacksection mb-10 rounded-md border bg-white p-9">
           {user && (
             <div className="flex justify-center">
