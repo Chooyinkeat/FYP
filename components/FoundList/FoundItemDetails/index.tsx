@@ -1,13 +1,13 @@
 "use client";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { useSearchParams } from "next/navigation";
 import UserProfile from "@/components/LostList/UserProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 import ClaimQuestionForm from "@/components/FoundList/Question";
 import React, { useCallback, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 const updateItemStatus = async (id: string) => {
   try {
@@ -38,7 +38,7 @@ const FoundItemDetails = () => {
   const userId = searchParams.get("userId");
 
   const [files, setFiles] = useState<File[]>([]);
-  const [results, setResults] = useState<any[]>([]);
+  // const [results, setResults] = useState<any[]>([]);
   const [questionPayload, setQuestionPayload] = useState<any[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>[]>([]);
   const [showButton, setShowButton] = useState(false);
@@ -78,7 +78,7 @@ const FoundItemDetails = () => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
 
-  const verifyFoundItem = async (e: React.FormEvent) => {
+  const verifyFoundItem = async (e: React.FormEvent, userId, location) => {
     e.preventDefault();
     const formData = new FormData();
 
@@ -111,36 +111,23 @@ const FoundItemDetails = () => {
         { withCredentials: true },
       );
       if (response.data.status == 200) {
-        setResults(response.data.data);
         if (response.data.averageScore >= 80) {
-          formData.append("userId", userId ?? "");
           Swal.fire({
             icon: "success",
             title: "Success",
             text: "Your images are highly similar (above 80%) to the found item. The founder has been notified.",
-          });
-          try {
-            const response = await axios.post(
-              "/api/protected/notifyUserAPI",
-              formData,
-              {
-                withCredentials: true,
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                },
-              },
+          }).then(() => {
+            setFiles([]);
+
+            // ✅ Redirect to appointment page with query params
+            router.push(
+              `/appointment?userId=${encodeURIComponent(
+                userId,
+              )}&urls=${encodeURIComponent(
+                JSON.stringify(response.data.urls),
+              )}`,
             );
-            if (response.data.success) {
-              setFiles([]);
-            }
-          } catch (error) {
-            console.log("Error notifying user:", error);
-            Swal.fire({
-              icon: "error",
-              title: "Notification Failed",
-              text: "Failed to notify the user about the found item.",
-            });
-          }
+          });
         } else {
           formData.append("foundItemUserId", userId ?? "");
           try {
@@ -346,7 +333,7 @@ const FoundItemDetails = () => {
             <div className="flex flex-col gap-4 sm:flex-row xl:justify-between">
               <button
                 type="submit"
-                onClick={verifyFoundItem}
+                onClick={(e) => verifyFoundItem(e, userId, location)}
                 aria-label="send message"
                 className="inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none sm:w-auto dark:bg-blue-500 dark:hover:bg-blue-600"
               >

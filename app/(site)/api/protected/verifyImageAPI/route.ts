@@ -2,6 +2,7 @@
 import pool from "@/lib/db";
 import { NextResponse, NextRequest } from "next/server";
 import { GoogleGenerativeAI, Part } from "@google/generative-ai";
+import cloudinary from "@/lib/cloudinary";
 
 if (!process.env.GOOGLE_GEMINI_API_KEY) {
   throw new Error("Missing GOOGLE_API_KEY environment variable");
@@ -142,6 +143,17 @@ Only provide these two lines in your response.
         similarityScore,
       }),
     );
+    let urls: any[] = [];
+    if (averageScore >= 80) {
+      // Pass all the userUploadImage to cloudinary
+      urls = await Promise.all(
+        base64UserImages.map((base64Image) =>
+          cloudinary.uploader.upload(
+            `data:image/jpeg;base64,${base64Image.split(",")[1]}`,
+          ),
+        ),
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -149,6 +161,7 @@ Only provide these two lines in your response.
       data: simplifiedResults,
       averageScore: parseFloat(averageScore.toFixed(2)), // include average
       message: "Image analysis and comparison completed",
+      urls: urls.map((url: any) => url.secure_url),
     });
   } catch (error) {
     return NextResponse.json(

@@ -1,6 +1,5 @@
 "use server";
 import { Queue } from "bullmq";
-import cloudinary from "@/lib/cloudinary";
 import connection from "@/lib/redis";
 import { jwtDecode } from "jwt-decode";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,22 +16,36 @@ export async function POST(request: NextRequest) {
 
   const decoded: any = jwtDecode(token);
   const emailQueue = new Queue("exampleQueue", { connection });
+
   const formData = await request.formData();
-  const userId = formData.get("userId") as string;
-  const images = formData.getAll("userImages") as File[];
-  if (!userId || images.length === 0) {
+  const urls = JSON.parse(formData.get("urls") as string);
+  console.log(Array.isArray(urls));
+
+  const receiverId = formData.get("receiverId") as string;
+  const email = formData.get("email") as string;
+  const location = formData.get("location") as string;
+  const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
+  const contact = formData.get("contact") as string;
+
+  if (
+    !receiverId ||
+    !urls ||
+    !email ||
+    !location ||
+    !date ||
+    !time ||
+    !contact
+  ) {
     return NextResponse.json(
-      { success: false, message: "Id is required" },
+      { success: false, message: "All fields are required" },
       { status: 400 },
     );
   }
-
   try {
-    const imageUrls: string[] = [];
-
     const [rows] = await pool.query(
       "SELECT email FROM user WHERE user_id = ? LIMIT 1",
-      [userId],
+      [receiverId],
     );
 
     if ((rows as any[]).length === 0) {
@@ -42,25 +55,17 @@ export async function POST(request: NextRequest) {
         status: 404,
       });
     }
-
-    if (images.length !== 0) {
-      for (let i = 0; i < images.length; i++) {
-        const file = images[i];
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const uploadResult: any = await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: "lost-and-found" }, (err, result) => {
-              if (err) return reject(err);
-              resolve(result);
-            })
-            .end(buffer);
-        });
-        imageUrls.push(uploadResult.secure_url);
-      }
-    }
     await emailQueue.add(
       "sendEmail",
-      { email: (rows as any[])[0].email, images: imageUrls },
+      {
+        email: (rows as any[])[0].email,
+        images: urls,
+        userEmail: email,
+        location: location,
+        date: date,
+        time: time,
+        contact: contact,
+      },
       {
         removeOnFail: {
           age: 60,
