@@ -14,7 +14,7 @@ const menuData: Menu[] = [
     path: "/#features",
   },
   {
-    id: 2.1,
+    id: 3,
     title: "Lost items",
     newTab: false,
     path: "/lostItems",
@@ -26,10 +26,16 @@ const menuData: Menu[] = [
     path: "/foundItems",
   },
   {
-    id: 4,
+    id: 5,
     title: "Submit Item",
     newTab: false,
     path: "/submitItem",
+  },
+  {
+    id: 6,
+    title: "Meet up",
+    newTab: false,
+    path: "/appointment/list",
   },
 ];
 

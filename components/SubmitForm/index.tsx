@@ -290,7 +290,7 @@ const Submit = () => {
 
   return (
     <>
-      <section id="support" className="px-4 md:px-8 2xl:px-0">
+      <section id="submit" className="px-4 md:px-8 2xl:px-0">
         <div className="max-w-c-1390 relative mx-auto px-7.5 pt-10 lg:px-15 lg:pt-15 xl:px-20 xl:pt-20">
           <div className="absolute top-0 left-0 -z-1 h-2/3 w-full rounded-lg bg-linear-to-t from-transparent to-[#dee7ff47] dark:bg-linear-to-t dark:to-[#252A42]"></div>
           <div className="absolute bottom-[-255px] left-0 -z-1 h-full w-full">
@@ -331,16 +331,19 @@ const Submit = () => {
                 Report case
               </h2>
 
-              <form method="POST">
-                <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
-                  {/* Status Radio Buttons */}
+              <form
+                method="POST"
+                className="space-y-8 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900"
+              >
+                {/* Status Radio Buttons */}
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                   {["Lost", "Found"].map((option) => (
                     <label
                       key={option}
-                      className={`mx-5 cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition ${
+                      className={`cursor-pointer rounded-full border px-6 py-2 text-sm font-medium transition-all duration-200 ${
                         status === option
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                          ? "border-blue-600 bg-blue-600 text-white shadow-md"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
                       }`}
                     >
                       <input
@@ -356,15 +359,16 @@ const Submit = () => {
                     </label>
                   ))}
                 </div>
+
                 {status === "Lost" && files.length === 0 && (
                   <>
                     {/* Category */}
-                    <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
                       <select
                         name="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                       >
                         <option value="">Select Category</option>
                         <option value="electronics">
@@ -385,77 +389,76 @@ const Submit = () => {
                           value={otherCategory}
                           onChange={(e) => setOtherCategory(e.target.value)}
                           placeholder="Please specify the item category"
-                          className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
+                          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                           required
                         />
                       )}
                     </div>
+
                     {/* Description */}
-                    <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
-                      <textarea
-                        name="description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Describe the lost item in detail"
-                        rows={4}
-                        className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
-                        required
-                      ></textarea>
-                    </div>
+                    <textarea
+                      name="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe the lost item in detail"
+                      rows={4}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                      required
+                    ></textarea>
                   </>
                 )}
-                {/* Date picker and time picker */}
-                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
-                  <div className="flex w-full flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
-                    <input
-                      type="date"
-                      name="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
-                      required
-                    />
-                    <input
-                      type="time"
-                      name="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-1/2 dark:bg-black dark:text-white"
-                      required
-                    />
-                  </div>
-                </div>
-                {/* Location */}
-                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+
+                {/* Date and Time */}
+                <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
                   <input
-                    type="text"
-                    value={location}
-                    name="location"
-                    onChange={(e) => setLocation(e.target.value)}
-                    onBlur={handleForwardGeocode}
-                    placeholder="Enter address or location..."
-                    className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee mt-4 w-full border-b bg-transparent pb-3.5 focus-visible:outline-hidden lg:w-full dark:bg-black dark:text-white"
+                    type="date"
+                    name="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                    required
+                  />
+                  <input
+                    type="time"
+                    name="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                    required
                   />
                 </div>
-                {/* Leaflet map */}
-                <div className="mb-7.5 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-14">
+
+                {/* Location */}
+                <input
+                  type="text"
+                  value={location}
+                  name="location"
+                  onChange={(e) => setLocation(e.target.value)}
+                  onBlur={handleForwardGeocode}
+                  placeholder="Enter address or location..."
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                />
+
+                {/* Map */}
+                <div className="relative z-0 overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600">
                   <MyMap
                     position={mapPosition}
                     zoom={20}
                     onLocationSelect={(lat, lng) => {
-                      setMapPosition([lat, lng]); // Only update the coordinates
+                      setMapPosition([lat, lng]);
                     }}
                     editable={true}
                   />
                 </div>
-                {/* Dropzone input */}
+
+                {/* Dropzone */}
                 <div
                   {...getRootProps()}
-                  className={`mb-7 flex min-h-40 flex-col items-center justify-center gap-2 rounded border-2 border-dashed ${
+                  className={`flex min-h-40 flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed transition-colors duration-200 ${
                     isDragActive
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-400 dark:border-gray-600"
-                  } p-4 text-center text-gray-500 dark:text-gray-300`}
+                  } p-6 text-center text-gray-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800`}
                 >
                   <input {...getInputProps()} />
                   {files.length > 0 ? (
@@ -467,7 +470,7 @@ const Submit = () => {
                         >
                           <button
                             onClick={() => removeFile(file.name)}
-                            className="absolute -top-1 -right-1 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white hover:bg-red-600"
+                            className="absolute -top-2 -right-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white shadow hover:bg-red-600"
                             title="Remove"
                           >
                             ✕
@@ -475,9 +478,9 @@ const Submit = () => {
                           <img
                             src={URL.createObjectURL(file)}
                             alt="Preview"
-                            className="h-20 w-20 rounded object-cover"
+                            className="h-20 w-20 rounded-lg object-cover shadow-sm"
                           />
-                          <p className="max-w-[80px] truncate text-center text-xs text-black dark:text-white">
+                          <p className="max-w-[80px] truncate text-center text-xs text-gray-700 dark:text-gray-200">
                             {file.name}
                           </p>
                         </div>
@@ -489,19 +492,21 @@ const Submit = () => {
                     <p>Drag & drop up to 5 image files, or click to select</p>
                   )}
                 </div>
-                {/* Show file name */}
+
+                {/* File name */}
                 {files.length > 0 && (
-                  <div className="mb-4 text-sm text-black dark:text-white">
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
                     Selected file: {files[0].name}
                   </div>
                 )}
-                {/* Submit button */}
-                <div className="flex flex-wrap gap-4 xl:justify-between">
+
+                {/* Submit */}
+                <div className="flex justify-end">
                   <button
                     type="submit"
                     onClick={handleSubmit}
                     aria-label="send message"
-                    className="hover:bg-blackho dark:bg-btndark inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out"
+                    className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
                   >
                     Submit
                     <svg
@@ -509,13 +514,9 @@ const Submit = () => {
                       width="14"
                       height="14"
                       viewBox="0 0 14 14"
-                      fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <path
-                        d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
-                        fill=""
-                      />
+                      <path d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z" />
                     </svg>
                   </button>
                 </div>
@@ -733,6 +734,7 @@ const Submit = () => {
               )}
             </motion.div>
 
+            {/* Contact Card */}
             <motion.div
               variants={{
                 hidden: { opacity: 0, y: -20 },
@@ -742,48 +744,82 @@ const Submit = () => {
               whileInView="visible"
               transition={{ duration: 1.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="animate_top w-full md:w-2/5 md:p-7.5 lg:w-[26%] xl:pt-15"
+              className="animate_top w-full space-y-6 md:w-2/5 md:p-7.5 lg:w-[26%] xl:pt-15"
             >
-              <h2 className="xl:text-sectiontitle2 mb-12 text-3xl font-semibold text-black dark:text-white">
-                Reach Out to Us
-              </h2>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Reach Us
+              </h3>
 
-              <div className="mb-7">
-                <h3 className="text-metatitle3 mb-4 font-medium text-black dark:text-white">
-                  Our Location
-                </h3>
-                <p>VisionVault HQ, Block D, Jalan Pintar, Kuala Lumpur</p>
+              {/* Location */}
+              <div className="flex items-start gap-3 rounded-lg bg-blue-50 p-4 dark:bg-gray-800">
+                <svg
+                  className="text-blue-600 dark:text-blue-400"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10 2a6 6 0 00-6 6c0 4.5 6 10 6 10s6-5.5 6-10a6 6 0 00-6-6z" />
+                </svg>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    Our Location
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    VisionVault HQ, Block D, Jalan Pintar, Kuala Lumpur
+                  </p>
+                </div>
               </div>
 
-              <div className="mb-7">
-                <h3 className="text-metatitle3 mb-4 font-medium text-black dark:text-white">
-                  Email Support
-                </h3>
-                <p>
+              {/* Email */}
+              <div className="flex items-start gap-3 rounded-lg bg-green-50 p-4 dark:bg-gray-800">
+                <svg
+                  className="text-green-600 dark:text-green-400"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M2 4l6 4 6-4v10H2V4z" />
+                </svg>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    Email Support
+                  </h3>
                   <a
                     href="mailto:support@visionvault.edu"
-                    className="text-blue-600 underline dark:text-blue-400"
+                    className="text-sm text-blue-600 underline dark:text-blue-400"
                   >
                     support@visionvault.edu
                   </a>
-                </p>
+                </div>
               </div>
 
-              <div className="mb-7">
-                <h4 className="text-metatitle3 mb-4 font-medium text-black dark:text-white">
-                  Call Us
-                </h4>
-                <p>
+              {/* Phone */}
+              <div className="flex items-start gap-3 rounded-lg bg-yellow-50 p-4 dark:bg-gray-800">
+                <svg
+                  className="text-yellow-600 dark:text-yellow-400"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M3 2a1 1 0 00-1 1v2c0 6.627 5.373 12 12 12h2a1 1 0 001-1v-3.586a1 1 0 00-.293-.707l-3-3a1 1 0 00-1.414 0L12 11a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414l2.293-2.293a1 1 0 000-1.414l-3-3A1 1 0 006.414 1H4a1 1 0 00-1 1z" />
+                </svg>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    Call Us
+                  </h3>
                   <a
                     href="tel:+60123456789"
-                    className="text-blue-600 underline dark:text-blue-400"
+                    className="text-sm text-blue-600 underline dark:text-blue-400"
                   >
                     +60 12-345 6789
                   </a>
-                </p>
+                </div>
               </div>
 
-              <p className="mt-6 text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 We're here to help you reunite with what you've lost. Don't
                 hesitate to contact us!
               </p>

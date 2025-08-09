@@ -12,7 +12,6 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // jose expects a Uint8Array for the secret
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
 
@@ -28,8 +27,13 @@ export const config = {
     "/api/protected/:path*",
     "/submitItem",
     "/foundItems",
+    "/foundItems/foundItems-details",
     "/lostItems",
+    "/lostItems/lostItems-details",
     "/profile",
     "/docs",
+    "/reports",
+    "/appointment",
+    "/appointment/view",
   ],
 };
