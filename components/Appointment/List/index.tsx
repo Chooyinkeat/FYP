@@ -8,9 +8,9 @@ import { Appointment } from "@/types/appointment";
 
 // Status color mapping
 const statusColors: Record<number, string> = {
-  0: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200", // Pending
-  1: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", // Confirmed
-  2: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", // Cancelled
+  0: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  1: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  2: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
 const fetchAppointments = async () => {
@@ -36,13 +36,20 @@ function formatTimeTo12Hour(time24: string) {
 
 export default function AppointmentsList() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("incoming");
 
   useEffect(() => {
+    const storedUserId = Number(sessionStorage.getItem("userId"));
+
     fetchAppointments().then((data) => {
-      console.log("Fetched appointments: ", data);
-      setAppointments(data);
+      const filteredData =
+        selectedType === "incoming"
+          ? data.filter((obj) => obj.user_id == storedUserId)
+          : data.filter((obj) => obj.user_id != storedUserId);
+
+      setAppointments(filteredData);
     });
-  }, []);
+  }, [selectedType]);
 
   return (
     <section className="bg-gradient-to-b from-gray-50 via-white to-white pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24 dark:from-gray-900 dark:via-gray-950 dark:to-black">
@@ -61,6 +68,37 @@ export default function AppointmentsList() {
             View and manage all your upcoming and past appointments.
           </p>
         </motion.div>
+
+        {/* Filter options */}
+        <div className="mb-8 flex flex-wrap justify-center gap-6">
+          <label className="flex cursor-pointer items-center space-x-2">
+            <input
+              type="radio"
+              name="appointmentType"
+              value="incoming"
+              checked={selectedType === "incoming"}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+            />
+            <span className="text-gray-700 dark:text-gray-300">
+              Others booked with you
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-center space-x-2">
+            <input
+              type="radio"
+              name="appointmentType"
+              value="outgoing"
+              checked={selectedType === "outgoing"}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+            />
+            <span className="text-gray-700 dark:text-gray-300">
+              You booked with others
+            </span>
+          </label>
+        </div>
 
         {appointments.length === 0 ? (
           <motion.div
@@ -131,12 +169,22 @@ export default function AppointmentsList() {
                   <p>✉️ {appt.email}</p>
                 </div>
 
-                {/* Link */}
-                <Link href={`/appointments/${appt.appointment_id}`}>
-                  <button className="w-full rounded-full bg-blue-600 px-4 py-2 text-white shadow transition-transform hover:scale-105 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800">
-                    View Details
-                  </button>
-                </Link>
+                {/* Buttons */}
+                <div className="flex gap-2">
+                  <Link
+                    href={{
+                      pathname: "/appointment/view",
+                      query: {
+                        data: encodeURIComponent(JSON.stringify(appointments)),
+                      },
+                    }}
+                    className="w-full"
+                  >
+                    <button className="w-full cursor-pointer rounded-full bg-blue-600 px-4 py-2 text-white shadow transition-transform hover:scale-105 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800">
+                      View Details
+                    </button>
+                  </Link>
+                </div>
               </motion.div>
             ))}
           </div>

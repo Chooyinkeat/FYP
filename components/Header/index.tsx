@@ -26,6 +26,7 @@ const Header = () => {
 
         if (res.data.success) {
           setUserId(res.data.userId);
+          sessionStorage.setItem("userId", res.data.userId);
           setProfile(res.data.profile);
         } else {
           // Token is invalid or expired
