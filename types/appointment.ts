@@ -10,4 +10,5 @@ export interface Appointment {
   status: number;
   time: string;
   user_id: number;
+  case_id: number;
 }

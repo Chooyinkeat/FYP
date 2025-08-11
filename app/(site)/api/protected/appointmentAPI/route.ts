@@ -24,7 +24,16 @@ export async function POST(request: NextRequest) {
   const email = formData.get("email");
   const contact = formData.get("contact");
   const receiverId = formData.get("receiverId");
-  if (!date || !time || !location || !email || !contact || !receiverId) {
+  const caseId = formData.get("caseId");
+  if (
+    !date ||
+    !time ||
+    !location ||
+    !email ||
+    !contact ||
+    !receiverId ||
+    !caseId
+  ) {
     return NextResponse.json(
       { success: false, message: "All fields are required" },
       { status: 400 },
@@ -33,8 +42,8 @@ export async function POST(request: NextRequest) {
 
   try {
     await pool.query(
-      "INSERT INTO appointment (user_id, receiver_id, date, time, location, email, contact, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [userId, receiverId, date, time, location, email, contact, 0],
+      "INSERT INTO appointment (user_id, receiver_id, date, time, location, email, contact, status, case_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [userId, receiverId, date, time, location, email, contact, 0, caseId],
     );
 
     return NextResponse.json({

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import AppointmentView from "@/components/Appointment/View";
 export const metadata: Metadata = {
   title: "View Appointments | VisionVault",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 export default function AppointmentPage() {
   return (
     <>
-      <AppointmentView />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AppointmentView />
+      </Suspense>
     </>
   );
 }
