@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Report } from "@/types/admin";
-
+import Link from "next/link";
 const getData = async () => {
   try {
     const response = await axios.get("/api/protected/getReportDetailsAPI", {
@@ -11,13 +11,13 @@ const getData = async () => {
     });
     return response;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.log("Error fetching data:", error);
     return null;
   }
 };
 
 const ReportList = () => {
-  const [data, setData] = useState<Report[]>([]);
+  const [report, setData] = useState<Report[]>([]);
 
   useEffect(() => {
     getData().then((response) => {
@@ -33,13 +33,13 @@ const ReportList = () => {
         Reports Management
       </h1>
 
-      {data.length === 0 ? (
+      {report.length === 0 ? (
         <div className="flex h-60 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500">
           No reports available.
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((report) => {
+          {report.map((report) => {
             const parsedImages = (() => {
               try {
                 return JSON.parse(report.image_payload);
@@ -80,6 +80,9 @@ const ReportList = () => {
                   </span>
 
                   {/* Additional Images */}
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Additional Images :
+                  </label>
                   {parsedImages.userUploadImage?.length > 1 && (
                     <div className="mb-4 grid grid-cols-3 gap-2">
                       {parsedImages.userUploadImage
@@ -115,6 +118,28 @@ const ReportList = () => {
                         "en-MY",
                         { dateStyle: "medium", timeStyle: "short" },
                       )}
+                    </div>
+                    <div className="mt-5 flex w-full">
+                      <Link
+                        className="flex w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 focus:outline-none dark:focus:ring-blue-800"
+                        href={{
+                          pathname: "/dashboard/reportsDetails",
+                          query: {
+                            id: report.report_id,
+                          },
+                        }}
+                      >
+                        View details
+                        <svg
+                          className="fill-white"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 14 14"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z" />
+                        </svg>
+                      </Link>
                     </div>
                   </div>
                 </div>

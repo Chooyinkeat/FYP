@@ -20,7 +20,8 @@ const fetchAppointments = async () => {
     });
     return response.data.data as Appointment[];
   } catch (error) {
-    console.error("Error fetching appointments:", error);
+    console.log("test");
+    console.log("Error fetching appointments:", error);
     return [];
   }
 };
