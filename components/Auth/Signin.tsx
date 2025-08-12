@@ -37,7 +37,6 @@ const submitForm = async (e: React.FormEvent) => {
   };
   try {
     const response = await axios.post("/api/loginApi", jsonData);
-    console.log("Response: ", response.data);
     if (response.data.status === 200) {
       Swal.fire({
         icon: "success",
@@ -47,7 +46,11 @@ const submitForm = async (e: React.FormEvent) => {
         const data = response.data.user;
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("profile", data.profile);
-        window.location.href = "/lostItems";
+        if (data.is_admin !== 0) {
+          window.location.href = "/dashboard";
+        } else {
+          window.location.href = "/lostItems";
+        }
       });
     } else {
       Swal.fire({
@@ -137,7 +140,7 @@ const handleGithubSignIn = async () => {
           const data = response.data.user;
           sessionStorage.setItem("userId", data.userId);
           sessionStorage.setItem("profile", data.profile);
-          window.location.href = "/lostItems"; // Change this to your desired route
+          window.location.href = "/lostItems";
         } else {
           Swal.fire({
             icon: "error",
@@ -157,7 +160,7 @@ const handleGithubSignIn = async () => {
       }
     }
   } catch (error) {
-    console.error("GitHub sign-in failed:", error);
+    console.log("GitHub sign-in failed:", error);
     Swal.fire({
       icon: "error",
       title: "GitHub Sign-in Failed",

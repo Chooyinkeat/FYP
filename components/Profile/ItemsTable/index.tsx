@@ -307,7 +307,10 @@ const Table = () => {
                           <Link
                             href={`/reports?suspectId=${encodeURIComponent(
                               claim.suspectId,
-                            )}&itemId=${encodeURIComponent(claim.itemId)}`}
+                              // Change this item_id to fake claim Id.
+                            )}&fakeClaimId=${encodeURIComponent(
+                              claim.fakeClaimId,
+                            )}`}
                             className="ml-4 cursor-pointer rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700"
                           >
                             Report this user

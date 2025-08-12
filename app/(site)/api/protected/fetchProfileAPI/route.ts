@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const decoded: any = jwtDecode(token); // Already verified by middleware
+  const decoded: any = jwtDecode(token);
   const userId = decoded.userId;
 
   try {
