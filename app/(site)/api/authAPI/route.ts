@@ -28,11 +28,19 @@ export async function POST(request: NextRequest) {
     if ((existingUsers as any[]).length > 0) {
       const user = (existingUsers as any[])[0];
       userId = user.user_id;
-      role = user.role;
+      role = user.is_admin ? 1 : 0;
+
+      if (user.status === 1) {
+        return NextResponse.json({
+          success: false,
+          message: "This users has been banned",
+          status: 400,
+        });
+      }
     } else {
       const [result] = await pool.query(
-        "INSERT INTO user (username, email, profile, sign_up_type, role) VALUES (?, ?, ?, ?, ?)",
-        [username, email, profile, type, "user"],
+        "INSERT INTO user (username, email, profile, sign_up_type, is_admin, status) VALUES (?, ?, ?, ?, ?, ?)",
+        [username, email, profile, type, 0, 0],
       );
 
       if ((result as any).affectedRows === 0) {

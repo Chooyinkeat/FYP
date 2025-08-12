@@ -80,11 +80,10 @@ export async function POST(request: NextRequest) {
     const results: {
       userImageIndex: number;
       lostImageIndex: number;
-      similarityScore: string; // contains explanation + score as a string
-      numericScore: number; // extracted score for average calculation
+      similarityScore: string;
+      numericScore: number;
     }[] = [];
 
-    // Prompt message to gemini AI
     for (let i = 0; i < base64UserImages.length; i++) {
       for (let j = 0; j < base64Images.length; j++) {
         const promptParts: Part[] = [
@@ -102,12 +101,12 @@ export async function POST(request: NextRequest) {
           },
           {
             text: `
-Compare these two images and respond with:
+              Compare these two images and respond with:
 
-Explanation: <brief explanation of visual similarity>
-Similarity Score: <number between 0 and 100>
+              Explanation: <brief explanation of visual similarity>
+              Similarity Score: <number between 0 and 100>
 
-Only provide these two lines in your response.
+              Only provide these two lines in your response.
         `,
           },
         ];

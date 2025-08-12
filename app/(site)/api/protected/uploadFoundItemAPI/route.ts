@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const userId = decoded.userId;
 
   const formData = await request.formData();
-  const metadataJson = formData.get("metadata") as string; // from clientside confirmation
+  const metadataJson = formData.get("metadata") as string;
   const images = formData.getAll("images") as File[];
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;

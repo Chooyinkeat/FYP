@@ -4,7 +4,6 @@ import { jwtDecode } from "jwt-decode";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  console.log("Fetching reports...");
   const token = request.cookies.get("token")?.value;
 
   if (!token) {

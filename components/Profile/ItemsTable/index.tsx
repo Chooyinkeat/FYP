@@ -2,8 +2,9 @@
 import axios from "axios";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FoundItemTable, LostItemTable } from "@/types/items";
 import { FakeClaimItem } from "@/types/fakeClaim";
+import { FoundItemTable, LostItemTable } from "@/types/items";
+
 const fetchItems = async (type) => {
   try {
     const response = await axios.post(
@@ -62,7 +63,7 @@ const Table = () => {
   const [foundItems, setFoundItems] = useState<FoundItemTable[]>([]);
   const [fakeClaims, setFakeClaims] = useState<FakeClaimItem[]>([]);
   const [selectedType, setSelectedType] = useState<
-    "lost" | "found" | "fakeclaim" | "match"
+    "lost" | "found" | "fakeclaim"
   >("lost");
 
   useEffect(() => {
@@ -118,17 +119,6 @@ const Table = () => {
             onChange={() => setSelectedType("lost")}
           />
           <span className="ml-2">Lost items</span>
-        </label>
-        <label className="inline-flex cursor-pointer items-center">
-          <input
-            type="radio"
-            className="form-radio text-blue-600"
-            name="itemType"
-            value="match"
-            // checked={selectedType === "match"}
-            // onChange={() => setSelectedType("match")}
-          />
-          <span className="ml-2">Match results</span>
         </label>
         <label className="inline-flex cursor-pointer items-center">
           <input
@@ -291,44 +281,67 @@ const Table = () => {
               {fakeClaims.map((claim, index) => (
                 <tr
                   key={claim.itemId ?? index}
-                  className="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
+                  className="border-b bg-white transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
                 >
-                  <td colSpan={5} className="px-6 py-4">
-                    <div className="mb-2 text-sm text-gray-800 dark:text-gray-200">
+                  <td colSpan={5} className="px-6 py-5">
+                    {/* Top Info Section */}
+                    <div className="mb-4 flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-200">
                       <p>
-                        <strong>Item ID:</strong> {claim.itemId}
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">
+                          Item ID:
+                        </span>{" "}
+                        {claim.itemId}
                       </p>
                       <p>
-                        <strong>Suspect ID:</strong> {claim.suspectId} <br />
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">
+                          Suspect ID:
+                        </span>{" "}
+                        {claim.suspectId}
                       </p>
-                      <div key={index}>
-                        <strong>Status: </strong>
+
+                      {/* Status Section */}
+                      <div className="mt-1">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">
+                          Status:
+                        </span>{" "}
                         {claim.status === 0 ? (
                           <Link
                             href={`/reports?suspectId=${encodeURIComponent(
                               claim.suspectId,
-                              // Change this item_id to fake claim Id.
                             )}&fakeClaimId=${encodeURIComponent(
                               claim.fakeClaimId,
                             )}`}
-                            className="ml-4 cursor-pointer rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700"
+                            className="ml-3 inline-flex items-center rounded bg-red-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none"
                           >
                             Report this user
                           </Link>
                         ) : claim.status === 1 ? (
-                          <span className="font-semibold text-yellow-600">
-                            Pending
-                          </span>
+                          <div className="mt-1 rounded border border-yellow-200 bg-yellow-50 px-3 py-2">
+                            <span className="block font-semibold text-yellow-700">
+                              Pending
+                            </span>
+                            <p className="text-xs text-yellow-800">
+                              Admin is handling this issue.
+                            </p>
+                          </div>
                         ) : (
-                          <span className="font-semibold text-green-600">
-                            Solved
-                          </span>
+                          <div className="mt-1 rounded border border-green-200 bg-green-50 px-3 py-2">
+                            <span className="block font-semibold text-green-700">
+                              Solved
+                            </span>
+                            <p className="text-xs text-green-800">
+                              The suspected user has been banned.
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+
+                    {/* Images Section */}
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      {/* User Uploaded */}
                       <div>
-                        <p className="mb-1 font-medium">
+                        <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                           User Uploaded Images:
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -338,15 +351,18 @@ const Table = () => {
                                 key={idx}
                                 src={url}
                                 alt={`User Upload ${idx}`}
-                                className="h-24 w-24 rounded border object-cover"
+                                className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
                               />
                             ),
                           )}
                         </div>
                       </div>
+
                       {/* Original Images */}
                       <div>
-                        <p className="mb-1 font-medium">Original Images:</p>
+                        <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Original Images:
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {claim.imagePayload.image_url_payload.map(
                             (url, idx) => (
@@ -354,7 +370,7 @@ const Table = () => {
                                 key={idx}
                                 src={url}
                                 alt={`Original Image ${idx}`}
-                                className="h-24 w-24 rounded border object-cover"
+                                className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
                               />
                             ),
                           )}

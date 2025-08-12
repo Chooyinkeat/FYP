@@ -8,12 +8,12 @@ export interface Report {
   description: string;
   reason: string;
   status: number;
-  created_date: string; // ISO date string
-  last_updated_date: string; // ISO date string
+  created_date: string;
+  last_updated_date: string;
   user_id: number;
   case_id: number;
   fake_claim_id: number;
-  image_payload: string; // stringified JSON
+  image_payload: string;
   item_id: number;
   suspect_id: number;
 }
