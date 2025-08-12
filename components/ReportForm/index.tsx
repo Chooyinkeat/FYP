@@ -58,7 +58,7 @@ const handleSubmit = async (event, caseId: string) => {
 const ReportForm = () => {
   const searchParams = useSearchParams();
   const suspectId = searchParams.get("suspectId");
-  const claimId = searchParams.get("itemId");
+  const claimId = searchParams.get("fakeClaimId");
   return (
     <>
       {/* ✅ reCAPTCHA script only for this page */}

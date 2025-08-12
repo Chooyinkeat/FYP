@@ -15,6 +15,15 @@ export async function middleware(request: NextRequest) {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
 
+    // Role-based protection
+    const pathname = request.nextUrl.pathname;
+
+    if (pathname.startsWith("/dashboard")) {
+      if (payload.role !== 1) {
+        return NextResponse.redirect(new URL("/error", request.url));
+      }
+    }
+
     return NextResponse.next();
   } catch (error) {
     console.error("❌ Invalid or expired token:", error);
@@ -35,5 +44,6 @@ export const config = {
     "/reports",
     "/appointment",
     "/appointment/view",
+    "/dashboard/:path*",
   ],
 };

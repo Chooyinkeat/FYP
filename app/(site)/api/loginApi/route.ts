@@ -1,3 +1,5 @@
+"use server";
+
 import pool from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = jwt.sign(
-      { userId: user.user_id, email: user.email },
+      { userId: user.user_id, email: user.email, role: user.is_admin },
       JWT_SECRET,
       { expiresIn: JWT_hour },
     );
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
       user: {
         userId: user.user_id,
         profile: user.profile,
+        role: user.is_admin,
       },
       status: 200,
     });

@@ -1,6 +1,7 @@
+"use server";
 import pool from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_hour = process.env.JWT_EXPIRATION || "1h";
@@ -16,23 +17,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // ✅ Check if user exists (SSO support)
     const [existingUsers] = await pool.query(
       "SELECT * FROM user WHERE email = ? AND sign_up_type = ? LIMIT 1",
       [email, type],
     );
 
     let userId: number;
+    let role: number;
 
     if ((existingUsers as any[]).length > 0) {
-      // ✅ User already exists — treat as login
       const user = (existingUsers as any[])[0];
-      userId = user.user_id; // adapt to your DB column
+      userId = user.user_id;
+      role = user.role;
     } else {
-      // ✅ Insert new user
       const [result] = await pool.query(
-        "INSERT INTO user (username, email, profile, sign_up_type) VALUES (?, ?, ?, ?)",
-        [username, email, profile, type],
+        "INSERT INTO user (username, email, profile, sign_up_type, role) VALUES (?, ?, ?, ?, ?)",
+        [username, email, profile, type, "user"],
       );
 
       if ((result as any).affectedRows === 0) {
@@ -44,14 +44,13 @@ export async function POST(request: NextRequest) {
       }
 
       userId = (result as any).insertId;
+      role = 0;
     }
 
-    // ✅ Create JWT token
-    const token = jwt.sign({ userId, email }, JWT_SECRET, {
+    const token = jwt.sign({ userId, email, role }, JWT_SECRET, {
       expiresIn: JWT_hour,
     });
 
-    // ✅ Set HttpOnly cookie
     const response = NextResponse.json({
       status: 200,
       success: true,
@@ -59,6 +58,7 @@ export async function POST(request: NextRequest) {
       user: {
         userId,
         profile,
+        role,
       },
     });
 

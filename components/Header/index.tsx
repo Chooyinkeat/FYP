@@ -193,7 +193,6 @@ const Header = () => {
           <div className="mt-7 flex items-center gap-6 xl:mt-0">
             <ThemeToggler />
             {userId ? (
-              // Logged in view
               <>
                 <button
                   onClick={handleLogout}
