@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const [rows]: any = await pool.query(
-      `SELECT * FROM fake_claim_item WHERE user_id = ?`,
+      `SELECT * FROM fake_claim_item WHERE user_id = ? AND is_closed = 0`,
       [userId],
     );
 

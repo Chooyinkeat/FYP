@@ -251,7 +251,7 @@ const AppointmentView = () => {
             </motion.div>
             {/* Appointment Card */}
             {appointments.length > 0 && appointments[0]?.case_id && (
-              <Card foundId={appointments[0].case_id} />
+              <Card foundId={appointments[0].case_id} className="lg:w-1/4" />
             )}
           </div>
         </div>

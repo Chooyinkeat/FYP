@@ -25,6 +25,7 @@ const Header = () => {
         });
 
         if (res.data.success) {
+          console.log(res.data);
           setUserId(res.data.userId);
           sessionStorage.setItem("userId", res.data.userId);
           setProfile(res.data.profile);

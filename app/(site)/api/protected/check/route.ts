@@ -1,5 +1,4 @@
 "use server";
-// /app/api/protected/check/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
@@ -21,7 +20,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       userId: payload.userId,
-      profile: payload.profile,
+      profile: payload.userProfile,
+      role: payload.role,
       status: 200,
     });
   } catch (err) {
