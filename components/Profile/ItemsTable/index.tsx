@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FakeClaimItem } from "@/types/fakeClaim";
 import { FoundItemTable, LostItemTable } from "@/types/items";
-
+import Card from "@/components/Card";
+import UserProfile from "@/components/LostList/UserProfile";
 const fetchItems = async (type) => {
   try {
     const response = await axios.post(
@@ -25,6 +26,22 @@ const fetchFakeClaims = async () => {
   try {
     const response = await axios.get(
       "/api/protected/fakeClaimAPI/getFakeClaimAPI",
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error fetching fake claims:", error);
+    return { success: false, message: "Failed to fetch fake claims" };
+  }
+};
+
+const closedFakeClaim = async (Id: number) => {
+  try {
+    const response = await axios.post(
+      "/api/protected/fakeClaimAPI/updateStatusAPI",
+      { id: Id },
       {
         withCredentials: true,
       },
@@ -77,22 +94,28 @@ const Table = () => {
       });
     } else if (selectedType === "fakeclaim") {
       fetchFakeClaims().then((response) => {
-        const parsed = response.data.map((claim) => {
-          const parsedImagePayload = JSON.parse(claim.image_payload);
-          const imagePayload = {
-            userUploadImage: parsedImagePayload.userUploadImage,
-            image_url_payload: JSON.parse(parsedImagePayload.image_url_payload),
-          };
+        if (response.status === 200) {
+          const parsed = response.data.map((claim) => {
+            const parsedImagePayload = JSON.parse(claim.image_payload);
+            const imagePayload = {
+              userUploadImage: parsedImagePayload.userUploadImage,
+              image_url_payload: JSON.parse(
+                parsedImagePayload.image_url_payload,
+              ),
+            };
 
-          return {
-            ...claim,
-            itemId: claim.item_id,
-            suspectId: claim.suspect_id,
-            fakeClaimId: claim.fake_claim_id,
-            imagePayload,
-          };
-        });
-        setFakeClaims(parsed);
+            return {
+              ...claim,
+              itemId: claim.item_id,
+              suspectId: claim.suspect_id,
+              fakeClaimId: claim.fake_claim_id,
+              imagePayload,
+            };
+          });
+          setFakeClaims(parsed);
+        } else {
+          setFakeClaims([]);
+        }
       });
     } else {
       fetchItems("1").then((response) => {
@@ -267,122 +290,137 @@ const Table = () => {
           </table>
         ) : null}
         {/* 🆕 FAKE CLAIMS SECTION */}
-        {selectedType === "fakeclaim" && fakeClaims.length > 0 && (
-          <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-            <tbody>
-              <tr>
-                <td
-                  colSpan={5}
-                  className="bg-red-50 px-6 py-4 text-center font-semibold text-red-600 dark:bg-red-900"
-                >
-                  Fake Claims Detected
-                </td>
-              </tr>
-              {fakeClaims.map((claim, index) => (
-                <tr
-                  key={claim.itemId ?? index}
-                  className="border-b bg-white transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
-                >
-                  <td colSpan={5} className="px-6 py-5">
-                    {/* Top Info Section */}
-                    <div className="mb-4 flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-200">
-                      <p>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">
-                          Item ID:
-                        </span>{" "}
-                        {claim.itemId}
-                      </p>
-                      <p>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">
-                          Suspect ID:
-                        </span>{" "}
-                        {claim.suspectId}
-                      </p>
-
-                      {/* Status Section */}
-                      <div className="mt-1">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">
-                          Status:
-                        </span>{" "}
-                        {claim.status === 0 ? (
-                          <Link
-                            href={`/reports?suspectId=${encodeURIComponent(
-                              claim.suspectId,
-                            )}&fakeClaimId=${encodeURIComponent(
-                              claim.fakeClaimId,
-                            )}`}
-                            className="ml-3 inline-flex items-center rounded bg-red-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none"
-                          >
-                            Report this user
-                          </Link>
-                        ) : claim.status === 1 ? (
-                          <div className="mt-1 rounded border border-yellow-200 bg-yellow-50 px-3 py-2">
-                            <span className="block font-semibold text-yellow-700">
-                              Pending
-                            </span>
-                            <p className="text-xs text-yellow-800">
-                              Admin is handling this issue.
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="mt-1 rounded border border-green-200 bg-green-50 px-3 py-2">
-                            <span className="block font-semibold text-green-700">
-                              Solved
-                            </span>
-                            <p className="text-xs text-green-800">
-                              The suspected user has been banned.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Images Section */}
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      {/* User Uploaded */}
-                      <div>
-                        <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          User Uploaded Images:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {claim.imagePayload.userUploadImage.map(
-                            (url, idx) => (
-                              <img
-                                key={idx}
-                                src={url}
-                                alt={`User Upload ${idx}`}
-                                className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
-                              />
-                            ),
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Original Images */}
-                      <div>
-                        <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Original Images:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {claim.imagePayload.image_url_payload.map(
-                            (url, idx) => (
-                              <img
-                                key={idx}
-                                src={url}
-                                alt={`Original Image ${idx}`}
-                                className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
-                              />
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    </div>
+        {selectedType === "fakeclaim" &&
+          (fakeClaims.length > 0 ? (
+            <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+              <tbody>
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="bg-red-50 px-6 py-4 text-center font-semibold text-red-600 dark:bg-red-900"
+                  >
+                    Fake Claims Detected
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                {fakeClaims.map((claim, index) => (
+                  <tr
+                    key={claim.itemId ?? index}
+                    className="border-b bg-white transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  >
+                    <td colSpan={5} className="px-6 py-5">
+                      {/* Top Info Section */}
+                      <div className="mb-4 flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-200">
+                        <div className="flex">
+                          <div className="w-1/2">
+                            <UserProfile userId={claim.suspectId.toString()} />
+                          </div>
+                          <div className="w-1/2">
+                            <Card foundId={claim.itemId} className="" />
+                          </div>
+                        </div>
+                        {/* Status Section */}
+                        <div className="mt-1">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">
+                            Status:
+                          </span>{" "}
+                          {claim.status === 0 ? (
+                            <Link
+                              href={`/reports?suspectId=${encodeURIComponent(
+                                claim.suspectId,
+                              )}&fakeClaimId=${encodeURIComponent(
+                                claim.fakeClaimId,
+                              )}`}
+                              className="ml-3 inline-flex items-center rounded bg-red-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                            >
+                              Report this user
+                            </Link>
+                          ) : claim.status === 1 ? (
+                            <div className="mt-1 rounded border border-yellow-200 bg-yellow-50 px-3 py-2">
+                              <span className="block font-semibold text-yellow-700">
+                                Pending
+                              </span>
+                              <p className="text-xs text-yellow-800">
+                                Admin is handling this issue.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="mt-1 rounded border border-green-200 bg-green-50 px-3 py-2">
+                              <span className="block font-semibold text-green-700">
+                                Solved
+                              </span>
+                              <p className="text-xs text-green-800">
+                                The suspected user has been banned.
+                              </p>
+                              <button
+                                className="mt-1 inline-flex cursor-pointer items-center rounded bg-red-500 px-3 py-1 text-xs font-medium text-white shadow-sm"
+                                onClick={() =>
+                                  closedFakeClaim(claim.fakeClaimId).then(
+                                    (response) => {
+                                      if (response.status === 200) {
+                                        // Refresh the page or update the UI
+                                        location.reload();
+                                      }
+                                    },
+                                  )
+                                }
+                              >
+                                Closed
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Images Section */}
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        {/* User Uploaded */}
+                        <div>
+                          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            User Uploaded Images:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {claim.imagePayload.userUploadImage.map(
+                              (url, idx) => (
+                                <img
+                                  key={idx}
+                                  src={url}
+                                  alt={`User Upload ${idx}`}
+                                  className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
+                                />
+                              ),
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Original Images */}
+                        <div>
+                          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Original Images:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {claim.imagePayload.image_url_payload.map(
+                              (url, idx) => (
+                                <img
+                                  key={idx}
+                                  src={url}
+                                  alt={`Original Image ${idx}`}
+                                  className="h-24 w-24 rounded-lg border border-gray-300 object-cover shadow-sm transition-transform hover:scale-105 hover:shadow-md"
+                                />
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="mt-4 rounded border border-gray-200 bg-gray-50 px-6 py-4 text-center text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              🎉 No fake claim cases at the moment!
+            </div>
+          ))}
       </div>
     </>
   );

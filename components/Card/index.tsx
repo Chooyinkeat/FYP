@@ -7,10 +7,6 @@ import { FoundItem } from "@/types/items";
 import Swal from "sweetalert2";
 import Link from "next/link";
 
-interface CardProps {
-  foundId: number;
-}
-
 const getFoundItemDetails = async (foundId: number) => {
   try {
     const response = await axios.post(
@@ -49,7 +45,13 @@ const convertTime = (time: string) => {
   });
 };
 
-const Card = ({ foundId }: CardProps) => {
+const Card = ({
+  foundId,
+  className = "",
+}: {
+  foundId: number;
+  className?: string;
+}) => {
   // Set state
   const [foundItem, setFoundItem] = useState<FoundItem | null>(null);
 
@@ -85,7 +87,7 @@ const Card = ({ foundId }: CardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.2 }}
-      className="w-full px-4 lg:w-1/4"
+      className={`w-full px-4 ${className}`}
     >
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
         {/* Image */}

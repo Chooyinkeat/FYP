@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
 
     let userId: number;
     let role: number;
-
+    let userProfile: string;
     if ((existingUsers as any[]).length > 0) {
       const user = (existingUsers as any[])[0];
       userId = user.user_id;
       role = user.is_admin ? 1 : 0;
-
+      userProfile = user.profile;
       if (user.status === 1) {
         return NextResponse.json({
           success: false,
@@ -53,9 +53,10 @@ export async function POST(request: NextRequest) {
 
       userId = (result as any).insertId;
       role = 0;
+      userProfile = profile;
     }
 
-    const token = jwt.sign({ userId, email, role }, JWT_SECRET, {
+    const token = jwt.sign({ userId, email, role, userProfile }, JWT_SECRET, {
       expiresIn: JWT_hour,
     });
 
@@ -65,9 +66,9 @@ export async function POST(request: NextRequest) {
       message: "User signed in via SSO",
       user: {
         userId,
-        profile,
         role,
       },
+      profile: userProfile,
     });
 
     response.cookies.set("token", token, {
