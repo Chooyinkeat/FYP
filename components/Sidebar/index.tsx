@@ -3,15 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Menu, 
-  X, 
-  LayoutDashboard, 
-  FileText, 
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  FileText,
   Bot,
   Shield,
   Settings,
-  User
+  User,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -19,23 +19,23 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { 
-      label: "Dashboard", 
-      href: "/dashboard", 
+    {
+      label: "Dashboard",
+      href: "/dashboard",
       icon: LayoutDashboard,
-      description: "Overview and analytics"
+      description: "Overview and analytics",
     },
-    { 
-      label: "Reports", 
-      href: "/dashboard/reports", 
+    {
+      label: "Reports",
+      href: "/dashboard/reports",
       icon: FileText,
-      description: "Manage user reports"
+      description: "Manage user reports",
     },
-    { 
-      label: "AI Gemini Prompt", 
-      href: "/dashboard/ai-gemini", 
+    {
+      label: "User account",
+      href: "/dashboard/user-account",
       icon: Bot,
-      description: "AI-powered assistance"
+      description: "Manage user accounts",
     },
   ];
 
@@ -53,7 +53,7 @@ export default function Sidebar() {
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="rounded-lg bg-white/20 p-2 text-white transition-all hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="rounded-lg bg-white/20 p-2 text-white transition-all hover:bg-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none"
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -84,35 +84,49 @@ export default function Sidebar() {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`group relative flex items-center space-x-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-white/10 ${
-                    active 
-                      ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-white/20' 
-                      : 'hover:border-white/10'
+                    active
+                      ? "border border-white/20 bg-gradient-to-r from-indigo-500/20 to-purple-500/20"
+                      : "hover:border-white/10"
                   }`}
                 >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200 ${
-                    active 
-                      ? 'bg-gradient-to-br from-indigo-400 to-purple-400 shadow-lg' 
-                      : 'bg-white/10 group-hover:bg-white/20'
-                  }`}>
-                    <Icon className={`h-5 w-5 transition-colors ${
-                      active ? 'text-white' : 'text-indigo-200 group-hover:text-white'
-                    }`} />
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200 ${
+                      active
+                        ? "bg-gradient-to-br from-indigo-400 to-purple-400 shadow-lg"
+                        : "bg-white/10 group-hover:bg-white/20"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-5 w-5 transition-colors ${
+                        active
+                          ? "text-white"
+                          : "text-indigo-200 group-hover:text-white"
+                      }`}
+                    />
                   </div>
                   <div className="flex-1">
-                    <p className={`font-medium transition-colors ${
-                      active ? 'text-white' : 'text-indigo-100 group-hover:text-white'
-                    }`}>
+                    <p
+                      className={`font-medium transition-colors ${
+                        active
+                          ? "text-white"
+                          : "text-indigo-100 group-hover:text-white"
+                      }`}
+                    >
                       {item.label}
                     </p>
-                    <p className={`text-xs transition-colors ${
-                      active ? 'text-indigo-200' : 'text-indigo-300 group-hover:text-indigo-200'
-                    }`}>
+                    <p
+                      className={`text-xs transition-colors ${
+                        active
+                          ? "text-indigo-200"
+                          : "text-indigo-300 group-hover:text-indigo-200"
+                      }`}
+                    >
                       {item.description}
                     </p>
                   </div>
