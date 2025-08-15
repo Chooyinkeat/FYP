@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function FoundItemsPage() {
   return (
     <>
-      <section className="py-20 lg:py-25 xl:py-30">
+      <section className="py-10 lg:py-10 xl:py-10">
         <div className="max-w-c-1280 mx-auto mt-15 px-4 md:px-8 xl:mt-20 xl:px-0">
           <div className="max-w-c-1280 mx-auto mt-15 px-4 md:px-8 xl:mt-20 xl:px-0">
             <FoundList />

@@ -12,19 +12,40 @@ const getData = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return null;
+    console.log("Error fetching data:", error);
+  }
+};
+
+const getUserStatus = async () => {
+  try {
+    const response = await axios.get("/api/protected/getUserStatusAPI", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error fetching user status:", error);
   }
 };
 
 const Dashboard = () => {
   const [data, setData] = useState<TotalRows[] | null>(null);
+  const [userData, setUserData] = useState<TotalRows[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getData().then((response) => {
       if (response && response.status === 200) {
         setData(response.data);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    getUserStatus().then((response) => {
+      if (response.status === 200) {
+        setUserData(response.data);
+        console.log("User Data: ", response.data[0].total_users);
       }
       setLoading(false);
     });
@@ -94,9 +115,11 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  GEMINI Prompts
+                  Active users
                 </p>
-                <p className="text-3xl font-bold text-gray-900">Active</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {userData?.[0]?.total_rows || 0}
+                </p>
               </div>
               <div className="rounded-lg bg-green-100 p-3">
                 <Bot className="h-6 w-6 text-green-600" />
@@ -107,7 +130,7 @@ const Dashboard = () => {
                 href="/admin/gemini"
                 className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-700"
               >
-                Manage prompts
+                Manage users account
                 <BarChart3 className="ml-1 h-4 w-4" />
               </a>
             </div>
@@ -151,10 +174,10 @@ const Dashboard = () => {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Manage GEMINI
+                  Manage users
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Configure AI prompts and settings
+                  Configure user settings and permissions
                 </p>
               </div>
             </a>

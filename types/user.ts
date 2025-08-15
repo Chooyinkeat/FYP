@@ -5,3 +5,4 @@ export interface User {
   contact: string;
   profile: string;
 }
+
