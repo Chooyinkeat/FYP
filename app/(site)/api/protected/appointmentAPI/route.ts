@@ -25,6 +25,17 @@ export async function POST(request: NextRequest) {
   const contact = formData.get("contact");
   const receiverId = formData.get("receiverId");
   const caseId = formData.get("caseId");
+  console.log("Received data:", {
+    userId,
+    receiverId,
+    date,
+    time,
+    location,
+    email,
+    contact,
+    caseId,
+  });
+
   if (
     !date ||
     !time ||

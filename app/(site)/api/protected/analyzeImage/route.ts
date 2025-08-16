@@ -1,6 +1,7 @@
 "use server";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI, Part } from "@google/generative-ai";
+import cloudinary from "@/lib/cloudinary";
 
 if (!process.env.GOOGLE_GEMINI_API_KEY) {
   throw new Error("Missing GOOGLE_API_KEY environment variable");
@@ -123,11 +124,22 @@ export async function POST(request: NextRequest) {
   }
 
   const averageScore = count > 0 ? totalScore / count : 0;
-
+  let urls: any[] = [];
+  if (averageScore >= 80) {
+    // Pass all the userUploadImage to cloudinary
+    urls = await Promise.all(
+      base64UserImages.map((base64Image) =>
+        cloudinary.uploader.upload(
+          `data:image/jpeg;base64,${base64Image.split(",")[1]}`,
+        ),
+      ),
+    );
+  }
   return NextResponse.json({
     success: true,
     data: results,
     averageScore,
     status: 200,
+    urls: urls.map((url: any) => url.secure_url),
   });
 }

@@ -12,6 +12,7 @@ const Appointment = () => {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
   const urls = searchParams.get("urls");
+  const caseId = searchParams.get("caseId");
   const [location, setLocation] = useState<string>("");
   const [mapPosition, setMapPosition] = useState<[number, number]>([
     3.139, 101.6869,
@@ -50,15 +51,12 @@ const Appointment = () => {
     e: React.FormEvent<HTMLFormElement>,
     urls: string,
     userId: string,
+    caseId: string,
   ) => {
     e.preventDefault();
-
-    // Grab all inputs automatically
     const formData = new FormData(e.currentTarget);
-
-    // Add the extra stuff that’s not in <input> fields
     formData.append("receiverId", userId);
-
+    formData.append("caseId", caseId);
     try {
       const response = await axios.post(
         "/api/protected/appointmentAPI",
@@ -72,6 +70,7 @@ const Appointment = () => {
           title: "Upload Successful",
           text: "Your appointment has been created successfully.",
         });
+
         formData.append("urls", urls);
         try {
           const response = await axios.post(
@@ -82,7 +81,6 @@ const Appointment = () => {
             },
           );
           if (response.data.success) {
-            console.log("User notified successfully");
             // clear form
             formData.forEach((value, key) => {
               formData.set(key, "");
@@ -96,6 +94,8 @@ const Appointment = () => {
             text: "Failed to notify the user about the found item.",
           });
         }
+
+        window.location.href = "/appointment/list";
       }
     } catch (err) {
       console.log("Unexpected error: ", err);
@@ -103,6 +103,8 @@ const Appointment = () => {
   };
 
   useEffect(() => {
+    console.log("caseId: ", caseId);
+
     const fetchAddress = async () => {
       const [lat, lon] = mapPosition;
       try {
@@ -166,7 +168,9 @@ const Appointment = () => {
               <form
                 method="POST"
                 className="space-y-8"
-                onSubmit={(e) => handleSubmit(e, urls || "", userId || "")}
+                onSubmit={(e) =>
+                  handleSubmit(e, urls || "", userId || "", caseId || "")
+                }
               >
                 {/* email */}
                 <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">

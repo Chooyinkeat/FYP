@@ -63,58 +63,6 @@ const ManageUser = () => {
     return matchesQuery && matchesStatus;
   });
 
-  // Export CSV function
-  const exportToCSV = () => {
-    // Define CSV headers
-    const headers = [
-      "User ID",
-      "Username",
-      "Email",
-      "Contact",
-      "Status",
-      "Created Date",
-      "Found Items Count",
-      "Lost Items Count",
-    ];
-
-    // Convert user data to CSV rows
-    const csvRows = [
-      headers.join(","),
-      ...filteredUsers.map((user) =>
-        [
-          user.user_id,
-          `"${user.username}"`,
-          `"${user.email}"`,
-          `"${user.contact || "N/A"}"`,
-          user.status === 0 ? "Active" : "Suspended",
-          `"${new Date(user.created_date).toLocaleDateString("en-MY")}"`,
-          user.found_count,
-          user.lost_count,
-        ].join(","),
-      ),
-    ];
-
-    // Create CSV content
-    const csvContent = csvRows.join("\n");
-
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `users_export_${new Date().toISOString().split("T")[0]}.csv`,
-      );
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   // Handle user activation
   const handleActivateUser = async (userId: number) => {
     try {
