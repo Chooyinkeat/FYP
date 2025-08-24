@@ -428,10 +428,20 @@ const ManageUser = () => {
                               <div className="mr-1.5 h-2 w-2 rounded-full bg-emerald-400"></div>
                               Active
                             </>
+                          ) : user.status === 1 ? (
+                            <>
+                              <div className="mr-1.5 h-2 w-2 rounded-full bg-yellow-400"></div>
+                              Warning Issued
+                            </>
+                          ) : user.status === 2 ? (
+                            <>
+                              <div className="mr-1.5 h-2 w-2 rounded-full bg-orange-400"></div>
+                              Posting Restricted
+                            </>
                           ) : (
                             <>
-                              <div className="mr-1.5 h-2 w-2 rounded-full bg-red-400"></div>
-                              Suspended
+                              <div className="mr-1.5 h-2 w-2 rounded-full bg-red-500"></div>
+                              Banned
                             </>
                           )}
                         </span>
@@ -501,7 +511,7 @@ const ManageUser = () => {
 
                       {/* Actions */}
                       <td className="px-6 py-4">
-                        {user.status === 1 ? (
+                        {user.status === 3 ? (
                           <button
                             onClick={() => handleActivateUser(user.user_id)}
                             className="inline-flex items-center rounded-md border border-transparent bg-emerald-600 px-3 py-2 text-sm leading-4 font-medium text-white transition-colors duration-150 hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
