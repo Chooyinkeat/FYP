@@ -25,12 +25,14 @@ export async function POST(request: NextRequest) {
     let userId: number;
     let role: number;
     let userProfile: string;
+    let status: number;
     if ((existingUsers as any[]).length > 0) {
       const user = (existingUsers as any[])[0];
       userId = user.user_id;
       role = user.is_admin ? 1 : 0;
       userProfile = user.profile;
-      if (user.status === 1) {
+      status = user.status;
+      if (user.status === 3) {
         return NextResponse.json({
           success: false,
           message: "This users has been banned",
@@ -54,11 +56,16 @@ export async function POST(request: NextRequest) {
       userId = (result as any).insertId;
       role = 0;
       userProfile = profile;
+      status = 0;
     }
 
-    const token = jwt.sign({ userId, email, role, userProfile }, JWT_SECRET, {
-      expiresIn: JWT_hour,
-    });
+    const token = jwt.sign(
+      { userId, email, role, userProfile, status },
+      JWT_SECRET,
+      {
+        expiresIn: JWT_hour,
+      },
+    );
 
     const response = NextResponse.json({
       status: 200,
@@ -67,6 +74,7 @@ export async function POST(request: NextRequest) {
       user: {
         userId,
         role,
+        status,
       },
       profile: userProfile,
     });

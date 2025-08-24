@@ -32,7 +32,57 @@ const getDetails = async (id: string | null) => {
   }
 };
 
-const submitReport = async (
+const warningUser = async (
+  id: number,
+  type: string,
+  suspectedId: number,
+  fakeClaimId: number,
+) => {
+  try {
+    const response = await axios.post(
+      `/api/protected/warningUserAPI`,
+      {
+        reportId: id,
+        type: type,
+        suspectedId: suspectedId,
+        fakeClaimId: fakeClaimId,
+      },
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error updating report:", error);
+  }
+};
+
+const restrictUser = async (
+  id: number,
+  type: string,
+  suspectedId: number,
+  fakeClaimId: number,
+) => {
+  try {
+    const response = await axios.post(
+      `/api/protected/restrictPostingAPI`,
+      {
+        reportId: id,
+        type: type,
+        suspectedId: suspectedId,
+        fakeClaimId: fakeClaimId,
+      },
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error updating report:", error);
+  }
+};
+
+const banUser = async (
   id: number,
   type: string,
   suspectedId: number,
@@ -134,8 +184,10 @@ const ManageReport = () => {
             const parsedPayload = JSON.parse(response.data[0].image_payload);
             setImagePayload({
               userUploadImage: parsedPayload.userUploadImage || [],
-              image_url_payload:
-                JSON.parse(parsedPayload.image_url_payload) || [],
+              image_url_payload: parsedPayload.originalImages?.[0]
+                ?.image_url_payload
+                ? JSON.parse(parsedPayload.originalImages[0].image_url_payload)
+                : [],
             });
           } catch (err) {
             console.log("Failed to parse image_payload:", err);
@@ -160,21 +212,27 @@ const ManageReport = () => {
   if (!report) {
     return (
       <div className="flex min-h-screen items-center justify-center">
+        {" "}
         <div className="text-center">
-          <AlertTriangle className="mx-auto mb-4 h-16 w-16 text-red-500" />
+          {" "}
+          <AlertTriangle className="mx-auto mb-4 h-16 w-16 text-red-500" />{" "}
           <h2 className="mb-2 text-2xl font-bold text-gray-900">
-            Report Not Found
-          </h2>
+            {" "}
+            Report Not Found{" "}
+          </h2>{" "}
           <p className="text-gray-600">
-            The requested report could not be found.
-          </p>
+            {" "}
+            The requested report could not be found.{" "}
+          </p>{" "}
           <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            {" "}
             <p className="text-sm text-yellow-800">
+              {" "}
               <strong>Debug Info:</strong> reportId: {reportId}, loading:{" "}
-              {loading.toString()}
-            </p>
-          </div>
-        </div>
+              {loading.toString()}{" "}
+            </p>{" "}
+          </div>{" "}
+        </div>{" "}
       </div>
     );
   }
@@ -364,58 +422,76 @@ const ManageReport = () => {
           </h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* <button
-              className="cursor-pointer rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+            {/* Warn User */}
+            <button
+              className="cursor-pointer rounded-lg bg-yellow-600 px-6 py-3 font-medium text-white transition-colors hover:bg-yellow-700 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none"
               onClick={() =>
-                submitReport(
+                warningUser(
                   report.report_id,
-                  "closed",
+                  "warning",
                   report.suspect_id,
                   report.fake_claim_id,
                 ).then((response) => {
                   if (response.status === 200) {
-                    Swal.fire({
-                      title: "Success!",
-                      text: "Report has been closed.",
-                      icon: "success",
-                      confirmButtonText: "OK",
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        router.push("/dashboard");
-                      }
-                    });
+                    Swal.fire(
+                      "Banned",
+                      "The suspected user account has been banned.",
+                      "success",
+                    );
+                    router.push("/dashboard");
                   }
                 })
               }
             >
-              Closed case
-            </button> */}
+              Send Warning
+            </button>
 
+            {/* Disable user to post */}
+            <button
+              className="cursor-pointer rounded-lg bg-orange-600 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none"
+              onClick={() =>
+                restrictUser(
+                  report.report_id,
+                  "restrict",
+                  report.suspect_id,
+                  report.fake_claim_id,
+                ).then((response) => {
+                  if (response.status === 200) {
+                    Swal.fire(
+                      "Banned",
+                      "The suspected user account has been banned.",
+                      "success",
+                    );
+                    router.push("/dashboard");
+                  }
+                })
+              }
+            >
+              Restrict Posting
+            </button>
+
+            {/* Ban User */}
             <button
               className="cursor-pointer rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
               onClick={() =>
-                submitReport(
+                banUser(
                   report.report_id,
-                  "banned",
+                  "ban",
                   report.suspect_id,
                   report.fake_claim_id,
                 ).then((response) => {
                   if (response.status === 200) {
-                    Swal.fire({
-                      title: "Success!",
-                      text: "Report has been closed.",
-                      icon: "success",
-                      confirmButtonText: "OK",
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        router.push("/dashboard");
-                      }
-                    });
+                    Swal.fire(
+                      "Banned",
+                      "The suspected user account has been banned.",
+                      "success",
+                    );
+                    router.push("/dashboard");
                   }
                 })
               }
             >
-              Ban suspected user account
+              Ban Suspected User Account
             </button>
           </div>
         </motion.div>

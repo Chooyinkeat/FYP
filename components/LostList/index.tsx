@@ -13,7 +13,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { debounce } from "lodash";
 import { Description } from "@/types/items";
 
-
 const LostList = () => {
   const [lostItems, setLostItems] = useState<LostItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -88,6 +87,23 @@ const LostList = () => {
           text: "An error occurred while fetching lost items.",
         });
       });
+  }, []);
+
+  useEffect(() => {
+    const status = sessionStorage.getItem("status");
+    if (status === "1") {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "You have been warned once. If you perform a fake claim again, your account will be banned.",
+      });
+    } else if (status === "2") {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "You have been warned twice. If you perform a fake claim again, your account will be banned.",
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -225,7 +241,7 @@ const LostList = () => {
                 </p>
 
                 <div className="mt-6 flex justify-between">
-                  <button 
+                  <button
                     onClick={async () => {
                       const itemUrl = `${window.location.origin}/lostItems/lostItems-details?id=${item.lostId}`;
                       try {
@@ -238,7 +254,7 @@ const LostList = () => {
                           showConfirmButton: false,
                         });
                       } catch (err) {
-                        console.error('Failed to copy URL:', err);
+                        console.error("Failed to copy URL:", err);
                         Swal.fire({
                           icon: "error",
                           title: "Copy Failed",
@@ -246,7 +262,7 @@ const LostList = () => {
                         });
                       }
                     }}
-                    className="cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition not-last:inline-flex hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 active:scale-95"
+                    className="cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition not-last:inline-flex hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none active:scale-95 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
                   >
                     Copy and Share
                   </button>
