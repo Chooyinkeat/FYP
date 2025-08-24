@@ -20,13 +20,6 @@ const ErroPage = () => {
           height={400}
         />
 
-        {/* <h2 className="mb-5 text-2xl font-semibold text-black md:text-4xl dark:text-white">
-          This Page Does Not Exist
-        </h2>
-        <p className="mb-7.5">
-          The page you were looking for appears to have been moved, deleted or
-          does not exist.
-        </p> */}
         <h2 className="mb-5 text-2xl font-semibold text-black md:text-4xl dark:text-white">
           Something Went Wrong
         </h2>

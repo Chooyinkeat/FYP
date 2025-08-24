@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         status: 401,
       });
     }
-    if (user.status === 1) {
+    if (user.status === 3) {
       return NextResponse.json({
         success: false,
         message: "This user has been banned",
@@ -49,8 +49,9 @@ export async function POST(request: NextRequest) {
       });
     }
     let role = user.is_admin ? 1 : 0;
+    let status = user.status;
     const token = jwt.sign(
-      { userId: user.user_id, email: user.email, role },
+      { userId: user.user_id, email: user.email, role, status },
       JWT_SECRET,
       { expiresIn: JWT_hour },
     );
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
         userId: user.user_id,
         profile: user.profile,
         role: role,
+        status: status,
       },
       status: 200,
     });

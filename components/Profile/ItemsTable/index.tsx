@@ -131,10 +131,10 @@ const Table = () => {
   }, [selectedType]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8 dark:from-gray-900 dark:to-gray-800">
       {/* Enhanced Header Section */}
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl dark:text-white">
           My Items Dashboard
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -154,7 +154,7 @@ const Table = () => {
             onClick={() => setSelectedType(tab.value as any)}
             className={`group relative flex w-full items-center justify-center space-x-2 rounded-xl px-6 py-4 text-sm font-medium transition-all duration-300 sm:w-auto ${
               selectedType === tab.value
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900"
+                ? "bg-blue-600 text-white shadow-lg ring-2 shadow-blue-600/25 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900"
                 : "bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400"
             }`}
           >
@@ -204,7 +204,9 @@ const Table = () => {
                             {item.category}
                           </Link>
                         </td>
-                        <td className="px-6 py-4">{item.description.location}</td>
+                        <td className="px-6 py-4">
+                          {item.description.location}
+                        </td>
                         <td className="px-6 py-4">
                           {convertDate(item.description.date)}
                         </td>
@@ -301,7 +303,8 @@ const Table = () => {
                   <div className="mb-2 text-3xl">🚨</div>
                   <h3 className="text-xl font-bold">Fake Claims Detected</h3>
                   <p className="text-red-100">
-                    {fakeClaims.length} potential false claim{fakeClaims.length !== 1 ? 's' : ''} found
+                    {fakeClaims.length} potential false claim
+                    {fakeClaims.length !== 1 ? "s" : ""} found
                   </p>
                 </div>
 
@@ -318,22 +321,25 @@ const Table = () => {
                             <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                               Suspect Profile
                             </h4>
-                              <UserProfile userId={claim.suspectId.toString()} />
+                            <UserProfile userId={claim.suspectId.toString()} />
                           </div>
                           <div className="space-y-4">
                             <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                               Claimed Item
                             </h4>
-                              <Card foundId={claim.itemId} className="" />
+                            <Card foundId={claim.itemId} className="" />
                           </div>
                         </div>
 
+                        {/* Status Section */}
                         {/* Status Section */}
                         <div className="mb-6">
                           <h4 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                             Case Status
                           </h4>
+
                           {claim.status === 0 ? (
+                            // === 0: Action Required
                             <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
                               <div className="flex items-center space-x-2 rounded-lg bg-yellow-50 px-4 py-3 dark:bg-yellow-900/20">
                                 <i className="fa fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
@@ -354,6 +360,7 @@ const Table = () => {
                               </Link>
                             </div>
                           ) : claim.status === 1 ? (
+                            // === 1: Pending Review
                             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-900/20">
                               <div className="flex items-center space-x-2">
                                 <i className="fa fa-clock text-yellow-600 dark:text-yellow-400"></i>
@@ -362,10 +369,40 @@ const Table = () => {
                                 </span>
                               </div>
                               <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                                Admin is currently handling this issue. Please wait for updates.
+                                Admin is currently handling this issue. Please
+                                wait for updates.
+                              </p>
+                            </div>
+                          ) : claim.status === 2 ? (
+                            // === 2: Warning Issued
+                            <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-700 dark:bg-orange-900/20">
+                              <div className="flex items-center space-x-2">
+                                <i className="fa fa-exclamation-circle text-orange-600 dark:text-orange-400"></i>
+                                <span className="font-semibold text-orange-800 dark:text-orange-200">
+                                  Warning Issued
+                                </span>
+                              </div>
+                              <p className="mt-2 text-sm text-orange-700 dark:text-orange-300">
+                                The suspected user has received a warning
+                                regarding their activity.
+                              </p>
+                            </div>
+                          ) : claim.status === 3 ? (
+                            // === 3: Posting Restricted
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-900/20">
+                              <div className="flex items-center space-x-2">
+                                <i className="fa fa-ban text-blue-600 dark:text-blue-400"></i>
+                                <span className="font-semibold text-blue-800 dark:text-blue-200">
+                                  Posting Restricted
+                                </span>
+                              </div>
+                              <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                The suspected user is restricted from posting
+                                lost or found items and claiming found items.
                               </p>
                             </div>
                           ) : (
+                            // === else: Case Resolved (Banned)
                             <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-700 dark:bg-green-900/20">
                               <div className="flex items-center space-x-2">
                                 <i className="fa fa-check-circle text-green-600 dark:text-green-400"></i>
@@ -374,7 +411,8 @@ const Table = () => {
                                 </span>
                               </div>
                               <p className="mt-2 text-sm text-green-700 dark:text-green-300">
-                                The suspected user has been banned. You can now close this case.
+                                The suspected user has been banned. You can now
+                                close this case.
                               </p>
                               <button
                                 className="mt-3 inline-flex items-center rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none dark:bg-red-600 dark:hover:bg-red-700"
@@ -414,7 +452,7 @@ const Table = () => {
                                       key={idx}
                                       src={url}
                                       alt={`User Upload ${idx + 1}`}
-                                      className="h-20 w-full rounded-lg border border-gray-300 object-cover shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md dark:border-gray-600 sm:h-24"
+                                      className="h-20 w-full rounded-lg border border-gray-300 object-cover shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md sm:h-24 dark:border-gray-600"
                                     />
                                   ),
                                 )}
@@ -434,7 +472,7 @@ const Table = () => {
                                       key={idx}
                                       src={url}
                                       alt={`Original Image ${idx + 1}`}
-                                      className="h-20 w-full rounded-lg border border-gray-300 object-cover shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md dark:border-gray-600 sm:h-24"
+                                      className="h-20 w-full rounded-lg border border-gray-300 object-cover shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md sm:h-24 dark:border-gray-600"
                                     />
                                   ),
                                 )}

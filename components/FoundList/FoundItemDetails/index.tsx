@@ -196,11 +196,11 @@ const FoundItemDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8 dark:from-gray-900 dark:to-gray-800">
       <div className="mx-auto max-w-7xl">
         {/* Enhanced Header Section */}
         <div className="mb-8 text-center">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl dark:text-white">
             Found Item Details
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -216,7 +216,7 @@ const FoundItemDetails = () => {
                 {/* Header with Close Case Button */}
                 <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                    <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                       Found Item Case
                     </h2>
                     <p className="mt-2 text-gray-600 dark:text-gray-400">
@@ -285,8 +285,12 @@ const FoundItemDetails = () => {
                           <i className="fa fa-tag text-blue-600 dark:text-blue-400"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Category</p>
-                          <p className="text-gray-900 dark:text-white">{category || "Unknown Category"}</p>
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Category
+                          </p>
+                          <p className="text-gray-900 dark:text-white">
+                            {category || "Unknown Category"}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
@@ -294,8 +298,12 @@ const FoundItemDetails = () => {
                           <i className="fa fa-calendar text-green-600 dark:text-green-400"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Date</p>
-                          <p className="text-gray-900 dark:text-white">{date || "Unknown Date"}</p>
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Date
+                          </p>
+                          <p className="text-gray-900 dark:text-white">
+                            {date || "Unknown Date"}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -305,8 +313,12 @@ const FoundItemDetails = () => {
                           <i className="fa fa-clock text-purple-600 dark:text-purple-400"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Time</p>
-                          <p className="text-gray-900 dark:text-white">{time || "Unknown Time"}</p>
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Time
+                          </p>
+                          <p className="text-gray-900 dark:text-white">
+                            {time || "Unknown Time"}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
@@ -314,8 +326,12 @@ const FoundItemDetails = () => {
                           <i className="fa fa-map-marker text-orange-600 dark:text-orange-400"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</p>
-                          <p className="text-gray-900 dark:text-white">{location || "Unknown Location"}</p>
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Location
+                          </p>
+                          <p className="text-gray-900 dark:text-white">
+                            {location || "Unknown Location"}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -340,9 +356,10 @@ const FoundItemDetails = () => {
                         🔍 Image Verification
                       </h3>
                       <p className="mb-4 text-sm text-blue-800 dark:text-blue-200">
-                        Upload images if you have found the item to verify ownership:
+                        Upload images if you have found the item to verify
+                        ownership:
                       </p>
-                      
+
                       <form method="POST" className="mx-auto w-full max-w-2xl">
                         {/* Enhanced Dropzone */}
                         <div
@@ -355,7 +372,7 @@ const FoundItemDetails = () => {
                           tabIndex={0}
                         >
                           <input {...getInputProps()} />
-                          
+
                           {files.length > 0 ? (
                             <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                               {files.map((file, idx) => (
@@ -365,7 +382,7 @@ const FoundItemDetails = () => {
                                 >
                                   <button
                                     onClick={() => removeFile(file.name)}
-                                    className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg transition-all duration-200 hover:bg-red-600 hover:scale-110 focus:ring-2 focus:ring-red-300 focus:outline-none"
+                                    className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none"
                                     title="Remove"
                                     type="button"
                                   >
@@ -392,7 +409,7 @@ const FoundItemDetails = () => {
                           ) : (
                             <div className="space-y-3">
                               <div className="text-4xl">📤</div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                              <p className="text-sm text-gray-600 sm:text-base dark:text-gray-400">
                                 Drag & drop up to 5 image files, or{" "}
                                 <span className="cursor-pointer font-medium text-blue-600 underline transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                                   click to select
@@ -409,7 +426,9 @@ const FoundItemDetails = () => {
                         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                           <button
                             type="submit"
-                            onClick={(e) => verifyFoundItem(e, userId, location)}
+                            onClick={(e) =>
+                              verifyFoundItem(e, userId, location)
+                            }
                             aria-label="verify found item"
                             className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none sm:w-auto dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700"
                           >

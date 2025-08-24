@@ -41,7 +41,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-2 rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-2 transition-all duration-200 hover:from-indigo-100 hover:to-purple-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="flex cursor-pointer items-center space-x-2 rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-2 transition-all duration-200 hover:from-indigo-100 hover:to-purple-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600">
                   <User className="h-4 w-4 text-white" />
@@ -68,7 +68,7 @@ export default function Navbar() {
 
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center space-x-3 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+                    className="flex w-full cursor-pointer items-center space-x-3 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Logout</span>

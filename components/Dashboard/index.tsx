@@ -73,7 +73,7 @@ const Dashboard = () => {
             Dashboard Overview
           </h1>
           <p className="mt-2 text-gray-600">
-            Manage your reports and AI prompts
+            Manage your reports and User accounts
           </p>
         </motion.div>
 
@@ -101,7 +101,7 @@ const Dashboard = () => {
             </div>
             <div className="mt-4">
               <a
-                href="/admin/reports"
+                href="/dashboard/reports"
                 className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
               >
                 View all reports
@@ -127,7 +127,7 @@ const Dashboard = () => {
             </div>
             <div className="mt-4">
               <a
-                href="/admin/gemini"
+                href="/dashboard/user-account"
                 className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-700"
               >
                 Manage users account
@@ -166,7 +166,7 @@ const Dashboard = () => {
             </a>
 
             <a
-              href="/dashboard"
+              href="/dashboard/user-account"
               className="group flex items-center rounded-lg border border-gray-200 p-4 transition-colors hover:border-green-300 hover:bg-green-50"
             >
               <div className="rounded-lg bg-green-100 p-3 transition-colors group-hover:bg-green-200">

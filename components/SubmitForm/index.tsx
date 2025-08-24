@@ -4,9 +4,9 @@ import Swal from "sweetalert2";
 import NextImage from "next/image";
 import { motion } from "framer-motion";
 import { useDropzone } from "react-dropzone";
-import React, { useState, useCallback, useEffect } from "react";
 import { AIResponse } from "@/types/airesponse";
 import MyMap from "@/components/MapWrapper";
+import React, { useState, useCallback, useEffect } from "react";
 
 const Submit = () => {
   const [status, setStatus] = useState("Lost");

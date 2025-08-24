@@ -24,6 +24,14 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    if (
+      pathname.startsWith("/foundItems") ||
+      pathname.startsWith("/submitItem")
+    ) {
+      if (payload.status === 2) {
+        return NextResponse.redirect(new URL("/warning", request.url));
+      }
+    }
     return NextResponse.next();
   } catch (error) {
     console.error("❌ Invalid or expired token:", error);

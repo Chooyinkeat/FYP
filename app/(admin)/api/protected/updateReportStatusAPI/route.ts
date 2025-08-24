@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
     );
   }
   let sql = "";
-  if (type === "banned") {
+  if (type === "ban") {
     sql = "UPDATE report SET status = 3 WHERE report_id = ?";
     // Update user status
     const [userResult] = await pool.query(
       "UPDATE user SET status = ? WHERE user_id = ?",
-      [1, suspectedId],
+      [3, suspectedId],
     );
     if ((userResult as any).affectedRows === 0) {
       return NextResponse.json({
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Update fake claim status
     const [claimResult] = await pool.query(
       "UPDATE fake_claim_item SET status = ? WHERE fake_claim_id = ?",
-      [2, fakeClaimId],
+      [4, fakeClaimId],
     );
     if ((claimResult as any).affectedRows === 0) {
       return NextResponse.json({

@@ -46,6 +46,7 @@ const submitForm = async (e: React.FormEvent) => {
         const data = response.data.user;
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("profile", data.profile);
+        sessionStorage.setItem("status", data.status);
         if (data.is_admin !== 0) {
           window.location.href = "/dashboard";
         } else {
@@ -90,21 +91,21 @@ const handleGoogleSignIn = async () => {
           const data = response.data.user;
           sessionStorage.setItem("userId", data.userId);
           sessionStorage.setItem("profile", data.profile);
-          window.location.href = "/lostItems"; // Change this to your desired route
+          sessionStorage.setItem("status", data.status);
+          window.location.href = "/lostItems";
         } else {
           Swal.fire({
             icon: "error",
-            title: "Registration Failed",
-            text:
-              response.data.message || "An error occurred during registration.",
+            title: "Login Failed",
+            text: response.data.message || "An error occurred during login.",
           });
         }
       } catch (error) {
         console.error("Error registering user:", error);
         Swal.fire({
           icon: "error",
-          title: "Registration Failed",
-          text: "Error during user registration: " + (error as Error).message,
+          title: "Login Failed",
+          text: "Error during user login: " + (error as Error).message,
         });
         return;
       }
@@ -140,21 +141,21 @@ const handleGithubSignIn = async () => {
           const data = response.data.user;
           sessionStorage.setItem("userId", data.userId);
           sessionStorage.setItem("profile", data.profile);
+          sessionStorage.setItem("status", data.status);
           window.location.href = "/lostItems";
         } else {
           Swal.fire({
             icon: "error",
-            title: "Registration Failed",
-            text:
-              response.data.message || "An error occurred during registration.",
+            title: "Login Failed",
+            text: response.data.message || "An error occurred during login.",
           });
         }
       } catch (error) {
         console.error("Error registering user:", error);
         Swal.fire({
           icon: "error",
-          title: "Registration Failed",
-          text: "Error during user registration: " + (error as Error).message,
+          title: "Login Failed",
+          text: "Error during user login: " + (error as Error).message,
         });
         return;
       }
