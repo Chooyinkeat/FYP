@@ -233,6 +233,19 @@ const Submit = () => {
       });
       return;
     }
+
+    const hasSelected = Object.values(selectedQuestions).some(
+      (val) => val === true,
+    );
+    if (!hasSelected) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Questions Selected",
+        text: "Please select at least one verification question before confirming upload.",
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append("date", date);
     formData.append("time", time);
@@ -246,7 +259,6 @@ const Submit = () => {
       const selectedLevel2 = res.questions.level_2.filter(
         (_, i) => selectedQuestions[`l2-${resIndex}-${i}`],
       );
-      console.log("Selected Questions:", res.metadata);
       return {
         filename: res.filename,
         category: res.category,
@@ -259,21 +271,18 @@ const Submit = () => {
     });
 
     formData.append("metadata", JSON.stringify(filteredResponses));
+    files.forEach((file) => formData.append("images", file));
 
-    files.forEach((file) => {
-      formData.append("images", file);
-    });
     try {
       const response = await axios.post(
         "/api/protected/uploadFoundItemAPI",
         formData,
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         },
       );
+
       if (response.status === 200) {
         Swal.fire({
           icon: "success",
@@ -282,6 +291,8 @@ const Submit = () => {
         });
         setAiResponses([]);
         setFiles([]);
+        setShowModal(false);
+        setCurrentIndex(0);
       }
     } catch (err) {
       console.log("Unexpected error: ", err);
@@ -721,8 +732,6 @@ const Submit = () => {
                       <button
                         onClick={() => {
                           handleConfirmUpload();
-                          setShowModal(false);
-                          setCurrentIndex(0);
                         }}
                         className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:w-auto"
                       >

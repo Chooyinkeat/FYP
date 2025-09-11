@@ -82,7 +82,7 @@ export default function AppointmentsList() {
               className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
             />
             <span className="text-gray-700 dark:text-gray-300">
-              Others booked with you
+              You are the host
             </span>
           </label>
 
@@ -96,7 +96,7 @@ export default function AppointmentsList() {
               className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
             />
             <span className="text-gray-700 dark:text-gray-300">
-              You booked with others
+              You are the guest
             </span>
           </label>
         </div>
@@ -176,7 +176,7 @@ export default function AppointmentsList() {
                     href={{
                       pathname: "/appointment/view",
                       query: {
-                        data: encodeURIComponent(JSON.stringify(appointments)),
+                        data: encodeURIComponent(JSON.stringify(appt)),
                       },
                     }}
                     className="w-full"

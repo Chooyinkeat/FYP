@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
   if (!foundId || !foundItemUserId || images.length === 0) {
     return NextResponse.json(
-      { success: false, message: "Missing required fields" },
+      { success: false, message: "Missing required fields", status: 400 },
       { status: 400 },
     );
   }
@@ -37,7 +37,11 @@ export async function POST(request: NextRequest) {
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Found item not found or unauthorized" },
+        {
+          success: false,
+          message: "Found item not found or unauthorized",
+          status: 404,
+        },
         { status: 404 },
       );
     }
@@ -73,18 +77,22 @@ export async function POST(request: NextRequest) {
     );
     if ((result as any).affectedRows === 0) {
       return NextResponse.json(
-        { success: false, message: "Failed to create fake claim" },
+        { success: false, message: "Failed to create fake claim", status: 500 },
         { status: 500 },
       );
     }
     return NextResponse.json(
-      { success: true, message: "Fake claim created successfully" },
+      {
+        success: true,
+        message: "Fake claim created successfully",
+        status: 200,
+      },
       { status: 200 },
     );
   } catch (error) {
     console.log("Error processing request: ", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "Internal server error", status: 500 },
       { status: 500 },
     );
   }

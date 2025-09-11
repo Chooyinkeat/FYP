@@ -139,17 +139,14 @@ const FoundItemDetails = () => {
                 },
               },
             );
+            console.log("Fake claim response: ", response);
             if (response.status === 200) {
               Swal.fire({
                 icon: "warning",
                 title: "Error",
                 text: "The uploaded images are not found item.",
+                confirmButtonText: "OK",
               });
-            } else {
-              console.log(
-                "Fake claim API failed with status: ",
-                response.data.message,
-              );
             }
           } catch (error) {
             console.log("Error in fake claim API:", error);
@@ -163,8 +160,6 @@ const FoundItemDetails = () => {
         title: "Error",
         text: "Failed to verify found item.",
       });
-    } finally {
-      Swal.close();
     }
   };
 

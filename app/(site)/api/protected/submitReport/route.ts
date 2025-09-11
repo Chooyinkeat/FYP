@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
     const values = [userId, caseId, title, description, reason, "0"];
 
     const result = await pool.query(query, values);
-    if ((result as any[]).length > 0) {
+    if ((result as any[]).length === 0) {
       return NextResponse.json({
         success: false,
-        message: "Email already registered",
+        message: "Failed to insert report",
         status: 409,
       });
     }
