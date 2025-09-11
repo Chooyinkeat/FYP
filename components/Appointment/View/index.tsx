@@ -38,12 +38,13 @@ const AppointmentView = () => {
     if (appointmentData) {
       const parsedData = JSON.parse(
         decodeURIComponent(appointmentData),
-      ) as Appointment[];
-      setAppointments(parsedData);
+      ) as Appointment;
+      console.log("Appointment data: ", parsedData);
+      setAppointment(parsedData);
     }
   }, [appointmentData]);
 
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointment] = useState<Appointment>();
 
   return (
     <>
@@ -102,7 +103,9 @@ const AppointmentView = () => {
                       Date
                     </p>
                     <p className="text-lg font-medium text-gray-900 dark:text-white">
-                      {convertDateFormat(appointments[0]?.date)}
+                      {appointments?.date
+                        ? convertDateFormat(appointments.date)
+                        : "—"}
                     </p>
                   </div>
 
@@ -112,7 +115,7 @@ const AppointmentView = () => {
                       Time
                     </p>
                     <p className="text-lg font-medium text-gray-900 dark:text-white">
-                      {appointments[0]?.time}
+                      {appointments?.time}
                     </p>
                   </div>
 
@@ -123,20 +126,20 @@ const AppointmentView = () => {
                     </p>
                     <span
                       className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                        appointments[0]?.status === 0
+                        appointments?.status === 0
                           ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                          : appointments[0]?.status === 1
+                          : appointments?.status === 1
                           ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : appointments[0]?.status === 2
+                          : appointments?.status === 2
                           ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
                           : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
                       }`}
                     >
-                      {appointments[0]?.status === 0
+                      {appointments?.status === 0
                         ? "Pending"
-                        : appointments[0]?.status === 1
+                        : appointments?.status === 1
                         ? "Confirmed"
-                        : appointments[0]?.status === 2
+                        : appointments?.status === 2
                         ? "Cancelled"
                         : "Unknown"}
                     </span>
@@ -148,7 +151,7 @@ const AppointmentView = () => {
                       Contact
                     </p>
                     <p className="text-lg font-medium text-gray-900 dark:text-white">
-                      {appointments[0]?.contact}
+                      {appointments?.contact}
                     </p>
                   </div>
 
@@ -158,7 +161,7 @@ const AppointmentView = () => {
                       Email
                     </p>
                     <p className="text-lg font-medium break-all text-gray-900 dark:text-white">
-                      {appointments[0]?.email}
+                      {appointments?.email}
                     </p>
                   </div>
 
@@ -168,17 +171,17 @@ const AppointmentView = () => {
                       Location
                     </p>
                     <p className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
-                      {appointments[0]?.location}
+                      {appointments?.location}
                     </p>
-                    {appointments[0]?.location && (
-                      <ItemLocation location={appointments[0].location} />
+                    {appointments?.location && (
+                      <ItemLocation location={appointments.location} />
                     )}
                   </div>
                 </motion.div>
 
                 {/* Action Buttons */}
-                {appointments[0]?.status === 0 &&
-                  (appointments[0]?.user_id !==
+                {appointments?.status === 0 &&
+                  (appointments?.user_id !==
                   Number(sessionStorage.getItem("userId")) ? (
                     <motion.div
                       initial={{ opacity: 0, y: 15 }}
@@ -250,8 +253,8 @@ const AppointmentView = () => {
               </div>
             </motion.div>
             {/* Appointment Card */}
-            {appointments.length > 0 && appointments[0]?.case_id && (
-              <Card foundId={appointments[0].case_id} className="lg:w-1/4" />
+            {appointments?.case_id && (
+              <Card foundId={appointments.case_id} className="lg:w-1/4" />
             )}
           </div>
         </div>

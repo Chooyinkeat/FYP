@@ -101,7 +101,7 @@ const Profile = () => {
           },
         },
       );
-      if (response.data.success) {
+      if (response.data.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Profile Updated",

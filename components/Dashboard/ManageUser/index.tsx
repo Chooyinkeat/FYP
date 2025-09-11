@@ -37,6 +37,59 @@ const statusBadge: Record<Table["status"], string> = {
   2: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-700",
 };
 
+const exportToCSV = (data: Table[], filename: string) => {
+  if (!data || data.length === 0) return;
+
+  // Define CSV headers
+  const headers = [
+    "User ID",
+    "Username",
+    "Email",
+    "Contact",
+    "Status",
+    "Created Date",
+    "Found Count",
+    "Lost Count",
+  ];
+
+  // Map rows
+  const rows = data.map((user) => [
+    user.user_id,
+    user.username,
+    user.email,
+    user.contact || "Not provided",
+    user.status,
+    new Date(user.created_date).toLocaleDateString("en-MY"),
+    user.found_count,
+    user.lost_count,
+  ]);
+
+  // Join headers + rows
+  const csvContent = [
+    headers.join(","), // header row
+    ...rows.map((row) =>
+      row
+        .map((cell) =>
+          typeof cell === "string" && cell.includes(",")
+            ? `"${cell}"` // wrap in quotes if contains comma
+            : cell,
+        )
+        .join(","),
+    ),
+  ].join("\n");
+
+  // Create a Blob and trigger download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const ManageUser = () => {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<Table[]>([]);
@@ -111,6 +164,7 @@ const ManageUser = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
+                onClick={() => exportToCSV(users, "users.csv")}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
               >
                 <svg

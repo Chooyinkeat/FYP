@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Update user status
     const [userResult] = await pool.query(
       "UPDATE user SET status = ? WHERE user_id = ?",
-      [2, suspectedId],
+      [1, suspectedId],
     );
     if ((userResult as any).affectedRows === 0) {
       return NextResponse.json({

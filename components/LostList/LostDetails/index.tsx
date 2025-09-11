@@ -176,20 +176,22 @@ const LostDetails = () => {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 animate-spin rounded-full border-4 border-blue-600 border-t-transparent h-12 w-12 mx-auto"></div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Loading item details...</p>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            Loading item details...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8 dark:from-gray-900 dark:to-gray-800">
       {item && parsedDescription ? (
         <div className="mx-auto max-w-7xl">
           {/* Enhanced Header Section */}
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
+            <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl dark:text-white">
               Lost Item Details
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -227,7 +229,7 @@ const LostDetails = () => {
                   {/* Header with Close Case Button */}
                   <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                      <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         {parsedDescription.description}
                       </h2>
                       <p className="mt-2 text-gray-600 dark:text-gray-400">
@@ -296,8 +298,12 @@ const LostDetails = () => {
                             <i className="fa fa-file-text text-blue-600 dark:text-blue-400"></i>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
-                            <p className="text-gray-900 dark:text-white">{parsedDescription.description}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                              Description
+                            </p>
+                            <p className="text-gray-900 dark:text-white">
+                              {parsedDescription.description}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
@@ -305,8 +311,12 @@ const LostDetails = () => {
                             <i className="fa fa-calendar text-green-600 dark:text-green-400"></i>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Date</p>
-                            <p className="text-gray-900 dark:text-white">{parsedDescription.date}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                              Date
+                            </p>
+                            <p className="text-gray-900 dark:text-white">
+                              {parsedDescription.date}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -316,8 +326,12 @@ const LostDetails = () => {
                             <i className="fa fa-clock text-purple-600 dark:text-purple-400"></i>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Time</p>
-                            <p className="text-gray-900 dark:text-white">{parsedDescription.time}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                              Time
+                            </p>
+                            <p className="text-gray-900 dark:text-white">
+                              {parsedDescription.time}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
@@ -325,8 +339,12 @@ const LostDetails = () => {
                             <i className="fa fa-map-marker text-orange-600 dark:text-orange-400"></i>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</p>
-                            <p className="text-gray-900 dark:text-white">{parsedDescription.location}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                              Location
+                            </p>
+                            <p className="text-gray-900 dark:text-white">
+                              {parsedDescription.location}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -355,7 +373,7 @@ const LostDetails = () => {
                             ? "Upload images to check similarity with the lost item:"
                             : "Upload images to notify the user about your found item:"}
                         </p>
-                        
+
                         <form onSubmit={(e) => handleSubmit(e, item.userId)}>
                           {/* Enhanced Dropzone */}
                           <div
@@ -368,7 +386,7 @@ const LostDetails = () => {
                             tabIndex={0}
                           >
                             <input {...getInputProps()} />
-                            
+
                             {files.length > 0 ? (
                               <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                                 {files.map((file, idx) => (
@@ -378,7 +396,7 @@ const LostDetails = () => {
                                   >
                                     <button
                                       onClick={() => removeFile(file.name)}
-                                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg transition-all duration-200 hover:bg-red-600 hover:scale-110 focus:ring-2 focus:ring-red-300 focus:outline-none"
+                                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none"
                                       title="Remove"
                                       type="button"
                                     >
@@ -405,7 +423,7 @@ const LostDetails = () => {
                             ) : (
                               <div className="space-y-3">
                                 <div className="text-4xl">📤</div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                                <p className="text-sm text-gray-600 sm:text-base dark:text-gray-400">
                                   Drag & drop up to 5 image files, or{" "}
                                   <span className="cursor-pointer font-medium text-blue-600 underline transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                                     click to select
@@ -449,14 +467,17 @@ const LostDetails = () => {
                         {results.length > 0 && (
                           <div className="mt-8 space-y-6">
                             <div className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 p-6 text-center text-white shadow-lg">
-                              <h3 className="mb-2 text-xl font-bold">Image Analysis Results</h3>
+                              <h3 className="mb-2 text-xl font-bold">
+                                Image Analysis Results
+                              </h3>
                               <div className="text-2xl font-bold">
-                                🧮 Average Similarity Score: {averageScore.toFixed(2)} / 100
+                                🧮 Average Similarity Score:{" "}
+                                {averageScore.toFixed(2)} / 100
                               </div>
                               {averageScore >= 80 && (
                                 <div className="mt-4">
                                   <button
-                                    className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-green-600 shadow-lg transition-all duration-300 hover:bg-gray-50 hover:shadow-xl"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-green-600 shadow-lg transition-all duration-300 hover:bg-gray-50 hover:shadow-xl"
                                     onClick={() => {
                                       router.push(
                                         `/appointment?userId=${encodeURIComponent(
@@ -487,7 +508,7 @@ const LostDetails = () => {
                                       Comparison #{idx + 1}
                                     </h4>
                                   </div>
-                                  
+
                                   <div className="grid items-center gap-6 sm:grid-cols-3">
                                     {/* User Image */}
                                     <div className="flex flex-col items-center space-y-2">
@@ -498,7 +519,9 @@ const LostDetails = () => {
                                         src={URL.createObjectURL(
                                           files[result.userImageIndex],
                                         )}
-                                        alt={`User Image ${result.userImageIndex + 1}`}
+                                        alt={`User Image ${
+                                          result.userImageIndex + 1
+                                        }`}
                                         className="h-24 w-24 rounded-lg border-2 border-blue-300 object-cover shadow-md dark:border-blue-600"
                                       />
                                     </div>
@@ -506,7 +529,9 @@ const LostDetails = () => {
                                     {/* VS Indicator */}
                                     <div className="flex flex-col items-center justify-center">
                                       <div className="rounded-full bg-blue-600 p-3 text-white shadow-lg">
-                                        <span className="text-lg font-bold">VS</span>
+                                        <span className="text-lg font-bold">
+                                          VS
+                                        </span>
                                       </div>
                                     </div>
 
@@ -517,7 +542,9 @@ const LostDetails = () => {
                                       </p>
                                       <img
                                         src={result.lostImageUrl}
-                                        alt={`Lost Image ${result.lostImageIndex + 1}`}
+                                        alt={`Lost Image ${
+                                          result.lostImageIndex + 1
+                                        }`}
                                         className="h-24 w-24 rounded-lg border-2 border-blue-300 object-cover shadow-md dark:border-blue-600"
                                       />
                                     </div>
@@ -558,8 +585,10 @@ const LostDetails = () => {
       ) : (
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-            <div className="mb-4 animate-spin rounded-full border-4 border-blue-600 border-t-transparent h-12 w-12 mx-auto"></div>
-            <p className="text-lg text-gray-600 dark:text-gray-400">Loading item details...</p>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Loading item details...
+            </p>
           </div>
         </div>
       )}

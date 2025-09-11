@@ -434,8 +434,8 @@ const ManageReport = () => {
                 ).then((response) => {
                   if (response.status === 200) {
                     Swal.fire(
-                      "Banned",
-                      "The suspected user account has been banned.",
+                      "Success",
+                      "Warning message sent successfully.",
                       "success",
                     );
                     router.push("/dashboard");
@@ -458,8 +458,8 @@ const ManageReport = () => {
                 ).then((response) => {
                   if (response.status === 200) {
                     Swal.fire(
-                      "Banned",
-                      "The suspected user account has been banned.",
+                      "Success",
+                      "The suspected user has been restrcted posting.",
                       "success",
                     );
                     router.push("/dashboard");
