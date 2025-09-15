@@ -32,6 +32,16 @@ export async function POST(request: NextRequest) {
   try {
     const aiResults = JSON.parse(metadataJson);
     const category = aiResults[0].category;
+    let show_img = 0;
+    if (
+      category.toLowerCase() === "laptop" ||
+      category.toLowerCase() === "mobile phone" ||
+      category.toLowerCase() === "tablet" ||
+      category.toLowerCase() === "id card"
+    ) {
+      show_img = 1;
+    }
+
     const enhancedResults = aiResults.map((entry) => ({
       ...entry,
       date,
@@ -55,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     await pool.query(
-      `INSERT INTO found_item (status, category, image_url_payload, question_payload, location, date, time, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO found_item (status, category, image_url_payload, question_payload, location, date, time, show_img, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         0,
         category,
@@ -64,6 +74,7 @@ export async function POST(request: NextRequest) {
         location,
         date,
         time,
+        show_img,
         userId,
       ],
     );

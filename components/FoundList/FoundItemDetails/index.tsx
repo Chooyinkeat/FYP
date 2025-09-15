@@ -8,7 +8,11 @@ import UserProfile from "@/components/LostList/UserProfile";
 import ItemLocation from "@/components/LostList/ItemLocation";
 import ClaimQuestionForm from "@/components/FoundList/Question";
 import React, { useCallback, useState, useEffect } from "react";
-
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 const updateItemStatus = async (id: string) => {
   try {
     const response = await axios.post(
@@ -36,6 +40,18 @@ const FoundItemDetails = () => {
   const time = searchParams.get("time");
   const category = searchParams.get("category");
   const userId = searchParams.get("userId");
+  const show_img = searchParams.get("show_img");
+  const imageUrl = searchParams.get("image_url");
+  // ✅ Parse imageUrl safely into an array
+  const parsedImages: string[] = React.useMemo(() => {
+    if (!imageUrl) return [];
+    try {
+      return JSON.parse(decodeURIComponent(imageUrl));
+    } catch (err) {
+      console.error("Error parsing image_url:", err);
+      return [];
+    }
+  }, [imageUrl]);
 
   const [files, setFiles] = useState<File[]>([]);
   const [questionPayload, setQuestionPayload] = useState<any[]>([]);
@@ -43,6 +59,7 @@ const FoundItemDetails = () => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    console.log("Show img: ", show_img);
     const urlUserId = searchParams.get("userId");
     const sessionUserId = sessionStorage.getItem("userId");
 
@@ -120,7 +137,7 @@ const FoundItemDetails = () => {
 
             router.push(
               `/appointment?userId=${encodeURIComponent(
-                userId,
+                userId ?? "",
               )}&urls=${encodeURIComponent(
                 JSON.stringify(response.data.urls),
               )}&caseId=${encodeURIComponent(foundId ?? "")}`,
@@ -267,7 +284,26 @@ const FoundItemDetails = () => {
                     </button>
                   )}
                 </div>
-
+                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                  <Swiper
+                    pagination={{ clickable: true }}
+                    className="h-full w-full cursor-pointer"
+                  >
+                    {(show_img === "1" && parsedImages.length > 0
+                      ? parsedImages
+                      : ["/images/blog/img_1.webp"]
+                    ).map((imgUrl, i) => (
+                      <SwiperSlide key={i}>
+                        <Image
+                          src={imgUrl}
+                          alt={`Found item ${i + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
                 {/* Enhanced Item Details */}
                 <div className="mb-8 rounded-xl bg-gray-50 p-6 dark:bg-gray-700">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
@@ -344,7 +380,9 @@ const FoundItemDetails = () => {
                 </div>
 
                 {/* Enhanced Image Upload Section */}
-                {!show && (
+                {/* Conditional Rendering */}
+                {show_img === "0" && !show ? (
+                  // 🔹 Enhanced Image Upload Section
                   <div className="space-y-6">
                     <div className="rounded-xl bg-blue-50 p-6 dark:bg-blue-900/20">
                       <h3 className="mb-4 text-lg font-semibold text-blue-900 dark:text-blue-100">
@@ -356,7 +394,7 @@ const FoundItemDetails = () => {
                       </p>
 
                       <form method="POST" className="mx-auto w-full max-w-2xl">
-                        {/* Enhanced Dropzone */}
+                        {/* Dropzone */}
                         <div
                           {...getRootProps()}
                           className={`mb-6 flex min-h-48 flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed transition-all duration-300 focus-within:ring-2 focus-within:ring-blue-400 sm:min-h-56 ${
@@ -417,7 +455,7 @@ const FoundItemDetails = () => {
                           )}
                         </div>
 
-                        {/* Enhanced Action Buttons */}
+                        {/* Action Buttons */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                           <button
                             type="submit"
@@ -429,20 +467,8 @@ const FoundItemDetails = () => {
                           >
                             <i className="fa fa-check-circle text-lg"></i>
                             Verify with Images
-                            <svg
-                              className="fill-white"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 14 14"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
-                                fill=""
-                              />
-                            </svg>
                           </button>
+
                           <button
                             type="button"
                             onClick={getQuestionPayload}
@@ -450,20 +476,29 @@ const FoundItemDetails = () => {
                           >
                             <i className="fa fa-question-circle text-lg"></i>
                             Get Questions
-                            <svg
-                              className="fill-current"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 14 14"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z" />
-                            </svg>
                           </button>
                         </div>
                       </form>
                     </div>
+                  </div>
+                ) : (
+                  // 🔹 Make Appointment Button
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(
+                          `/appointment?userId=${encodeURIComponent(
+                            userId ?? "",
+                          )}&urls=${encodeURIComponent(
+                            JSON.stringify(parsedImages),
+                          )}&caseId=${encodeURIComponent(foundId ?? "")}`,
+                        );
+                      }}
+                      className="cursor-pointer rounded-xl bg-green-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-green-700 hover:shadow-xl focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:outline-none"
+                    >
+                      📅 Make Appointment
+                    </button>
                   </div>
                 )}
 

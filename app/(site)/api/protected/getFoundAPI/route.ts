@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get recent 18 found items
     const [rows] = await pool.query(
-      `SELECT category, location, date, time, status, found_id, user_id FROM found_item WHERE status = 0 ORDER BY created_date`,
+      `SELECT category, image_url_payload, location, date, time, status, show_img ,found_id, user_id FROM found_item WHERE status = 0 ORDER BY created_date`,
     );
     if ((rows as any[]).length === 0) {
       return NextResponse.json(
@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
       location: item.location,
       date: item.date,
       time: item.time,
+      image_url: JSON.parse(item.image_url_payload),
+      show_img: item.show_img,
       status: item.status,
       foundId: item.found_id,
       userId: item.user_id,
