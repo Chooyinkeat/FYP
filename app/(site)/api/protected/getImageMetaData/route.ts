@@ -15,34 +15,41 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 async function analyzeImageWithGemini(images: File[]) {
   const parts: any[] = [];
 
-  parts.push(`
+  parts.push({
+    text: `
 You will be provided with ${images.length} images. For each image, analyze it individually and return structured metadata and two levels of verification questions in the following valid JSON format:
 
 [
   {
     "filename": "image1.jpg",
-    "category": "Clothing",
+    "category": "Laptop",
     "metadata": {
-      "item_type": "Jacket",
-      "color": "Black",
-      "brand": "Nike",
-      "material": "Leather"
+      "item_type": "Dell XPS 13",
+      "color": "Silver",
+      "brand": "Dell",
+      "material": "Aluminum"
     },
     "questions": {
       "level_1": [
-        { "question": "What brand is this item?", "answer": "Nike" },
-        { "question": "What color is the jacket?", "answer": "Black" },
-        { "question": "What material is the jacket made of?", "answer": "Leather" }
+        { "question": "What brand is this laptop?", "answer": "Dell" },
+        { "question": "What is the color of the laptop?", "answer": "Silver" }
       ],
       "level_2": [
-        { "question": "Are there any visible scratches or wear marks?", "answer": "There are some minor wear marks on the sleeves." },
-        { "question": "Are there any custom decorations or stickers?", "answer": "No, the jacket has no custom decorations." }
+        { "question": "Does the laptop show any visible scratches?", "answer": "No scratches are visible." },
+        { "question": "Is the laptop powered on or off?", "answer": "It appears to be powered off." }
       ]
     }
   }
 ]
 
-Guidelines:
+### Category rules:
+- If the image is of a **laptop**, always set "category": "Laptop".
+- If the image is of a **mobile phone**, always set "category": "Mobile Phone".
+- If the image is of a **tablet**, always set "category": "Tablet".
+- If the image is of an **ID card** (driver’s license, passport, student ID, etc.), always set "category": "ID Card".
+- Otherwise, use a general category such as "Clothing", "Accessory", "Electronics", "Document", etc.
+
+### Additional guidelines:
 - Do not use '...' anywhere in the output.
 - Do not add trailing commas.
 - Do not wrap the result in \`\`\`json or \`\`\`.
@@ -50,9 +57,8 @@ Guidelines:
 - Ensure the final result is strictly valid JSON that can be parsed using JSON.parse().
 - Always use real values based on the image, and avoid placeholder text like "e.g.".
 - Always include the correct "filename" for each image.
-
-Strict formatting is required to ensure machine-readability.
-`);
+`,
+  });
 
   for (const image of images) {
     const arrayBuffer = await image.arrayBuffer();

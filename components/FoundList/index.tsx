@@ -2,31 +2,33 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Swiper, SwiperSlide } from "swiper/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FoundItem } from "@/types/items";
 import { debounce } from "lodash";
 import { useState, useEffect, useCallback } from "react";
 
+const fetchFoundItems = async () => {
+  try {
+    const response = await axios.get("/api/protected/getFoundAPI", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to fetch found items.",
+    });
+  }
+};
 
 const FoundList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [foundItems, setFoundItems] = useState<FoundItem[]>([]);
-
-  const fetchFoundItems = async () => {
-    try {
-      const response = await axios.get("/api/protected/getFoundAPI", {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to fetch found items.",
-      });
-    }
-  };
 
   const searchItems = async (category: string) => {
     try {
@@ -65,6 +67,7 @@ const FoundList = () => {
     fetchFoundItems()
       .then((data) => {
         if (data?.success && data.foundItems.length > 0) {
+          console.log("Found item: ", data.foundItems);
           setFoundItems(data.foundItems);
         } else {
           Swal.fire({
@@ -91,7 +94,7 @@ const FoundList = () => {
   }, [debouncedSearch]);
 
   const convertDate = (date: string) => {
-    const d = new Date(date); // Keep the full ISO string to preserve timezone
+    const d = new Date(date);
     const readableDate = d.toLocaleDateString("en-MY", {
       weekday: "long",
       year: "numeric",
@@ -181,15 +184,27 @@ const FoundList = () => {
             className="animate_top overflow-hidden rounded-2xl border border-gray-100 bg-white p-0 shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-none"
           >
             <div className="relative aspect-[368/239] w-full">
-              <Image
-                src="/images/blog/img_1.webp"
-                alt="Found item"
-                fill
-                className="rounded-t-2xl object-cover"
-                sizes="(max-width: 768px) 100vw, 368px"
-                priority
-              />
+              <Swiper
+                pagination={{ clickable: true }}
+                className="h-full w-full cursor-pointer"
+              >
+                {(item.show_img === 1 && item.image_url.length > 0
+                  ? item.image_url
+                  : ["/images/blog/img_1.webp"]
+                ) // fallback
+                  .map((imgUrl, i) => (
+                    <SwiperSlide key={i}>
+                      <Image
+                        src={imgUrl}
+                        alt={`Lost item ${i + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </SwiperSlide>
+                  ))}
+              </Swiper>
             </div>
+
             <div className="px-6 py-5">
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -218,9 +233,27 @@ const FoundList = () => {
                 </p>
               </div>
               <div className="mt-6 flex justify-between">
-                <button 
+                <button
                   onClick={async () => {
-                    const itemUrl = `${window.location.origin}/foundItems/claimItemForm?foundId=${encodeURIComponent(item.foundId)}&location=${encodeURIComponent(item.location)}&date=${encodeURIComponent(convertDate(item.date))}&time=${encodeURIComponent(convertTime(item.time))}&category=${encodeURIComponent(item.category)}&userId=${encodeURIComponent(item.userId)}`;
+                    const itemUrl = `${
+                      window.location.origin
+                    }/foundItems/claimItemForm?foundId=${encodeURIComponent(
+                      item.foundId,
+                    )}&location=${encodeURIComponent(
+                      item.location,
+                    )}&date=${encodeURIComponent(
+                      convertDate(item.date),
+                    )}&time=${encodeURIComponent(
+                      convertTime(item.time),
+                    )}&category=${encodeURIComponent(
+                      item.category,
+                    )}&userId=${encodeURIComponent(
+                      item.userId,
+                    )}&show_img=${encodeURIComponent(
+                      item.show_img,
+                    )}&image_url=${encodeURIComponent(
+                      JSON.stringify(item.image_url),
+                    )}`;
                     try {
                       await navigator.clipboard.writeText(itemUrl);
                       Swal.fire({
@@ -231,7 +264,7 @@ const FoundList = () => {
                         showConfirmButton: false,
                       });
                     } catch (err) {
-                      console.error('Failed to copy URL:', err);
+                      console.error("Failed to copy URL:", err);
                       Swal.fire({
                         icon: "error",
                         title: "Copy Failed",
@@ -239,7 +272,7 @@ const FoundList = () => {
                       });
                     }
                   }}
-                  className="cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition not-last:inline-flex hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 active:scale-95"
+                  className="cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition not-last:inline-flex hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none active:scale-95 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
                 >
                   Copy and Share
                 </button>
@@ -254,7 +287,13 @@ const FoundList = () => {
                     convertTime(item.time),
                   )}&category=${encodeURIComponent(
                     item.category,
-                  )}&userId=${encodeURIComponent(item.userId)}`}
+                  )}&userId=${encodeURIComponent(
+                    item.userId,
+                  )}&show_img=${encodeURIComponent(
+                    item.show_img,
+                  )}&image_url=${encodeURIComponent(
+                    JSON.stringify(item.image_url),
+                  )}`}
                   className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
                 >
                   <svg

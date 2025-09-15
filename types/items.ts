@@ -6,6 +6,8 @@ export interface FoundItem {
   time: string;
   location: string;
   userId: string;
+  image_url: string[];
+  show_img: number;
 }
 
 export interface QuestionBlock {

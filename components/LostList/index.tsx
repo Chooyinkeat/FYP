@@ -70,6 +70,7 @@ const LostList = () => {
     fetchLostItems()
       .then((data) => {
         if (data?.success && data.lostItems.length > 0) {
+          console.log(data.lostItems);
           setLostItems(data.lostItems);
         } else {
           Swal.fire({

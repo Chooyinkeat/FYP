@@ -205,6 +205,7 @@ const Submit = () => {
         },
       );
       const aiData = response.data.data;
+      console.log("Results : ", response.data.data);
       const aiDataWithPreview = aiData.map((item: any, index: number) => ({
         ...item,
         previewUrl: URL.createObjectURL(files[index]), // This assumes order is preserved
@@ -534,149 +535,277 @@ const Submit = () => {
               </form>
 
               {showModal && aiResponses.length > 0 && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                  <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
-                    {/* Close Button */}
-                    <button
-                      className="absolute top-4 right-4 text-2xl font-bold text-black focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
-                      onClick={() => setShowModal(false)}
-                      aria-label="Close modal"
-                    >
-                      ✕
-                    </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-300">
+                  <div className="relative flex max-h-[95vh] sm:max-h-[90vh] w-full max-w-xs sm:max-w-sm md:max-w-2xl lg:max-w-3xl xl:max-w-4xl flex-col rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-xl p-4 sm:p-6 md:p-8 shadow-2xl ring-1 ring-gray-200/50 dark:bg-gray-900/95 dark:ring-gray-700/50 animate-in slide-in-from-bottom-4 duration-500">
+                    {/* Header with Close Button */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent dark:from-white dark:to-gray-300">
+                            AI Analysis Results
+                          </h2>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Review and select verification questions</p>
+                        </div>
+                      </div>
+                      <button
+                        className="group relative p-2 rounded-xl bg-gray-100 hover:bg-red-50 focus:bg-red-50 transition-all duration-200 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:bg-gray-800 dark:hover:bg-red-900/20 dark:focus:bg-red-900/20"
+                        onClick={() => setShowModal(false)}
+                        aria-label="Close modal"
+                      >
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 group-focus:text-red-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
 
-                    {/* Carousel Content - Scrollable */}
-                    <div className="flex-1 overflow-y-auto">
-                      <div className="relative min-h-[22rem]">
+                    {/* Carousel Content - Enhanced Design */}
+                    <div className="flex-1 overflow-hidden mb-4">
+                      <div className="relative h-[450px] sm:h-[500px] md:h-[550px]">
                         {aiResponses.map((res, index) => (
                           <div
                             key={index}
-                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                            className={`absolute inset-0 transition-all duration-700 ease-out transform ${
                               index === currentIndex
-                                ? "z-10 opacity-100"
-                                : "z-0 opacity-0"
+                                ? "z-10 opacity-100 translate-x-0 scale-100"
+                                : index < currentIndex
+                                ? "z-0 opacity-0 -translate-x-full scale-95"
+                                : "z-0 opacity-0 translate-x-full scale-95"
                             }`}
                             data-carousel-item
                           >
-                            <div className="overflow-y-auto p-4 text-black dark:text-white">
-                              <img
-                                src={res.previewUrl}
-                                alt={res.filename}
-                                className="mb-4 w-full rounded-lg object-contain shadow"
-                              />
-                              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                {res.filename}
-                              </p>
+                            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-6">
+                              <div className="space-y-6 pr-2">
+                                {/* Image Section */}
+                                <div className="relative group">
+                                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg ring-1 ring-gray-200/50 dark:ring-gray-700/50">
+                                      <img
+                                        src={res.previewUrl}
+                                        alt={res.filename}
+                                        className="w-full max-h-32 sm:max-h-40 md:max-h-48 rounded-xl object-contain"
+                                      />
+                                    </div>
+                                </div>
 
-                              <ul className="mb-4 space-y-1 text-sm sm:text-base">
-                                <li>
-                                  <strong>Item Type:</strong>{" "}
-                                  {res.metadata.item_type}
-                                </li>
-                                <li>
-                                  <strong>Color:</strong> {res.metadata.color}
-                                </li>
-                                <li>
-                                  <strong>Brand:</strong> {res.metadata.brand}
-                                </li>
-                                <li>
-                                  <strong>Material:</strong>{" "}
-                                  {res.metadata.material}
-                                </li>
-                              </ul>
-                              <h3 className="mb-2 text-base font-medium">
-                                Verification Questions:
-                              </h3>
-                              <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base">
-                                <>
-                                  {/* level_1 */}
-                                  {res.questions.level_1.map((q, i) => (
-                                    <li
-                                      key={`l1-${i}`}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        id={`l1-checkbox-${index}-${i}`}
-                                        className="mt-1"
-                                        checked={
-                                          selectedQuestions[
-                                            `l1-${index}-${i}`
-                                          ] || false
-                                        }
-                                        onChange={(e) =>
-                                          setSelectedQuestions((prev) => ({
-                                            ...prev,
-                                            [`l1-${index}-${i}`]:
-                                              e.target.checked,
-                                          }))
-                                        }
-                                      />
-                                      <label
-                                        htmlFor={`l1-checkbox-${index}-${i}`}
+                                {/* Metadata Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <div className="p-1.5 bg-emerald-500 rounded-lg">
+                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                      </div>
+                                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+                                        Item Type
+                                      </span>
+                                    </div>
+                                    <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100 break-words">
+                                      {res.metadata.item_type}
+                                    </p>
+                                  </div>
+
+                                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-amber-200/50 dark:border-amber-700/50">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <div className="p-1.5 bg-amber-500 rounded-lg">
+                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                                        </svg>
+                                      </div>
+                                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                                        Color
+                                      </span>
+                                    </div>
+                                    <p className="text-sm font-medium text-amber-900 dark:text-amber-100 break-words">
+                                      {res.metadata.color}
+                                    </p>
+                                  </div>
+
+                                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200/50 dark:border-purple-700/50">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <div className="p-1.5 bg-purple-500 rounded-lg">
+                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                      </div>
+                                      <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                                        Brand
+                                      </span>
+                                    </div>
+                                    <p className="text-sm font-medium text-purple-900 dark:text-purple-100 break-words">
+                                      {res.metadata.brand}
+                                    </p>
+                                  </div>
+
+                                  <div className="bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 rounded-xl p-4 border border-rose-200/50 dark:border-rose-700/50">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <div className="p-1.5 bg-rose-500 rounded-lg">
+                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                        </svg>
+                                      </div>
+                                      <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wide">
+                                        Material
+                                      </span>
+                                    </div>
+                                    <p className="text-sm font-medium text-rose-900 dark:text-rose-100 break-words">
+                                      {res.metadata.material}
+                                    </p>
+                                  </div>
+                                </div>
+                                {/* Verification Questions Section */}
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg ring-1 ring-gray-200/50 dark:ring-gray-700/50">
+                                  <div className="flex items-center space-x-3 mb-6">
+                                    <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+                                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                    </div>
+                                    <div>
+                                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                        Verification Questions
+                                      </h3>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Select questions to include in your listing
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-4">
+                                    {/* Level 1 Questions */}
+                                    {res.questions.level_1.map((q, i) => (
+                                      <div
+                                        key={`l1-${i}`}
+                                        className="group relative bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200/50 dark:border-blue-700/50 hover:shadow-md transition-all duration-200"
                                       >
-                                        <strong>Q (Level 1):</strong>{" "}
-                                        {q.question}
-                                        <br />
-                                        <strong>A:</strong> {q.answer}
-                                      </label>
-                                    </li>
-                                  ))}
-                                  {/* level_2 */}
-                                  {res.questions.level_2.map((q, i) => (
-                                    <li
-                                      key={`l2-${i}`}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        id={`l2-checkbox-${index}-${i}`}
-                                        className="mt-1"
-                                        checked={
-                                          selectedQuestions[
-                                            `l2-${index}-${i}`
-                                          ] || false
-                                        }
-                                        onChange={(e) =>
-                                          setSelectedQuestions((prev) => ({
-                                            ...prev,
-                                            [`l2-${index}-${i}`]:
-                                              e.target.checked,
-                                          }))
-                                        }
-                                      />
-                                      <label
-                                        htmlFor={`l2-checkbox-${index}-${i}`}
+                                        <div className="flex items-start space-x-4">
+                                          <div className="flex-shrink-0 mt-1">
+                                            <input
+                                              type="checkbox"
+                                              id={`l1-checkbox-${index}-${i}`}
+                                              className="w-5 h-5 text-blue-600 bg-white border-2 border-blue-300 rounded-lg focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-blue-500 transition-all duration-200 hover:border-blue-400"
+                                              checked={
+                                                selectedQuestions[
+                                                  `l1-${index}-${i}`
+                                                ] || false
+                                              }
+                                              onChange={(e) =>
+                                                setSelectedQuestions((prev) => ({
+                                                  ...prev,
+                                                  [`l1-${index}-${i}`]:
+                                                    e.target.checked,
+                                                }))
+                                              }
+                                            />
+                                          </div>
+                                          <label
+                                            htmlFor={`l1-checkbox-${index}-${i}`}
+                                            className="flex-1 cursor-pointer"
+                                          >
+                                            <div className="mb-3">
+                                              <div className="flex items-center space-x-2 mb-2">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                                  Level 1
+                                                </span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Basic Verification</span>
+                                              </div>
+                                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-relaxed">
+                                                <span className="text-blue-600 dark:text-blue-400 font-semibold">Q:</span>{" "}
+                                                <span className="break-words">{q.question}</span>
+                                              </p>
+                                            </div>
+                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200/50 dark:border-green-700/50">
+                                              <p className="text-sm text-green-800 dark:text-green-200">
+                                                <span className="font-semibold text-green-600 dark:text-green-400">Correct Answer:</span>{" "}
+                                                <span className="break-words font-medium">{q.answer}</span>
+                                              </p>
+                                            </div>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    ))}
+
+                                    {/* Level 2 Questions */}
+                                    {res.questions.level_2.map((q, i) => (
+                                      <div
+                                        key={`l2-${i}`}
+                                        className="group relative bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200/50 dark:border-purple-700/50 hover:shadow-md transition-all duration-200"
                                       >
-                                        <strong>Q (Level 2):</strong>{" "}
-                                        {q.question}
-                                        <br />
-                                        <strong>A:</strong> {q.answer}
-                                      </label>
-                                    </li>
-                                  ))}
-                                </>
-                              </ul>
+                                        <div className="flex items-start space-x-4">
+                                          <div className="flex-shrink-0 mt-1">
+                                            <input
+                                              type="checkbox"
+                                              id={`l2-checkbox-${index}-${i}`}
+                                              className="w-5 h-5 text-purple-600 bg-white border-2 border-purple-300 rounded-lg focus:ring-purple-500 focus:ring-2 dark:bg-gray-700 dark:border-purple-500 transition-all duration-200 hover:border-purple-400"
+                                              checked={
+                                                selectedQuestions[
+                                                  `l2-${index}-${i}`
+                                                ] || false
+                                              }
+                                              onChange={(e) =>
+                                                setSelectedQuestions((prev) => ({
+                                                  ...prev,
+                                                  [`l2-${index}-${i}`]:
+                                                    e.target.checked,
+                                                }))
+                                              }
+                                            />
+                                          </div>
+                                          <label
+                                            htmlFor={`l2-checkbox-${index}-${i}`}
+                                            className="flex-1 cursor-pointer"
+                                          >
+                                            <div className="mb-3">
+                                              <div className="flex items-center space-x-2 mb-2">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                                                  Level 2
+                                                </span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Advanced Verification</span>
+                                              </div>
+                                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-relaxed">
+                                                <span className="text-purple-600 dark:text-purple-400 font-semibold">Q:</span>{" "}
+                                                <span className="break-words">{q.question}</span>
+                                              </p>
+                                            </div>
+                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200/50 dark:border-green-700/50">
+                                              <p className="text-sm text-green-800 dark:text-green-200">
+                                                <span className="font-semibold text-green-600 dark:text-green-400">Answer:</span>{" "}
+                                                <span className="break-words font-medium">{q.answer}</span>
+                                              </p>
+                                            </div>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Carousel Controls */}
-                    <div className="mt-4 flex items-center justify-between">
+                    {/* Carousel Controls with Integrated Confirm Button */}
+                    <div className="flex items-center justify-between px-2 gap-3">
+                      {/* Left: Previous Button */}
                       <button
                         type="button"
-                        className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
+                        className="group flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 focus:from-gray-200 focus:to-gray-300 transition-all duration-200 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         onClick={() =>
                           setCurrentIndex((prev) =>
                             prev > 0 ? prev - 1 : aiResponses.length - 1,
                           )
                         }
+                        disabled={aiResponses.length <= 1}
                         aria-label="Previous"
                       >
                         <svg
-                          className="h-5 w-5 text-black dark:text-white"
+                          className="h-4 w-4 text-gray-600 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100 transition-colors duration-200"
                           fill="none"
                           viewBox="0 0 6 10"
                         >
@@ -689,54 +818,76 @@ const Submit = () => {
                           />
                         </svg>
                       </button>
-                      <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {currentIndex + 1} of {aiResponses.length}
-                      </span>
-                      <button
-                        type="button"
-                        className="rounded-full bg-gray-200 p-2 hover:bg-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600"
-                        onClick={() =>
-                          setCurrentIndex((prev) =>
-                            prev < aiResponses.length - 1 ? prev + 1 : 0,
-                          )
-                        }
-                        aria-label="Next"
-                      >
-                        <svg
-                          className="h-5 w-5 text-black dark:text-white"
-                          fill="none"
-                          viewBox="0 0 6 10"
+                      
+                      {/* Center: Counter and Dots + Confirm Button */}
+                      <div className="flex-1 flex items-center justify-center gap-4">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
+                            {currentIndex + 1} of {aiResponses.length}
+                          </span>
+                          {aiResponses.length > 1 && (
+                            <div className="flex space-x-1.5">
+                              {aiResponses.map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => setCurrentIndex(index)}
+                                  className={`w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                                    index === currentIndex
+                                      ? "bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg"
+                                      : "bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+                                  }`}
+                                  aria-label={`Go to image ${index + 1}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Confirm Button */}
+                        <button
+                          onClick={() => {
+                            handleConfirmUpload();
+                          }}
+                          className="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 focus:from-blue-700 focus:via-purple-700 focus:to-blue-800 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 focus:outline-none shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 rounded-lg"
                         >
-                          <path
-                            d="M1 9l4-4-4-4"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Footer Buttons */}
-                    <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
-                      <button
-                        onClick={() => {
-                          setShowModal(false);
-                          setCurrentIndex(0);
-                        }}
-                        className="w-full rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 sm:w-auto dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                      >
-                        ✕ Close
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleConfirmUpload();
-                        }}
-                        className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:w-auto"
-                      >
-                        ✅ Confirm
-                      </button>
+                          <span className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                          <span className="relative flex items-center justify-center gap-1.5">
+                            <svg className="w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Confirm
+                          </span>
+                        </button>
+                      </div>
+                      
+                      {/* Right: Next Button + Close Button */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="group flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 focus:from-gray-200 focus:to-gray-300 transition-all duration-200 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                          onClick={() =>
+                            setCurrentIndex((prev) =>
+                              prev < aiResponses.length - 1 ? prev + 1 : 0,
+                            )
+                          }
+                          disabled={aiResponses.length <= 1}
+                          aria-label="Next"
+                        >
+                          <svg
+                            className="h-4 w-4 text-gray-600 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100 transition-colors duration-200"
+                            fill="none"
+                            viewBox="0 0 6 10"
+                          >
+                            <path
+                              d="M1 9l4-4-4-4"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
