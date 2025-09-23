@@ -44,10 +44,11 @@ const submitForm = async (e: React.FormEvent) => {
         text: "You have successfully logged in.",
       }).then(() => {
         const data = response.data.user;
+        console.log("Response data: ", data);
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("profile", data.profile);
         sessionStorage.setItem("status", data.status);
-        if (data.is_admin !== 0) {
+        if (data.role !== 0) {
           window.location.href = "/dashboard";
         } else {
           window.location.href = "/lostItems";
