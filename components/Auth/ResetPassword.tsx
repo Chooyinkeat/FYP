@@ -8,9 +8,9 @@ import axios from "axios";
 const ResetPassword = () => {
   // Set state
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // 💾 New password state
-  const [jwtToken, setJwtToken] = useState(""); // 🛡️ JWT token for OTP verification
-  const [otpEnabled, setOtpEnabled] = useState(false); // 🔐 Controls OTP input field state
+  const [password, setPassword] = useState("");
+  const [jwtToken, setJwtToken] = useState("");
+  const [otpEnabled, setOtpEnabled] = useState(false);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
 
   const handleSend = async () => {
@@ -26,16 +26,14 @@ const ResetPassword = () => {
     try {
       const response = await axios.post("/api/sendEmail", { email });
       if (response.data.success) {
-        setOtpEnabled(true); // ✅ Enable OTP fields
-        setJwtToken(response.data.token); // 🛡️ Store JWT token
+        setOtpEnabled(true);
+        setJwtToken(response.data.token);
         Swal.fire({
           icon: "success",
           title: "OTP Sent",
           text: "Check your email for the OTP.",
         });
-        // Optionally show success message
       } else {
-        // Handle failure (e.g., user not found)
         setOtpEnabled(false);
         Swal.fire({
           icon: "error",
@@ -50,17 +48,16 @@ const ResetPassword = () => {
   };
 
   const handleChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return; // Allow only digits and empty
+    if (!/^\d?$/.test(value)) return;
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
-    // Automatically move to the next input if available
     const next = document.getElementById(`code-${index + 2}`);
     if (value && next) (next as HTMLInputElement).focus();
   };
 
   const handleVerifyOtp = async () => {
-    const fullOtp = code.join(""); // Combine digits into 6-digit string
+    const fullOtp = code.join("");
     if (fullOtp.length < 6) {
       Swal.fire({
         icon: "warning",
@@ -147,7 +144,7 @@ const ResetPassword = () => {
               aria-label="signup with email and password"
               className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho my-3 inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out lg:my-2 xl:my-3"
             >
-              Send email
+              Send OTP code
               <svg
                 className="fill-white"
                 width="14"
