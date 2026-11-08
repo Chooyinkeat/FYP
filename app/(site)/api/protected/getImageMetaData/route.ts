@@ -17,7 +17,19 @@ async function analyzeImageWithGemini(images: File[]) {
 
   parts.push({
     text: `
-You will be provided with ${images.length} images. For each image, analyze it individually and return structured metadata and two levels of verification questions in the following valid JSON format:
+You will be provided with ${images.length} images. For each image, first determine if it contains a recognizable **item/object** (such as laptop, mobile phone, tablet, ID card, clothing, accessory, electronics, document, etc.).
+
+### Rules:
+- If the image contains a human face, body, group of people, animals, pets, or natural scenery, classify it as "Non-Item".
+- If the image contains an item, classify it into one of the categories below:
+  - Laptop → "Laptop"
+  - Mobile Phone → "Mobile Phone"
+  - Tablet → "Tablet"
+  - ID Card (driver’s license, passport, student ID, etc.) → "ID Card"
+  - Otherwise, choose a general category such as "Clothing", "Accessory", "Electronics", "Document", etc.
+
+### Output format:
+Return a strictly valid JSON array, where each entry has this format:
 
 [
   {
@@ -42,22 +54,24 @@ You will be provided with ${images.length} images. For each image, analyze it in
   }
 ]
 
-### Category rules:
-- If the image is of a **laptop**, always set "category": "Laptop".
-- If the image is of a **mobile phone**, always set "category": "Mobile Phone".
-- If the image is of a **tablet**, always set "category": "Tablet".
-- If the image is of an **ID card** (driver’s license, passport, student ID, etc.), always set "category": "ID Card".
-- Otherwise, use a general category such as "Clothing", "Accessory", "Electronics", "Document", etc.
+### Special Case:
+- If the category is "Non-Item", output:
+  {
+    "filename": "image1.jpg",
+    "category": "Non-Item",
+    "metadata": {},
+    "questions": { "level_1": [], "level_2": [] }
+  }
 
 ### Additional guidelines:
 - Do not use '...' anywhere in the output.
 - Do not add trailing commas.
 - Do not wrap the result in \`\`\`json or \`\`\`.
 - Only output a raw JSON array as shown above, and nothing else.
-- Ensure the final result is strictly valid JSON that can be parsed using JSON.parse().
-- Always use real values based on the image, and avoid placeholder text like "e.g.".
+- Ensure the final result is strictly valid JSON that can be parsed with JSON.parse().
 - Always include the correct "filename" for each image.
-`,
+- Do not generate fake metadata for non-item images.
+  `,
   });
 
   for (const image of images) {

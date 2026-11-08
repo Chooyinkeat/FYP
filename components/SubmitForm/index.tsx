@@ -206,9 +206,19 @@ const Submit = () => {
       );
       const aiData = response.data.data;
       console.log("Results : ", response.data.data);
+      const nonItemEntries = aiData.filter(
+        (item: any) => item.category === "Non-Item",
+      );
+
+      if (nonItemEntries.length > 0) {
+        Swal.close();
+        alert("The image submitted is not item");
+        return;
+      }
+
       const aiDataWithPreview = aiData.map((item: any, index: number) => ({
         ...item,
-        previewUrl: URL.createObjectURL(files[index]), // This assumes order is preserved
+        previewUrl: URL.createObjectURL(files[index]),
       }));
       setAiResponses(aiDataWithPreview);
       setShowModal(true);
@@ -535,134 +545,206 @@ const Submit = () => {
               </form>
 
               {showModal && aiResponses.length > 0 && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-300">
-                  <div className="relative flex max-h-[95vh] sm:max-h-[90vh] w-full max-w-xs sm:max-w-sm md:max-w-2xl lg:max-w-3xl xl:max-w-4xl flex-col rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-xl p-4 sm:p-6 md:p-8 shadow-2xl ring-1 ring-gray-200/50 dark:bg-gray-900/95 dark:ring-gray-700/50 animate-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 backdrop-blur-sm duration-300 sm:p-4">
+                  <div className="animate-in slide-in-from-bottom-4 relative flex max-h-[95vh] w-full max-w-xs flex-col rounded-2xl bg-white/95 p-4 shadow-2xl ring-1 ring-gray-200/50 backdrop-blur-xl duration-500 sm:max-h-[90vh] sm:max-w-sm sm:rounded-3xl sm:p-6 md:max-w-2xl md:p-8 lg:max-w-3xl xl:max-w-4xl dark:bg-gray-900/95 dark:ring-gray-700/50">
                     {/* Header with Close Button */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="mb-6 flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        <div className="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 p-2">
+                          <svg
+                            className="h-5 w-5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                            />
                           </svg>
                         </div>
                         <div>
-                          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent dark:from-white dark:to-gray-300">
+                          <h2 className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-xl font-bold text-transparent sm:text-2xl dark:from-white dark:to-gray-300">
                             AI Analysis Results
                           </h2>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Review and select verification questions</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Review and select verification questions
+                          </p>
                         </div>
                       </div>
                       <button
-                        className="group relative p-2 rounded-xl bg-gray-100 hover:bg-red-50 focus:bg-red-50 transition-all duration-200 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:bg-gray-800 dark:hover:bg-red-900/20 dark:focus:bg-red-900/20"
+                        className="group relative rounded-xl bg-gray-100 p-2 transition-all duration-200 hover:bg-red-50 focus:bg-red-50 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:bg-gray-800 dark:hover:bg-red-900/20 dark:focus:bg-red-900/20"
                         onClick={() => setShowModal(false)}
                         aria-label="Close modal"
                       >
-                        <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 group-focus:text-red-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-5 w-5 text-gray-400 transition-colors duration-200 group-hover:text-red-500 group-focus:text-red-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
 
                     {/* Carousel Content - Enhanced Design */}
-                    <div className="flex-1 overflow-hidden mb-4">
+                    <div className="mb-4 flex-1 overflow-hidden">
                       <div className="relative h-[450px] sm:h-[500px] md:h-[550px]">
                         {aiResponses.map((res, index) => (
                           <div
                             key={index}
-                            className={`absolute inset-0 transition-all duration-700 ease-out transform ${
+                            className={`absolute inset-0 transform transition-all duration-700 ease-out ${
                               index === currentIndex
-                                ? "z-10 opacity-100 translate-x-0 scale-100"
+                                ? "z-10 translate-x-0 scale-100 opacity-100"
                                 : index < currentIndex
-                                ? "z-0 opacity-0 -translate-x-full scale-95"
-                                : "z-0 opacity-0 translate-x-full scale-95"
+                                ? "z-0 -translate-x-full scale-95 opacity-0"
+                                : "z-0 translate-x-full scale-95 opacity-0"
                             }`}
                             data-carousel-item
                           >
-                            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-6">
+                            <div className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent h-full overflow-y-auto pb-6">
                               <div className="space-y-6 pr-2">
                                 {/* Image Section */}
-                                <div className="relative group">
-                                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg ring-1 ring-gray-200/50 dark:ring-gray-700/50">
-                                      <img
-                                        src={res.previewUrl}
-                                        alt={res.filename}
-                                        className="w-full max-h-32 sm:max-h-40 md:max-h-48 rounded-xl object-contain"
-                                      />
-                                    </div>
+                                <div className="group relative">
+                                  <div className="relative rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-200/50 dark:bg-gray-800 dark:ring-gray-700/50">
+                                    <img
+                                      src={res.previewUrl}
+                                      alt={res.filename}
+                                      className="max-h-32 w-full rounded-xl object-contain sm:max-h-40 md:max-h-48"
+                                    />
+                                  </div>
                                 </div>
 
                                 {/* Metadata Cards */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <div className="p-1.5 bg-emerald-500 rounded-lg">
-                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                  <div className="rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 dark:border-emerald-700/50 dark:from-emerald-900/20 dark:to-teal-900/20">
+                                    <div className="mb-2 flex items-center space-x-2">
+                                      <div className="rounded-lg bg-emerald-500 p-1.5">
+                                        <svg
+                                          className="h-3 w-3 text-white"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                                          />
                                         </svg>
                                       </div>
-                                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+                                      <span className="text-xs font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
                                         Item Type
                                       </span>
                                     </div>
-                                    <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100 break-words">
+                                    <p className="text-sm font-medium break-words text-emerald-900 dark:text-emerald-100">
                                       {res.metadata.item_type}
                                     </p>
                                   </div>
 
-                                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-amber-200/50 dark:border-amber-700/50">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <div className="p-1.5 bg-amber-500 rounded-lg">
-                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                                  <div className="rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-50 to-orange-50 p-4 dark:border-amber-700/50 dark:from-amber-900/20 dark:to-orange-900/20">
+                                    <div className="mb-2 flex items-center space-x-2">
+                                      <div className="rounded-lg bg-amber-500 p-1.5">
+                                        <svg
+                                          className="h-3 w-3 text-white"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"
+                                          />
                                         </svg>
                                       </div>
-                                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                                      <span className="text-xs font-semibold tracking-wide text-amber-700 uppercase dark:text-amber-300">
                                         Color
                                       </span>
                                     </div>
-                                    <p className="text-sm font-medium text-amber-900 dark:text-amber-100 break-words">
+                                    <p className="text-sm font-medium break-words text-amber-900 dark:text-amber-100">
                                       {res.metadata.color}
                                     </p>
                                   </div>
 
-                                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200/50 dark:border-purple-700/50">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <div className="p-1.5 bg-purple-500 rounded-lg">
-                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                  <div className="rounded-xl border border-purple-200/50 bg-gradient-to-br from-purple-50 to-pink-50 p-4 dark:border-purple-700/50 dark:from-purple-900/20 dark:to-pink-900/20">
+                                    <div className="mb-2 flex items-center space-x-2">
+                                      <div className="rounded-lg bg-purple-500 p-1.5">
+                                        <svg
+                                          className="h-3 w-3 text-white"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                          />
                                         </svg>
                                       </div>
-                                      <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                                      <span className="text-xs font-semibold tracking-wide text-purple-700 uppercase dark:text-purple-300">
                                         Brand
                                       </span>
                                     </div>
-                                    <p className="text-sm font-medium text-purple-900 dark:text-purple-100 break-words">
+                                    <p className="text-sm font-medium break-words text-purple-900 dark:text-purple-100">
                                       {res.metadata.brand}
                                     </p>
                                   </div>
 
-                                  <div className="bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 rounded-xl p-4 border border-rose-200/50 dark:border-rose-700/50">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <div className="p-1.5 bg-rose-500 rounded-lg">
-                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                  <div className="rounded-xl border border-rose-200/50 bg-gradient-to-br from-rose-50 to-red-50 p-4 dark:border-rose-700/50 dark:from-rose-900/20 dark:to-red-900/20">
+                                    <div className="mb-2 flex items-center space-x-2">
+                                      <div className="rounded-lg bg-rose-500 p-1.5">
+                                        <svg
+                                          className="h-3 w-3 text-white"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                                          />
                                         </svg>
                                       </div>
-                                      <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wide">
+                                      <span className="text-xs font-semibold tracking-wide text-rose-700 uppercase dark:text-rose-300">
                                         Material
                                       </span>
                                     </div>
-                                    <p className="text-sm font-medium text-rose-900 dark:text-rose-100 break-words">
+                                    <p className="text-sm font-medium break-words text-rose-900 dark:text-rose-100">
                                       {res.metadata.material}
                                     </p>
                                   </div>
                                 </div>
                                 {/* Verification Questions Section */}
-                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg ring-1 ring-gray-200/50 dark:ring-gray-700/50">
-                                  <div className="flex items-center space-x-3 mb-6">
-                                    <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
-                                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50 dark:bg-gray-800 dark:ring-gray-700/50">
+                                  <div className="mb-6 flex items-center space-x-3">
+                                    <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5">
+                                      <svg
+                                        className="h-5 w-5 text-white"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
                                       </svg>
                                     </div>
                                     <div>
@@ -670,7 +752,8 @@ const Submit = () => {
                                         Verification Questions
                                       </h3>
                                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        Select questions to include in your listing
+                                        Select questions to include in your
+                                        listing
                                       </p>
                                     </div>
                                   </div>
@@ -680,25 +763,27 @@ const Submit = () => {
                                     {res.questions.level_1.map((q, i) => (
                                       <div
                                         key={`l1-${i}`}
-                                        className="group relative bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200/50 dark:border-blue-700/50 hover:shadow-md transition-all duration-200"
+                                        className="group relative rounded-xl border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 transition-all duration-200 hover:shadow-md dark:border-blue-700/50 dark:from-blue-900/20 dark:to-indigo-900/20"
                                       >
                                         <div className="flex items-start space-x-4">
-                                          <div className="flex-shrink-0 mt-1">
+                                          <div className="mt-1 flex-shrink-0">
                                             <input
                                               type="checkbox"
                                               id={`l1-checkbox-${index}-${i}`}
-                                              className="w-5 h-5 text-blue-600 bg-white border-2 border-blue-300 rounded-lg focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-blue-500 transition-all duration-200 hover:border-blue-400"
+                                              className="h-5 w-5 rounded-lg border-2 border-blue-300 bg-white text-blue-600 transition-all duration-200 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:border-blue-500 dark:bg-gray-700"
                                               checked={
                                                 selectedQuestions[
                                                   `l1-${index}-${i}`
                                                 ] || false
                                               }
                                               onChange={(e) =>
-                                                setSelectedQuestions((prev) => ({
-                                                  ...prev,
-                                                  [`l1-${index}-${i}`]:
-                                                    e.target.checked,
-                                                }))
+                                                setSelectedQuestions(
+                                                  (prev) => ({
+                                                    ...prev,
+                                                    [`l1-${index}-${i}`]:
+                                                      e.target.checked,
+                                                  }),
+                                                )
                                               }
                                             />
                                           </div>
@@ -707,21 +792,31 @@ const Submit = () => {
                                             className="flex-1 cursor-pointer"
                                           >
                                             <div className="mb-3">
-                                              <div className="flex items-center space-x-2 mb-2">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                              <div className="mb-2 flex items-center space-x-2">
+                                                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
                                                   Level 1
                                                 </span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Basic Verification</span>
+                                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                  Basic Verification
+                                                </span>
                                               </div>
-                                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-relaxed">
-                                                <span className="text-blue-600 dark:text-blue-400 font-semibold">Q:</span>{" "}
-                                                <span className="break-words">{q.question}</span>
+                                              <p className="text-sm leading-relaxed font-medium text-gray-900 dark:text-gray-100">
+                                                <span className="font-semibold text-blue-600 dark:text-blue-400">
+                                                  Q:
+                                                </span>{" "}
+                                                <span className="break-words">
+                                                  {q.question}
+                                                </span>
                                               </p>
                                             </div>
-                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200/50 dark:border-green-700/50">
+                                            <div className="rounded-lg border border-green-200/50 bg-green-50 p-3 dark:border-green-700/50 dark:bg-green-900/20">
                                               <p className="text-sm text-green-800 dark:text-green-200">
-                                                <span className="font-semibold text-green-600 dark:text-green-400">Correct Answer:</span>{" "}
-                                                <span className="break-words font-medium">{q.answer}</span>
+                                                <span className="font-semibold text-green-600 dark:text-green-400">
+                                                  Correct Answer:
+                                                </span>{" "}
+                                                <span className="font-medium break-words">
+                                                  {q.answer}
+                                                </span>
                                               </p>
                                             </div>
                                           </label>
@@ -733,25 +828,27 @@ const Submit = () => {
                                     {res.questions.level_2.map((q, i) => (
                                       <div
                                         key={`l2-${i}`}
-                                        className="group relative bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200/50 dark:border-purple-700/50 hover:shadow-md transition-all duration-200"
+                                        className="group relative rounded-xl border border-purple-200/50 bg-gradient-to-r from-purple-50 to-pink-50 p-4 transition-all duration-200 hover:shadow-md dark:border-purple-700/50 dark:from-purple-900/20 dark:to-pink-900/20"
                                       >
                                         <div className="flex items-start space-x-4">
-                                          <div className="flex-shrink-0 mt-1">
+                                          <div className="mt-1 flex-shrink-0">
                                             <input
                                               type="checkbox"
                                               id={`l2-checkbox-${index}-${i}`}
-                                              className="w-5 h-5 text-purple-600 bg-white border-2 border-purple-300 rounded-lg focus:ring-purple-500 focus:ring-2 dark:bg-gray-700 dark:border-purple-500 transition-all duration-200 hover:border-purple-400"
+                                              className="h-5 w-5 rounded-lg border-2 border-purple-300 bg-white text-purple-600 transition-all duration-200 hover:border-purple-400 focus:ring-2 focus:ring-purple-500 dark:border-purple-500 dark:bg-gray-700"
                                               checked={
                                                 selectedQuestions[
                                                   `l2-${index}-${i}`
                                                 ] || false
                                               }
                                               onChange={(e) =>
-                                                setSelectedQuestions((prev) => ({
-                                                  ...prev,
-                                                  [`l2-${index}-${i}`]:
-                                                    e.target.checked,
-                                                }))
+                                                setSelectedQuestions(
+                                                  (prev) => ({
+                                                    ...prev,
+                                                    [`l2-${index}-${i}`]:
+                                                      e.target.checked,
+                                                  }),
+                                                )
                                               }
                                             />
                                           </div>
@@ -760,21 +857,31 @@ const Submit = () => {
                                             className="flex-1 cursor-pointer"
                                           >
                                             <div className="mb-3">
-                                              <div className="flex items-center space-x-2 mb-2">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                                              <div className="mb-2 flex items-center space-x-2">
+                                                <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
                                                   Level 2
                                                 </span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Advanced Verification</span>
+                                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                  Advanced Verification
+                                                </span>
                                               </div>
-                                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-relaxed">
-                                                <span className="text-purple-600 dark:text-purple-400 font-semibold">Q:</span>{" "}
-                                                <span className="break-words">{q.question}</span>
+                                              <p className="text-sm leading-relaxed font-medium text-gray-900 dark:text-gray-100">
+                                                <span className="font-semibold text-purple-600 dark:text-purple-400">
+                                                  Q:
+                                                </span>{" "}
+                                                <span className="break-words">
+                                                  {q.question}
+                                                </span>
                                               </p>
                                             </div>
-                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200/50 dark:border-green-700/50">
+                                            <div className="rounded-lg border border-green-200/50 bg-green-50 p-3 dark:border-green-700/50 dark:bg-green-900/20">
                                               <p className="text-sm text-green-800 dark:text-green-200">
-                                                <span className="font-semibold text-green-600 dark:text-green-400">Answer:</span>{" "}
-                                                <span className="break-words font-medium">{q.answer}</span>
+                                                <span className="font-semibold text-green-600 dark:text-green-400">
+                                                  Answer:
+                                                </span>{" "}
+                                                <span className="font-medium break-words">
+                                                  {q.answer}
+                                                </span>
                                               </p>
                                             </div>
                                           </label>
@@ -791,11 +898,11 @@ const Submit = () => {
                     </div>
 
                     {/* Carousel Controls with Integrated Confirm Button */}
-                    <div className="flex items-center justify-between px-2 gap-3">
+                    <div className="flex items-center justify-between gap-3 px-2">
                       {/* Left: Previous Button */}
                       <button
                         type="button"
-                        className="group flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 focus:from-gray-200 focus:to-gray-300 transition-all duration-200 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                        className="group flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 shadow-md transition-all duration-200 hover:from-gray-200 hover:to-gray-300 hover:shadow-lg focus:from-gray-200 focus:to-gray-300 focus:ring-2 focus:ring-blue-500/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700"
                         onClick={() =>
                           setCurrentIndex((prev) =>
                             prev > 0 ? prev - 1 : aiResponses.length - 1,
@@ -805,7 +912,7 @@ const Submit = () => {
                         aria-label="Previous"
                       >
                         <svg
-                          className="h-4 w-4 text-gray-600 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100 transition-colors duration-200"
+                          className="h-4 w-4 text-gray-600 transition-colors duration-200 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100"
                           fill="none"
                           viewBox="0 0 6 10"
                         >
@@ -818,11 +925,11 @@ const Submit = () => {
                           />
                         </svg>
                       </button>
-                      
+
                       {/* Center: Counter and Dots + Confirm Button */}
-                      <div className="flex-1 flex items-center justify-center gap-4">
+                      <div className="flex flex-1 items-center justify-center gap-4">
                         <div className="flex items-center space-x-3">
-                          <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
+                          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
                             {currentIndex + 1} of {aiResponses.length}
                           </span>
                           {aiResponses.length > 1 && (
@@ -831,7 +938,7 @@ const Submit = () => {
                                 <button
                                   key={index}
                                   onClick={() => setCurrentIndex(index)}
-                                  className={`w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                                  className={`h-2 w-2 rounded-full transition-all duration-300 hover:scale-125 ${
                                     index === currentIndex
                                       ? "bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg"
                                       : "bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
@@ -842,29 +949,37 @@ const Submit = () => {
                             </div>
                           )}
                         </div>
-                        
+
                         {/* Confirm Button */}
                         <button
                           onClick={() => {
                             handleConfirmUpload();
                           }}
-                          className="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 focus:from-blue-700 focus:via-purple-700 focus:to-blue-800 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 focus:outline-none shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 rounded-lg"
+                          className="group relative transform overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 hover:shadow-xl focus:from-blue-700 focus:via-purple-700 focus:to-blue-800 focus:ring-2 focus:ring-blue-500/50 focus:outline-none sm:px-4 sm:py-2 sm:text-sm"
                         >
-                          <span className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                          <span className="absolute inset-0 origin-left scale-x-0 transform bg-white/20 transition-transform duration-300 group-hover:scale-x-100"></span>
                           <span className="relative flex items-center justify-center gap-1.5">
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            <svg
+                              className="h-3 w-3 transition-transform duration-200 group-hover:scale-110 sm:h-4 sm:w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                             Confirm
                           </span>
                         </button>
                       </div>
-                      
+
                       {/* Right: Next Button + Close Button */}
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="group flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 focus:from-gray-200 focus:to-gray-300 transition-all duration-200 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                          className="group flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 shadow-md transition-all duration-200 hover:from-gray-200 hover:to-gray-300 hover:shadow-lg focus:from-gray-200 focus:to-gray-300 focus:ring-2 focus:ring-blue-500/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:from-gray-700 dark:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 dark:focus:from-gray-600 dark:focus:to-gray-700"
                           onClick={() =>
                             setCurrentIndex((prev) =>
                               prev < aiResponses.length - 1 ? prev + 1 : 0,
@@ -874,7 +989,7 @@ const Submit = () => {
                           aria-label="Next"
                         >
                           <svg
-                            className="h-4 w-4 text-gray-600 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100 transition-colors duration-200"
+                            className="h-4 w-4 text-gray-600 transition-colors duration-200 group-hover:text-gray-800 group-focus:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100 dark:group-focus:text-gray-100"
                             fill="none"
                             viewBox="0 0 6 10"
                           >

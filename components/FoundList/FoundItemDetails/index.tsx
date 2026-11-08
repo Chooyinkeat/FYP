@@ -299,6 +299,20 @@ const FoundItemDetails = () => {
                           alt={`Found item ${i + 1}`}
                           fill
                           className="object-cover"
+                          onClick={() => {
+                            Swal.fire({
+                              imageUrl: imgUrl,
+                              imageAlt: `Preview ${i + 1}`,
+                              showConfirmButton: false,
+                              showCloseButton: true,
+                              width: "600px",
+                              imageWidth: 400,
+                              imageHeight: 300,
+                              customClass: {
+                                popup: "rounded-xl",
+                              },
+                            });
+                          }}
                         />
                       </SwiperSlide>
                     ))}
@@ -379,7 +393,6 @@ const FoundItemDetails = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Image Upload Section */}
                 {/* Conditional Rendering */}
                 {show_img === "0" && !show ? (
                   // 🔹 Enhanced Image Upload Section
