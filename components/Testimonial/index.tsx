@@ -1,7 +1,7 @@
 "use client";
 import SectionHeader from "../Common/SectionHeader";
 
-import { Autoplay, Pagination } from "swiper";
+import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -47,9 +47,7 @@ const Testimonial = () => {
           viewport={{ once: true }}
           className="animate_top max-w-c-1235 mx-auto mt-15 px-4 md:px-8 xl:mt-20 xl:px-0"
         >
-          {/* <!-- Slider main container --> */}
           <div className="swiper testimonial-01 mb-20 pb-22.5">
-            {/* <!-- Additional required wrapper --> */}
             <Swiper
               spaceBetween={50}
               slidesPerView={2}
